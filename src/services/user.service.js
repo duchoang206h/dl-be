@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { User } = require('../models');
+const { User } = require('../../models/User');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -7,12 +7,12 @@ const ApiError = require('../utils/ApiError');
  * @param {Object} userBody
  * @returns {Promise<User>}
  */
-const createUser = async (userBody) => {
+/* const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
   return User.create(userBody);
-};
+}; */
 
 /**
  * Query for users
@@ -23,10 +23,10 @@ const createUser = async (userBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryUsers = async (filter, options) => {
+/* const queryUsers = async (filter, options) => {
   const users = await User.paginate(filter, options);
   return users;
-};
+}; */
 
 /**
  * Get user by id
