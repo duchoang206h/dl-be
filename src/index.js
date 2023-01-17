@@ -1,11 +1,14 @@
-const mongoose = require('mongoose');
+const db = require('./models/schema');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
 
 let server;
-mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
-  logger.info('Connected to MongoDB');
+db.sequelize.authenticate().then(() => {
+  if (process.env.NODE_ENV == 'development') {
+    db.sequelize.sync();
+  }
+  logger.info('Connected to mysql');
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);
   });
