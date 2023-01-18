@@ -3,9 +3,8 @@
         "username": "golf_score",
         "password": "golf_score",
         "database": "golf_score",
-        "host": "42.96.43.228",
-        "dialect": "mysql",
-        "use_env_variable": "DB_URL"
+        "host": "42.96.41.96",
+        "dialect": "mysql"
     },
     "test": {
         "username": "root",
@@ -19,7 +18,6 @@
         "password": null,
         "database": "database_production",
         "host": "127.0.0.1",
-        "dialect": "mysql",
-        "use_env_variable": "DB_URL"
+        "dialect": "mysql"
     }
 }

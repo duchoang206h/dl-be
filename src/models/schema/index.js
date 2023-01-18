@@ -31,6 +31,9 @@ const sequelize = new Sequelize(process.env.DB_URL, { dialect: 'mysql' });
 Object.keys(models).forEach((x) => {
   models[x].init(sequelize);
 });
+Object.keys(models).forEach((x) => {
+  models[x].associate(sequelize);
+});
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
