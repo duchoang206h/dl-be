@@ -10,5 +10,18 @@ class ApiError extends Error {
     }
   }
 }
-
-module.exports = ApiError;
+class BadRequestError extends ApiError {
+  constructor(message, isOperational = true, stack = '') {
+    super(400, message, isOperational, stack);
+  }
+}
+class InternalServerError extends ApiError {
+  constructor(message, isOperational = true, stack = '') {
+    super(500, message, isOperational, stack);
+  }
+}
+module.exports = {
+  ApiError,
+  BadRequestError,
+  InternalServerError,
+};

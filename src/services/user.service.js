@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const { User } = require('../../models/User');
-const ApiError = require('../utils/ApiError');
+const { ApiError } = require('../utils/ApiError');
 
 /**
  * Create a user

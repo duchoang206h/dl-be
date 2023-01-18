@@ -1,10 +1,11 @@
 {
     "development": {
-        "username": "root",
-        "password": null,
-        "database": "database_development",
-        "host": "127.0.0.1",
-        "dialect": "mysql"
+        "username": "s99_app",
+        "password": "zteQ12345!",
+        "database": "golf_score",
+        "host": "42.96.43.228",
+        "dialect": "mysql",
+        "use_env_variable": "DB_URL"
     },
     "test": {
         "username": "root",
@@ -18,6 +19,7 @@
         "password": null,
         "database": "database_production",
         "host": "127.0.0.1",
-        "dialect": "mysql"
+        "dialect": "mysql",
+        "use_env_variable": "DB_URL"
     }
 }
