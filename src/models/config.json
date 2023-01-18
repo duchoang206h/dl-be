@@ -1,7 +1,7 @@
 {
     "development": {
-        "username": "s99_app",
-        "password": "zteQ12345!",
+        "username": "golf_score",
+        "password": "golf_score",
         "database": "golf_score",
         "host": "42.96.43.228",
         "dialect": "mysql",

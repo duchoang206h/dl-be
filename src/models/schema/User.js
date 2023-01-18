@@ -1,39 +1,54 @@
-'use strict';
-const { Model } = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
-  class User extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-    }
+const { Base } = require('./Base');
+const Sequelize = require('sequelize');
+class User extends Base {
+  /**
+   * Helper method for defining associations.
+   * This method is not a part of Sequelize lifecycle.
+   * The `models/index` file will call this method automatically.
+   */
+  static associate(models) {
+    // define association here
   }
-  User.init(
-    {
-      user_id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
+  static init(sequelize) {
+    return super.init(
+      {
+        user_id: {
+          type: Sequelize.INTEGER,
+          autoIncrement: true,
+          primaryKey: true,
+        },
+        username: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
+        password: {
+          type: Sequelize.STRING,
+          allowNull: false,
+        },
+        role: {
+          type: Sequelize.STRING,
+          allowNull: false,
+          defaultValue: 'user',
+        },
+        is_super: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false,
+        },
+        course_id: {
+          type: Sequelize.INTEGER,
+          allowNull: true,
+        },
       },
-      username: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      role: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        defaultValue: 'user',
-      },
-    },
-    { sequelize, modelName: 'User', freezeTableName: true, tableName: 'users', timestamps: true }
-  );
-  return User;
+      {
+        sequelize,
+        modelName: 'User',
+        freezeTableName: true,
+        tableName: 'users',
+        timestamps: true,
+      }
+    );
+  }
+}
+module.exports = {
+  User,
 };
-

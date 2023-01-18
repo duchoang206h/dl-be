@@ -3,8 +3,9 @@ const { upload } = require('../../middlewares/upload');
 
 const router = express.Router();
 const playerController = require('../../controllers/player.controller');
-router.route('/').post('/import', upload.any(), playerController.importPlayers);
-
+const auth = require('../../middlewares/auth');
+router.post('/', auth);
+router.post('/import', upload.any(), playerController.importPlayers);
 module.exports = router;
 
 /**

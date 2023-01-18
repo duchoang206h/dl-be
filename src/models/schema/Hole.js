@@ -1,7 +1,7 @@
 const { Base } = require('./Base');
 const Sequelize = require('sequelize');
 
-class Round extends Base {
+class Hole extends Base {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
@@ -13,24 +13,25 @@ class Round extends Base {
   static init(sequelize) {
     return super.init(
       {
-        round_id: {
+        hole_id: {
           type: Sequelize.INTEGER,
           autoIncrement: true,
           primaryKey: true,
         },
         course_id: Sequelize.INTEGER,
-        round_num: Sequelize.INTEGER,
+        hole_num: Sequelize.INTEGER,
+        par: Sequelize.INTEGER,
       },
       {
         sequelize,
-        modelName: 'Round',
+        modelName: 'Hole',
         freezeTableName: true,
-        tableName: 'rounds',
+        tableName: 'holes',
         timestamps: true,
       }
     );
   }
 }
 module.exports = {
-  Round,
+  Hole,
 };

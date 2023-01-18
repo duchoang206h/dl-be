@@ -1,7 +1,8 @@
-const passport = require('passport');
 const httpStatus = require('http-status');
 const { ApiError } = require('../utils/ApiError');
 const { roleRights } = require('../config/roles');
+const { jwtVerify } = require('../services/token.service');
+const { getUserById } = require('../services/user.service');
 
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, user, info) => {
   if (err || info || !user) {
@@ -12,7 +13,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
   if (requiredRights.length) {
     const userRights = roleRights.get(user.role);
     const hasRequiredRights = requiredRights.every((requiredRight) => userRights.includes(requiredRight));
-    if (!hasRequiredRights && req.params.userId !== user.id) {
+    if (!hasRequiredRights && req.params.userId !== user.user_id) {
       return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden'));
     }
   }
@@ -20,7 +21,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
   resolve();
 };
 
-const auth =
+/* const auth =
   (...requiredRights) =>
   async (req, res, next) => {
     return new Promise((resolve, reject) => {
@@ -28,6 +29,38 @@ const auth =
     })
       .then(() => next())
       .catch((err) => next(err));
-  };
-
-module.exports = auth;
+  }; */
+const auth = async (req, res, next) => {
+  try {
+    const { token } = req.headers || {};
+    if (!token) return res.status(httpStatus.UNAUTHORIZED).send();
+    const payload = jwtVerify(token);
+    req.isAuthenticated = true;
+    req.userId = payload.sub;
+    return next();
+  } catch (error) {
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
+  }
+};
+const isSuperAdmin = async (req, res, next) => {
+  try {
+    const user = await getUserById(req.userId);
+    if (user && user.is_super) return next();
+    return res.status(httpStatus.FORBIDDEN).send();
+  } catch (error) {
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
+  }
+};
+const checkAminPermission = async (req, res, next) => {
+  try {
+    const user = await getUserById(req.userId);
+    if (user && user.is_super) return next();
+    else if (user && user.courseId == req.params.courseId) return next();
+    else {
+      return res.status(httpStatus.FORBIDDEN).send();
+    }
+  } catch (error) {
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
+  }
+};
+module.exports = { isSuperAdmin, auth, checkAminPermission };

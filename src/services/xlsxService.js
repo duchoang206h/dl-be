@@ -20,6 +20,7 @@ const getDataFromXlsx = async (data, schema, readAllSheet = false) => {
     }
     return [temp, null];
   } catch (error) {
+    console.log(error);
     return [null, new InternalServerError(error)];
   }
 };

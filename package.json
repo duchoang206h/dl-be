@@ -24,7 +24,8 @@
     "docker:prod": "docker-compose -f docker-compose.yml -f docker-compose.prod.yml up",
     "docker:dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up",
     "docker:test": "docker-compose -f docker-compose.yml -f docker-compose.test.yml up",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "migrate": "npx sequelize-cli db:migrate --name"
   },
   "keywords": [
     "node",
@@ -55,6 +56,7 @@
     "cross-env": "^7.0.0",
     "dotenv": "^16.0.3",
     "express": "^4.17.1",
+    "express-jwt": "^8.3.0",
     "express-mongo-sanitize": "^2.0.0",
     "express-rate-limit": "^5.0.0",
     "fast-csv": "^4.3.6",

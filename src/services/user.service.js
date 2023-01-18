@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
-const { User } = require('../../models/User');
 const { ApiError } = require('../utils/ApiError');
+const { User } = require('../models/schema');
+const { hashPassword } = require('../utils/hash');
 
 /**
  * Create a user
@@ -34,16 +35,16 @@ const { ApiError } = require('../utils/ApiError');
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-  return User.findById(id);
+  return await User.findByPk(id, { raw: true });
 };
 
 /**
- * Get user by email
- * @param {string} email
+ * Get user by username
+ * @param {string} username
  * @returns {Promise<User>}
  */
-const getUserByEmail = async (email) => {
-  return User.findOne({ email });
+const getUserByUsername = async (username) => {
+  return await User.findOne({ where: { username } });
 };
 
 /**
@@ -56,9 +57,6 @@ const updateUserById = async (userId, updateBody) => {
   const user = await getUserById(userId);
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-  }
-  if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
   Object.assign(user, updateBody);
   await user.save();
@@ -78,12 +76,15 @@ const deleteUserById = async (userId) => {
   await user.remove();
   return user;
 };
+const createUser = async (createBody) => {
+  const cloneBody = { ...createBody, password: hashPassword(createBody.password) };
+  return await User.create(cloneBody);
+};
 
 module.exports = {
   createUser,
-  queryUsers,
   getUserById,
-  getUserByEmail,
   updateUserById,
   deleteUserById,
+  getUserByUsername,
 };

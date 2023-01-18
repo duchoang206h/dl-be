@@ -3,6 +3,7 @@ const helmet = require('helmet');
 const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
+const { expressjwt } = require('express-jwt');
 const cors = require('cors');
 const passport = require('passport');
 const httpStatus = require('http-status');
@@ -13,6 +14,7 @@ const { authLimiter } = require('./middlewares/rateLimiter');
 const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const { ApiError } = require('./utils/ApiError');
+const { jwt } = require('./config/config');
 
 const app = express();
 
@@ -32,7 +34,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // sanitize request data
 app.use(xss());
-app.use(mongoSanitize());
 
 // gzip compression
 app.use(compression());
@@ -49,7 +50,13 @@ app.use(passport.initialize());
 if (config.env === 'production') {
   app.use('/v1/auth', authLimiter);
 }
-
+/* app.use(
+  expressjwt({
+    algorithms: ['HS256'],
+    secret: config.jwt.secret,
+    getToken: (req) => req.headers.token,
+  })
+); */
 // v1 api routes
 app.use('/v1', routes);
 
@@ -59,9 +66,9 @@ app.use((req, res, next) => {
 });
 
 // convert error to ApiError, if needed
-app.use(errorConverter);
+//app.use(errorConverter);
 
 // handle error
-app.use(errorHandler);
+//app.use(errorHandler);
 
 module.exports = app;

@@ -1,20 +1,21 @@
 const httpStatus = require('http-status');
 const tokenService = require('./token.service');
 const userService = require('./user.service');
-const Token = require('../models/token.model');
 const { ApiError } = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
+const { comparePassword } = require('../utils/hash');
+const { Token } = require('../models/schema');
 
 /**
  * Login with username and password
- * @param {string} email
+ * @param {string} username
  * @param {string} password
  * @returns {Promise<User>}
  */
-const loginUserWithEmailAndPassword = async (email, password) => {
-  const user = await userService.getUserByEmail(email);
-  if (!user || !(await user.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+const loginUserWithUsernameAndPassword = async (username, password) => {
+  const user = await userService.getUserByUsername(username);
+  if (!user || (user && !comparePassword(password, user.password))) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect username or password');
   }
   return user;
 };
@@ -64,8 +65,8 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
     if (!user) {
       throw new Error();
     }
-    await userService.updateUserById(user.id, { password: newPassword });
-    await Token.deleteMany({ user: user.id, type: tokenTypes.RESET_PASSWORD });
+    await userService.updateUserById(user.user_id, { password: newPassword });
+    await Token.deleteMany({ user: user.user_id, type: tokenTypes.RESET_PASSWORD });
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Password reset failed');
   }
@@ -83,15 +84,15 @@ const verifyEmail = async (verifyEmailToken) => {
     if (!user) {
       throw new Error();
     }
-    await Token.deleteMany({ user: user.id, type: tokenTypes.VERIFY_EMAIL });
-    await userService.updateUserById(user.id, { isEmailVerified: true });
+    await Token.deleteMany({ user: user.user_id, type: tokenTypes.VERIFY_EMAIL });
+    await userService.updateUserById(user.user_id, { isEmailVerified: true });
   } catch (error) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
   }
 };
 
 module.exports = {
-  loginUserWithEmailAndPassword,
+  loginUserWithUsernameAndPassword,
   logout,
   refreshAuth,
   resetPassword,

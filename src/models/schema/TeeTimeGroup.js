@@ -1,35 +1,39 @@
-const { Model } = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
-  class TeeTimeGroup extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-    }
+const { Base } = require('./Base');
+const Sequelize = require('sequelize');
+
+class TeeTimeGroup extends Base {
+  /**
+   * Helper method for defining associations.
+   * This method is not a part of Sequelize lifecycle.
+   * The `models/index` file will call this method automatically.
+   */
+  static associate(models) {
+    // define association here
   }
-  TeeTimeGroup.init(
-    {
-      teetime_group_id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
+  static init(sequelize) {
+    return super.init(
+      {
+        teetime_group_id: {
+          type: Sequelize.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+        },
+        course_id: Sequelize.INTEGER,
+        round_id: Sequelize.INTEGER,
+        group_num: Sequelize.INTEGER,
+        tee: Sequelize.INTEGER,
+        player_id: Sequelize.STRING,
       },
-      course_id: DataTypes.INTEGER,
-      round_id: DataTypes.INTEGER,
-      group_num: DataTypes.INTEGER,
-      tee: DataTypes.INTEGER,
-      player_id: DataTypes.STRING,
-    },
-    {
-      sequelize,
-      modelName: 'TeeTimeGroup',
-      freezeTableName: true,
-      tableName: 'teetimegroups',
-      timestamps: true,
-    }
-  );
-  return TeeTimeGroup;
+      {
+        sequelize,
+        modelName: 'TeeTimeGroup',
+        freezeTableName: true,
+        tableName: 'teetimegroups',
+        timestamps: true,
+      }
+    );
+  }
+}
+module.exports = {
+  TeeTimeGroup,
 };

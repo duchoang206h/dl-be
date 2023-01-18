@@ -1,0 +1,16 @@
+const express = require('express');
+const validate = require('../../middlewares/validate');
+const courseValidate = require('../../validations/course.validation');
+const courseController = require('../../controllers/course.controller');
+const userController = require('../../controllers/user.controller');
+const playerController = require('../../controllers/player.controller');
+const { checkAminPermission, auth, isSuperAdmin } = require('../../middlewares/auth');
+const { upload } = require('../../middlewares/upload');
+const router = express.Router();
+router.post('/', auth, validate(courseValidate.createCourse), userController.createUser);
+router.post('/:courseId/users', auth, isSuperAdmin, userController.createUser);
+router.get('/:courseId', auth, checkAminPermission, courseController.getCourseById);
+router.post('/:courseId/players', auth, checkAminPermission, upload.any(), playerController.importPlayers);
+router.get('/', auth, isSuperAdmin, courseController.getAllCourse);
+router.get('/:courseId/players', playerController.getAllPlayer);
+module.exports = router;
