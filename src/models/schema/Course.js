@@ -1,43 +1,47 @@
-const { Model } = require('sequelize');
-module.exports = (sequelize, DataTypes) => {
-  class Course extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
-    static associate(models) {
-      // define association here
-    }
+const { Base } = require('./Base');
+const Sequelize = require('sequelize');
+
+class Course extends Base {
+  /**
+   * Helper method for defining associations.
+   * This method is not a part of Sequelize lifecycle.
+   * The `models/index` file will call this method automatically.
+   */
+  static associate(models) {
+    // define association here
   }
-  Course.init(
-    {
-      course_id: {
-        type: DataTypes.INTEGER,
-        autoIncrement: true,
-        primaryKey: true,
+  static init(sequelize) {
+    return super.init(
+      {
+        course_id: {
+          type: Sequelize.INTEGER,
+          autoIncrement: true,
+          primaryKey: true,
+        },
+        name: Sequelize.STRING,
+        type: Sequelize.STRING,
+        event_date: Sequelize.STRING,
+        total_prize: Sequelize.FLOAT,
+        description: Sequelize.STRING,
+        total_round: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+        },
+        total_hole: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+        },
       },
-      name: DataTypes.STRING,
-      type: DataTypes.STRING,
-      event_date: DataTypes.STRING,
-      total_prize: DataTypes.FLOAT,
-      description: DataTypes.STRING,
-      total_round: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      total_hole: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-    },
-    {
-      sequelize,
-      modelName: 'Course',
-      freezeTableName: true,
-      tableName: 'courses',
-      timestamps: true,
-    }
-  );
-  return Course;
+      {
+        sequelize,
+        modelName: 'Course',
+        freezeTableName: true,
+        tableName: 'courses',
+        timestamps: true,
+      }
+    );
+  }
+}
+module.exports = {
+  Course,
 };

@@ -6,7 +6,7 @@ const logger = require('./config/logger');
 let server;
 db.sequelize.authenticate().then(() => {
   if (process.env.NODE_ENV == 'development') {
-    db.sequelize.sync();
+    //db.sequelize.sync();
   }
   logger.info('Connected to mysql');
   server = app.listen(config.port, () => {

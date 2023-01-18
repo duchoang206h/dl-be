@@ -3,9 +3,11 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { userService } = require('../services');
+const { ROLE } = require('../config/constant');
 
 const createUser = catchAsync(async (req, res) => {
-  const user = await userService.createUser(req.body);
+  const createData = { ...req.body, is_super: false, role: ROLE.COURSE_USER, course_id: req.params.courseId };
+  const user = await userService.createUser(createData);
   res.status(httpStatus.CREATED).send(user);
 });
 
