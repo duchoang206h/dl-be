@@ -10,6 +10,10 @@ class Round extends Base {
   static associate(models) {
     // define association here
     Round.hasMany(models.Score, { as: 'scores', foreignKey: 'round_id', sourceKey: 'round_id' });
+    Round.belongsTo(models.Course, {
+      foreignKey: 'course_id',
+      targetKey: 'course_id',
+    });
   }
   static init(sequelize) {
     return super.init(
