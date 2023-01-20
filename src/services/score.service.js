@@ -108,6 +108,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId) => {
       model: Score,
       as: 'scores',
       attributes: ['num_putt', 'score_type'],
+      raw: true,
       where: {
         round_id: roundId,
         course_id: courseId,
@@ -116,7 +117,14 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId) => {
     },
   });
   players = players.map((player) => {
+    player = player.toJSON();
     player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
+    const total = player.scores.reduce((pre, current) => pre + current.num_putt, 0);
+    const _in = player.scores.slice(0, 9).reduce((pre, current) => pre + current.num_putt, 0);
+    const out = player.scores.slice(9).reduce((pre, current) => pre + current.num_putt, 0);
+    player['in'] = _in;
+    player['total'] = total;
+    player['out'] = out;
     return player;
   });
   return players;
