@@ -29,7 +29,6 @@ const createManyScore = async (scoreBodyArr, { courseId, playerId, roundNum }) =
         holeService.getHoleByNumAndCourse(hole_num, courseId),
         roundService.getRoundByNumAndCourse(roundNum, courseId),
       ]);
-      console.log(hole);
       const scoreType = getScoreType(num_putt, hole.par);
       return Score.create({
         num_putt,
@@ -148,6 +147,36 @@ const getPlayerScoresByAllRound = async (courseId, playerId) => {
   }
   return scores;
 };
+const getAllPlayerScore = async (courseId) => {
+  const rounds = await roundService.getAllRoundByCourse(courseId);
+  let players = await Player.findAll({
+    where: { course_id: courseId },
+    attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+  });
+  players = await Promise.all(
+    players.map(async (player) => {
+      player = player.toJSON();
+      const scores = await Promise.all(
+        rounds.map(async (round) => {
+          const scores = await Score.findAll({
+            where: { player_id: player.player_id, round_id: round.round_id, course_id: courseId },
+            attributes: ['num_putt', 'score_type'],
+            include: [{ model: Hole, attributes: ['hole_num'] }],
+          });
+          return { scores, round: round.round_num };
+        })
+      );
+      for (const score of scores) {
+        player[score.round] = {
+          scores: score.scores,
+          total: score.scores.reduce((pre, current) => pre + current.num_putt, 0),
+        };
+      }
+      return player;
+    })
+  );
+  return players;
+};
 module.exports = {
   getScoresByPlayerAndRound,
   getHoleStatisticByRound,
@@ -157,4 +186,5 @@ module.exports = {
   updateScore,
   getPlayerScoresByRoundAndHole,
   createManyScore,
+  getAllPlayerScore,
 };
