@@ -11,6 +11,10 @@ class Hole extends Base {
   static associate(models) {
     // define association here
     Hole.hasMany(models.Score, { as: 'scores', foreignKey: 'hole_id', sourceKey: 'hole_id' });
+    Hole.belongsTo(models.Course, {
+      foreignKey: 'course_id',
+      targetKey: 'course_id',
+    });
   }
 
   static init(sequelize) {

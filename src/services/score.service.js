@@ -4,22 +4,7 @@ const { Score, Round, Hole, sequelize, Player } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { getScoreType, calculateScoreAverage } = require('../utils/score');
 
-const createScore = async (scoreBody) => {
-  const { course_id, round_num, hole_num, player_id, num_putt } = scoreBody;
-  const [hole, round] = await Promise.all([
-    holeService.getHoleByNumAndCourse(hole_num, course_id),
-    roundService.getRoundByNumAndCourse(round_num, course_id),
-  ]);
-  const scoreType = getScoreType(num_putt, hole.par);
-  return Score.create({
-    num_putt,
-    course_id,
-    round_id: round.round_id,
-    hole_id: hole.hole_id,
-    player_id,
-    score_type: scoreType,
-  });
-};
+const createScore = async (scoreBody) => {};
 const getPlayerScoresByRoundAndHole = async (scoreBody) => {
   const { course_id, roundNum, holeNum, player_id } = scoreBody;
   const [hole, round] = await Promise.all([
@@ -35,6 +20,27 @@ const getPlayerScoresByRoundAndHole = async (scoreBody) => {
     },
     raw: true,
   });
+};
+const createManyScore = async (scoreBodyArrs) => {
+  const result = await Promise.all(
+    scoreBodyArrs.map(async (scoreBody) => {
+      const { course_id, round_num, hole_num, player_id, num_putt } = scoreBody;
+      const [hole, round] = await Promise.all([
+        holeService.getHoleByNumAndCourse(hole_num, course_id),
+        roundService.getRoundByNumAndCourse(round_num, course_id),
+      ]);
+      const scoreType = getScoreType(num_putt, hole.par);
+      return Score.create({
+        num_putt,
+        course_id,
+        round_id: round.round_id,
+        hole_id: hole.hole_id,
+        player_id,
+        score_type: scoreType,
+      });
+    })
+  );
+  return result;
 };
 const updateScore = async (scoreBody) => {
   const { course_id, round_num, hole_num, player_id, num_putt } = scoreBody;
@@ -149,4 +155,5 @@ module.exports = {
   createScore,
   updateScore,
   getPlayerScoresByRoundAndHole,
+  createManyScore,
 };

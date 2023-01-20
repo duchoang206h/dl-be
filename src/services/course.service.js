@@ -1,7 +1,14 @@
-const { Course } = require('../models/schema');
+const { Course, Hole, Round } = require('../models/schema');
 const { Op } = require('sequelize');
 const createCourse = async (data) => Course.create(data);
-const getCourseById = async (id) => Course.findByPk(id, { raw: true });
+const getCourseById = async (id) =>
+  Course.findByPk(id, {
+    attributes: { exclude: ['createdAt', 'updatedAt'] },
+    include: [
+      { model: Hole, as: 'holes', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+      { model: Round, as: 'rounds', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+    ],
+  });
 const getAllCourseByOffsetLimit = async ({
   page = 1,
   limit = 100,
