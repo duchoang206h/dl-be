@@ -81,6 +81,12 @@ const getPlayerScoreByRoundAndHole = catchAsync(async (req, res) => {
     result: score,
   });
 });
+const getAllStatistic = catchAsync(async (req, res) => {
+  const score = await scoreService.getAllPlayerScore(req.params.courseId);
+  res.status(httpStatus.OK).send({
+    result: score,
+  });
+});
 module.exports = {
   getPlayerScoreByAllRound,
   getAllPlayerScoreByRound,
@@ -91,4 +97,5 @@ module.exports = {
   updateScore,
   getPlayerScoreByRoundAndHole,
   createManyScore,
+  getAllStatistic,
 };

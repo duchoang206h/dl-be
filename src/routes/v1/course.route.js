@@ -31,4 +31,5 @@ router.put('/:courseId/scores/players/:playerId', scoreController.updateScore);
 // statistic
 router.get('/:courseId/statistic/rounds/:roundNum', scoreController.getHoleStatisticByRoundNum);
 router.get('/:courseId/statistic/rounds', scoreController.getHoleStatisticByRoundNum);
+router.get('/:courseId/statistic', scoreController.getAllStatistic);
 module.exports = router;
