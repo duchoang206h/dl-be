@@ -49,6 +49,15 @@ const createScore = catchAsync(async (req, res) => {
     result: score,
   });
 });
+const createManyScore = catchAsync(async (req, res) => {
+  const scores = await scoreService.createScore(req.body.scores, {
+    courseId: req.params.courseId,
+    playerId: req.params.playerId,
+  });
+  res.status(httpStatus.CREATED).send({
+    result: scores,
+  });
+});
 const updateScore = catchAsync(async (req, res) => {
   const score = await scoreService.updateScore({
     ...req.body,
@@ -79,4 +88,5 @@ module.exports = {
   createScore,
   updateScore,
   getPlayerScoreByRoundAndHole,
+  createManyScore,
 };
