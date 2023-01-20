@@ -26,7 +26,7 @@ router.get(
 );
 router.get('/:courseId/scores/players/:playerId/rounds', scoreController.getPlayerScoreByAllRound);
 router.get('/:courseId/scores/players/rounds/:roundNum', scoreController.getAllPlayerScoreByRound);
-router.post('/:courseId/scores/players/:playerId', scoreController.createManyScore);
+router.post('/:courseId/scores/players/:playerId/rounds/:roundNum', scoreController.createManyScore);
 router.put('/:courseId/scores/players/:playerId', scoreController.updateScore);
 // statistic
 router.get('/:courseId/statistic/rounds/:roundNum', scoreController.getHoleStatisticByRoundNum);
