@@ -7,15 +7,13 @@ class Base extends Model {
     include = [],
     attributes,
     distinct = 'id',
-    order = [['createdAt', 'ASC']],
   }) {
     const options = {
-      order,
+      //order,
       where,
       include,
       attributes,
       distinct,
-      raw: true,
     };
 
     if (limit && page) {

@@ -21,7 +21,16 @@ const getAllCourseByOffsetLimit = async ({
   const where = {};
   if (type) where['type'] = type;
   if (name) where['name'] = { [Op.like]: `%${name}%` };
-  return await Course.getAllWithPaging({ page, limit, attributes: { exclude: ['createdAt', 'updatedAt'] }, where });
+  return await Course.getAllWithPaging({
+    page,
+    limit,
+    attributes: { exclude: ['createdAt', 'updatedAt'] },
+    where,
+    include: [
+      { model: Hole, as: 'holes', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+      { model: Round, as: 'rounds', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+    ],
+  });
 };
 
 module.exports = {
