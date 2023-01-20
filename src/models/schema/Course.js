@@ -11,6 +11,8 @@ class Course extends Base {
     // define association here
     Course.hasMany(models.Score, { as: 'scores', foreignKey: 'course_id', sourceKey: 'course_id' });
     Course.hasMany(models.Round, { as: 'rounds', foreignKey: 'course_id', sourceKey: 'course_id' });
+    Course.hasMany(models.Player, { as: 'players', foreignKey: 'course_id', sourceKey: 'course_id' });
+
     Course.hasMany(models.Hole, { as: 'holes', foreignKey: 'course_id', sourceKey: 'course_id' });
   }
   static init(sequelize) {
