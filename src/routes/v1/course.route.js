@@ -1,16 +1,28 @@
 const express = require('express');
 const validate = require('../../middlewares/validate');
-const courseValidate = require('../../validations/course.validation');
-const courseController = require('../../controllers/course.controller');
-const userController = require('../../controllers/user.controller');
-const playerController = require('../../controllers/player.controller');
+const { courseValidation, holeValidation } = require('../../validations');
+const { courseController, holeController, userController, playerController, scoreController } = require('../../controllers');
 const { checkAminPermission, auth, isSuperAdmin } = require('../../middlewares/auth');
 const { upload } = require('../../middlewares/upload');
 const router = express.Router();
-router.post('/', auth, validate(courseValidate.createCourse), userController.createUser);
+router.post('/', auth, validate(courseValidation.createCourse), courseController.createCourse);
 router.post('/:courseId/users', auth, isSuperAdmin, userController.createUser);
-router.get('/:courseId', auth, checkAminPermission, courseController.getCourseById);
+router.get('/:courseId', courseController.getCourseById);
 router.post('/:courseId/players', auth, checkAminPermission, upload.any(), playerController.importPlayers);
 router.get('/', auth, isSuperAdmin, courseController.getAllCourse);
 router.get('/:courseId/players', playerController.getAllPlayer);
+//create hole
+router.post('/:courseId/holes', auth, validate(holeValidation.createHole), holeController.createHole);
+router.put('/:courseId/holes/:holeNum', auth, validate(holeValidation.updateHole), holeController.updateHole);
+
+//score
+router.get('/:courseId/scores/players/:playerId/rounds/:roundNum', scoreController.getPlayerScoreByRound);
+router.get('/:courseId/scores/players/:playerId/rounds/:roundNum/holes/:holeNum', scoreController.getPlayerScoreByRoundAndHole);
+router.get('/:courseId/scores/players/:playerId/rounds', scoreController.getPlayerScoreByAllRound);
+router.get('/:courseId/scores/players/rounds/:roundNum', scoreController.getAllPlayerScoreByRound);
+router.post('/:courseId/scores/players/:playerId', scoreController.createScore);
+router.put('/:courseId/scores/players/:playerId', scoreController.updateScore);
+// statistic
+router.get('/:courseId/statistic/rounds/:roundNum', scoreController.getHoleStatisticByRoundNum);
+router.get('/:courseId/statistic/rounds', scoreController.getHoleStatisticByRoundNum);
 module.exports = router;

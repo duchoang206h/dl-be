@@ -1,5 +1,6 @@
-const { Base } = require('./Base');
 const Sequelize = require('sequelize');
+const { Base } = require('./Base');
+const { yardToMeter } = require('../../utils/convert');
 
 class Hole extends Base {
   /**
@@ -9,7 +10,9 @@ class Hole extends Base {
    */
   static associate(models) {
     // define association here
+    Hole.hasMany(models.Score, { as: 'scores', foreignKey: 'hole_id', sourceKey: 'hole_id' });
   }
+
   static init(sequelize) {
     return super.init(
       {
@@ -19,8 +22,24 @@ class Hole extends Base {
           primaryKey: true,
         },
         course_id: Sequelize.INTEGER,
-        hole_num: Sequelize.INTEGER,
-        par: Sequelize.INTEGER,
+        hole_num: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+        },
+        par: {
+          type: Sequelize.INTEGER,
+          allowNull: false,
+        },
+        yards: {
+          type: Sequelize.FLOAT,
+          allowNull: false,
+        },
+        meters: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return yardToMeter(this.yards);
+          },
+        },
       },
       {
         sequelize,

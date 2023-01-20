@@ -9,6 +9,7 @@ class Player extends Base {
    */
   static associate(models) {
     // define association here
+    Player.hasMany(models.Score, { as: 'scores', foreignKey: 'player_id', sourceKey: 'player_id' });
   }
   static init(sequelize) {
     return super.init(
