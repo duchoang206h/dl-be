@@ -15,9 +15,9 @@ const createHole = async (hole) => {
   return Hole.create(hole, { raw: true });
 };
 const getHoleByNumAndCourse = async (holeNum, courseId) =>
-  Hole.findOne({ where: { hole_num: holeNum, course_id: courseId }, raw: true });
+  Hole.findOne({ where: { hole_num: holeNum, course_id: courseId }, attributes: { exclude: ['createdAt', 'updatedAt'] } });
 const getHolesByCourseId = async (courseId) =>
-  Hole.findAll({ where: { course_id: courseId }, plain: true, attributes: { exclude: ['createdAt', 'updatedAt'] } });
+  Hole.findAll({ where: { course_id: courseId }, attributes: { exclude: ['createdAt', 'updatedAt'] } });
 module.exports = {
   createManyHole,
   updateHole,

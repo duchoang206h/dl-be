@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { holeService, courseService } = require('../services');
+const { Hole } = require('../models/schema');
 const createHole = catchAsync(async (req, res) => {
   const courseId = req.params.courseId;
   const course = courseService.getCourseById(courseId);
@@ -26,11 +27,22 @@ const updateHole = catchAsync(async (req, res) => {
 });
 const getHolesByCourseId = catchAsync(async (req, res) => {
   const courseId = req.params.courseId;
-  const holes = courseService.getCourseById(courseId);
+  const course = courseService.getCourseById(courseId);
   if (!course) return res.status(httpStatus.NOT_FOUND).send();
-  return   
+  const holes = await holeService.getHolesByCourseId(courseId);
+  return res.status(httpStatus.OK).send({ result: holes });
+});
+const getHolesByCourseIdAndHoleNum = catchAsync(async (req, res) => {
+  const courseId = req.params.courseId;
+  const holeNum = req.params.holeNum;
+  const course = await courseService.getCourseById(courseId);
+  if (!course) return res.status(httpStatus.NOT_FOUND).send();
+  const holes = await holeService.getHoleByNumAndCourse(holeNum, courseId);
+  return res.status(httpStatus.OK).send({ result: holes });
 });
 module.exports = {
   createHole,
   updateHole,
+  getHolesByCourseId,
+  getHolesByCourseIdAndHoleNum,
 };

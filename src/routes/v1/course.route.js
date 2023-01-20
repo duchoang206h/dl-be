@@ -11,13 +11,19 @@ router.get('/:courseId', courseController.getCourseById);
 router.post('/:courseId/players', auth, checkAminPermission, upload.any(), playerController.importPlayers);
 router.get('/', auth, isSuperAdmin, courseController.getAllCourse);
 router.get('/:courseId/players', playerController.getAllPlayer);
+router.get('/:courseId/players/:playerId', playerController.getPlayer);
 //create hole
 router.post('/:courseId/holes', auth, validate(holeValidation.createHole), holeController.createHole);
 router.put('/:courseId/holes/:holeNum', auth, validate(holeValidation.updateHole), holeController.updateHole);
+router.get('/:courseId/holes', holeController.getHolesByCourseId);
+router.get('/:courseId/holes/:holeNum', holeController.getHolesByCourseIdAndHoleNum);
 
 //score
 router.get('/:courseId/scores/players/:playerId/rounds/:roundNum', scoreController.getPlayerScoreByRound);
-router.get('/:courseId/scores/players/:playerId/rounds/:roundNum/holes/:holeNum', scoreController.getPlayerScoreByRoundAndHole);
+router.get(
+  '/:courseId/scores/players/:playerId/rounds/:roundNum/holes/:holeNum',
+  scoreController.getPlayerScoreByRoundAndHole
+);
 router.get('/:courseId/scores/players/:playerId/rounds', scoreController.getPlayerScoreByAllRound);
 router.get('/:courseId/scores/players/rounds/:roundNum', scoreController.getAllPlayerScoreByRound);
 router.post('/:courseId/scores/players/:playerId', scoreController.createScore);

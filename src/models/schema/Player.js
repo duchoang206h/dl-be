@@ -1,3 +1,4 @@
+const { getFlag } = require('../../utils/country');
 const { Base } = require('./Base');
 const Sequelize = require('sequelize');
 
@@ -27,6 +28,12 @@ class Player extends Base {
         country: {
           type: Sequelize.STRING,
           allowNull: false,
+        },
+        flag: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return getFlag(this.country);
+          },
         },
       },
       {
