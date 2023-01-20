@@ -21,14 +21,15 @@ const getPlayerScoresByRoundAndHole = async (scoreBody) => {
     raw: true,
   });
 };
-const createManyScore = async (scoreBodyArr, { courseId, playerId }) => {
+const createManyScore = async (scoreBodyArr, { courseId, playerId, roundNum }) => {
   const result = await Promise.all(
     scoreBodyArr.map(async (scoreBody) => {
-      const { round_num, hole_num, num_putt } = scoreBody;
+      const { hole_num, num_putt } = scoreBody;
       const [hole, round] = await Promise.all([
         holeService.getHoleByNumAndCourse(hole_num, courseId),
-        roundService.getRoundByNumAndCourse(round_num, courseId),
+        roundService.getRoundByNumAndCourse(roundNum, courseId),
       ]);
+      console.log(hole);
       const scoreType = getScoreType(num_putt, hole.par);
       return Score.create({
         num_putt,

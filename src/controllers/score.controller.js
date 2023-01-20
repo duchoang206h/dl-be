@@ -50,9 +50,11 @@ const createScore = catchAsync(async (req, res) => {
   });
 });
 const createManyScore = catchAsync(async (req, res) => {
-  const scores = await scoreService.createScore(req.body.scores, {
+  console.log(req.body.scores);
+  const scores = await scoreService.createManyScore(req.body.scores, {
     courseId: req.params.courseId,
     playerId: req.params.playerId,
+    roundNum: req.params.roundNum,
   });
   res.status(httpStatus.CREATED).send({
     result: scores,

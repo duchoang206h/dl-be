@@ -13,7 +13,7 @@ const seed = async () => {
     arr.map(() =>
       Player.create(
         {
-          course_id: 1,
+          course_id: 4,
           fullname: faker.name.fullName(),
           country: 'VIE',
         },
@@ -24,7 +24,7 @@ const seed = async () => {
   const holes = await Hole.findAll({ where: { course_id: 1 }, raw: true });
   const rounds = await Round.findAll({ where: { course_id: 1 }, raw: true });
   const promises = [];
-  for (const p of players) {
+  /* for (const p of players) {
     for (const r of rounds) {
       for (const h of holes) {
         const numputt = randomPutt();
@@ -40,7 +40,7 @@ const seed = async () => {
         );
       }
     }
-  }
+  } */
   await Promise.all(promises);
   console.log('---------------end');
 };
