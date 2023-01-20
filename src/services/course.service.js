@@ -9,6 +9,7 @@ const getCourseById = async (id) =>
       { model: Round, as: 'rounds', attributes: { exclude: ['createdAt', 'updatedAt'] } },
     ],
   });
+const existCourse = async (id) => (await Course.count({ where: { course_id: id } })) > 0;
 const getAllCourseByOffsetLimit = async ({
   page = 1,
   limit = 100,
@@ -20,11 +21,21 @@ const getAllCourseByOffsetLimit = async ({
   const where = {};
   if (type) where['type'] = type;
   if (name) where['name'] = { [Op.like]: `%${name}%` };
-  return await Course.getAllWithPaging({ page, limit, attributes: { exclude: ['createdAt', 'updatedAt'] }, where });
+  return await Course.getAllWithPaging({
+    page,
+    limit,
+    attributes: { exclude: ['createdAt', 'updatedAt'] },
+    where,
+    include: [
+      { model: Hole, as: 'holes', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+      { model: Round, as: 'rounds', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+    ],
+  });
 };
 
 module.exports = {
   createCourse,
   getCourseById,
   getAllCourseByOffsetLimit,
+  existCourse,
 };

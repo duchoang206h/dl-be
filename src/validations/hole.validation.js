@@ -7,6 +7,11 @@ const createHole = {
     yards: Joi.number().required(),
   }),
 };
+const createHoleMany = {
+  body: Joi.object().keys({
+    holes: Joi.array().required(),
+  }),
+};
 const updateHole = {
   body: Joi.object().keys({
     par: Joi.number(),
@@ -16,4 +21,5 @@ const updateHole = {
 module.exports = {
   createHole,
   updateHole,
+  createHoleMany,
 };
