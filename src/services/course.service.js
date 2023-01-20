@@ -9,6 +9,7 @@ const getCourseById = async (id) =>
       { model: Round, as: 'rounds', attributes: { exclude: ['createdAt', 'updatedAt'] } },
     ],
   });
+const existCourse = async (id) => (await Course.count({ where: { course_id: id } })) > 0;
 const getAllCourseByOffsetLimit = async ({
   page = 1,
   limit = 100,
@@ -27,4 +28,5 @@ module.exports = {
   createCourse,
   getCourseById,
   getAllCourseByOffsetLimit,
+  existCourse,
 };

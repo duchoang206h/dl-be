@@ -13,6 +13,17 @@ const createHole = catchAsync(async (req, res) => {
   if (hole) res.status(httpStatus.CREATED).json({ result: hole });
   return res.status(httpStatus.UNPROCESSABLE_ENTITY).send();
 });
+const createManyHole = catchAsync(async (req, res) => {
+  const courseId = req.params.courseId;
+  const holes = req.body.holes;
+  if (holes.length !== 18) return res.status(httpStatus.BAD_REQUEST).send();
+  console.log(holes.reduce((pre, current) => pre + current.par, 0));
+  console.log(holes.length);
+  if (holes.reduce((pre, current) => pre + current.par, 0) !== 72) return res.status(httpStatus.BAD_REQUEST).send();
+  const hole = await holeService.createManyHole(holes, courseId);
+  if (hole) res.status(httpStatus.CREATED).json({ result: hole });
+  return res.status(httpStatus.UNPROCESSABLE_ENTITY).send();
+});
 const updateHole = catchAsync(async (req, res) => {
   const courseId = req.params.courseId;
   const holeNum = req.params.holeNum;
@@ -45,4 +56,5 @@ module.exports = {
   updateHole,
   getHolesByCourseId,
   getHolesByCourseIdAndHoleNum,
+  createManyHole,
 };

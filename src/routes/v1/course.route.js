@@ -13,7 +13,7 @@ router.get('/', auth, isSuperAdmin, courseController.getAllCourse);
 router.get('/:courseId/players', playerController.getAllPlayer);
 router.get('/:courseId/players/:playerId', playerController.getPlayer);
 //create hole
-router.post('/:courseId/holes', auth, validate(holeValidation.createHole), holeController.createHole);
+router.post('/:courseId/holes', auth, validate(holeValidation.createHoleMany), holeController.createManyHole);
 router.put('/:courseId/holes/:holeNum', auth, validate(holeValidation.updateHole), holeController.updateHole);
 router.get('/:courseId/holes', holeController.getHolesByCourseId);
 router.get('/:courseId/holes/:holeNum', holeController.getHolesByCourseIdAndHoleNum);
