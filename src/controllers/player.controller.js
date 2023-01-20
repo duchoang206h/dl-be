@@ -18,4 +18,8 @@ const getAllPlayer = catchAsync(async (req, res) => {
   const players = await playerService.getAllPlayer(req.query);
   return res.status(httpStatus.OK).json({ result: players });
 });
-module.exports = { importPlayers, getAllPlayer };
+const getPlayer = catchAsync(async (req, res) => {
+  const player = await playerService.getPlayer(req.params.courseId, req.params.playerId);
+  return res.status(httpStatus.OK).json({ result: player });
+});
+module.exports = { importPlayers, getAllPlayer, getPlayer };

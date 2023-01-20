@@ -1,3 +1,4 @@
+const { getFlag } = require('../../utils/country');
 const { Base } = require('./Base');
 const Sequelize = require('sequelize');
 
@@ -9,6 +10,7 @@ class Player extends Base {
    */
   static associate(models) {
     // define association here
+    Player.hasMany(models.Score, { as: 'scores', foreignKey: 'player_id', sourceKey: 'player_id' });
   }
   static init(sequelize) {
     return super.init(
@@ -26,6 +28,12 @@ class Player extends Base {
         country: {
           type: Sequelize.STRING,
           allowNull: false,
+        },
+        flag: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return getFlag(this.country);
+          },
         },
       },
       {

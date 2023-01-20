@@ -44,7 +44,7 @@ const getUserById = async (id) => {
  * @returns {Promise<User>}
  */
 const getUserByUsername = async (username) => {
-  return await User.findOne({ where: { username } });
+  return await User.findOne({ where: { username }, raw: true, attributes: { exclude: ['createdAt', 'updatedAt'] } });
 };
 
 /**

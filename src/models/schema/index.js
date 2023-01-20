@@ -27,9 +27,16 @@ const models = {
   Token,
 };
 const sequelize = new Sequelize(process.env.DB_URL, { dialect: 'mysql' });
-
+//
+/* Hole.hasMany(Score, { foreignKey: 'hole_id', as: 'scores' });
+Round.hasMany(Score, { foreignKey: 'round_id', as: 'scores' });
+Course.hasMany(Score, { foreignKey: 'course_id', as: 'scores' });
+Player.hasMany(Score, { foreignKey: 'player_id', as: 'scores' }); */
 Object.keys(models).forEach((x) => {
   models[x].init(sequelize);
+});
+Object.keys(models).forEach((x) => {
+  models[x].associate(models);
 });
 
 db.sequelize = sequelize;

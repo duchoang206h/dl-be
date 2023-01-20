@@ -7,7 +7,6 @@ const COURSE_TYPE = {
 };
 const SCORE_TYPE = {
   PAR: 'PAR',
-  HOLE_IN_ONE: 'Hole in one',
   BIRDIE: 'Birdie',
   EAGLE: 'Eagle',
   BOGEY: 'Bogey',

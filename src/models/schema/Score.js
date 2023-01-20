@@ -9,6 +9,22 @@ class Score extends Base {
    */
   static associate(models) {
     // define association here
+    Score.belongsTo(models.Hole, {
+      foreignKey: 'hole_id',
+      targetKey: 'hole_id',
+    });
+    Score.belongsTo(models.Round, {
+      foreignKey: 'round_id',
+      targetKey: 'round_id',
+    });
+    Score.belongsTo(models.Player, {
+      foreignKey: 'player_id',
+      targetKey: 'player_id',
+    });
+    Score.belongsTo(models.Course, {
+      foreignKey: 'course_id',
+      targetKey: 'course_id',
+    });
   }
   static init(sequelize) {
     return super.init(

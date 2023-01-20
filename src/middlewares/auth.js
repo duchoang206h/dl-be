@@ -39,6 +39,7 @@ const auth = async (req, res, next) => {
     req.userId = payload.sub;
     return next();
   } catch (error) {
+    console.log(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
   }
 };
