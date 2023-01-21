@@ -7,8 +7,14 @@ const importPlayers = catchAsync(async (req, res) => {
   const [data, error] = await getDataFromXlsx(req.files[0].buffer, playerSchema);
   if (error) throw error;
   const players = data.map((player) => ({
-    fullname: player['Full name'],
-    country: player['Country'],
+    fullname: player['name-golfer'],
+    country: player['country'],
+    code: player['code'],
+    avatar: player['avatar'],
+    club: player['club'],
+    group: player['group'],
+    sex: player['sex'],
+    age: player['age'],
     course_id: req.params.courseId,
   }));
   await playerService.createManyPlayer(players);
