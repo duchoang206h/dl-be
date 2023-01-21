@@ -33,6 +33,12 @@ class Player extends Base {
           type: Sequelize.STRING,
           allowNull: false,
         },
+        age: Sequelize.INTEGER,
+        sex: Sequelize.BOOLEAN,
+        code: Sequelize.STRING,
+        club: Sequelize.STRING,
+        group: Sequelize.STRING,
+        avatar: Sequelize.STRING,
         flag: {
           type: Sequelize.VIRTUAL,
           get() {
