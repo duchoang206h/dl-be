@@ -166,11 +166,13 @@ const getAllPlayerScore = async (courseId) => {
           return { scores, round: round.round_num };
         })
       );
+      player['rounds'] = [];
       for (const score of scores) {
-        player[score.round] = {
+        player['rounds'].push({
+          round: score.round,
           scores: score.scores,
           total: score.scores.reduce((pre, current) => pre + current.num_putt, 0),
-        };
+        });
       }
       return player;
     })
@@ -196,11 +198,13 @@ const getPlayerScore = async (courseId, playerId) => {
       return { scores: score, round: round.round_num };
     })
   );
+  player['rounds'] = [];
   for (const score of scores) {
-    player[score.round] = {
+    player['rounds'].push({
+      round: score.round,
       scores: score.scores,
       total: score.scores.reduce((pre, current) => pre + current.num_putt, 0),
-    };
+    });
   }
   return player;
 };
