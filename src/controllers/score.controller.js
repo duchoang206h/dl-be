@@ -50,7 +50,6 @@ const createScore = catchAsync(async (req, res) => {
   });
 });
 const createManyScore = catchAsync(async (req, res) => {
-  console.log(req.body.scores);
   const scores = await scoreService.createManyScore(req.body.scores, {
     courseId: req.params.courseId,
     playerId: req.params.playerId,
@@ -61,13 +60,12 @@ const createManyScore = catchAsync(async (req, res) => {
   });
 });
 const updateScore = catchAsync(async (req, res) => {
-  const score = await scoreService.updateScore({
-    ...req.body,
-    course_id: req.params.courseId,
-    player_id: req.params.playerId,
+  const scores = await scoreService.updateManyScore(req.body.scores, {
+    courseId: req.params.courseId,
+    playerId: req.params.playerId,
   });
   res.status(httpStatus.OK).send({
-    result: score,
+    result: scores,
   });
 });
 const getPlayerScoreByRoundAndHole = catchAsync(async (req, res) => {
