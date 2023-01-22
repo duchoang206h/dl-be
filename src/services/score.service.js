@@ -54,6 +54,22 @@ const updateScore = async (scoreBody) => {
     { where: { course_id, round_id: round.round_id, hole_id: hole.hole_id, player_id } }
   );
 };
+const updateManyScore = async (scores, { courseId, playerId }) => {
+  return await Promise.all(
+    scores.map(async (score) => {
+      const { round_num, hole_num, num_putt } = score;
+      const [hole, round] = await Promise.all([
+        holeService.getHoleByNumAndCourse(hole_num, courseId),
+        roundService.getRoundByNumAndCourse(round_num, courseId),
+      ]);
+      const scoreType = getScoreType(num_putt, hole.par);
+      return Score.update(
+        { num_putt, score_type: scoreType },
+        { where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId } }
+      );
+    })
+  );
+};
 const getScoresByPlayerAndRound = async ({ playerId, roundId, courseId }) => {
   return Score.findAll({
     where: {
@@ -136,7 +152,6 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId) => {
   return players;
 };
 const getPlayerScoresByAllRound = async (courseId, playerId) => {
-  console.log(playerId);
   const rounds = await Round.findAll({ where: { course_id: courseId }, raw: true, order: [['round_num', 'asc']] });
   const scores = await Promise.all(
     rounds.map(async (round) => {
@@ -219,4 +234,5 @@ module.exports = {
   createManyScore,
   getAllPlayerScore,
   getPlayerScore,
+  updateManyScore,
 };
