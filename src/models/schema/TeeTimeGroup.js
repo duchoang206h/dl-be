@@ -8,7 +8,14 @@ class TeeTimeGroup extends Base {
    * The `models/index` file will call this method automatically.
    */
   static associate(models) {
+    TeeTimeGroup.belongsTo(models.TeeTime, { foreignKey: 'teetime_group_id', targetKey: 'teetime_group_id' });
     // define association here
+    TeeTimeGroup.belongsToMany(models.Player, {
+      as: 'players',
+      through: { model: models.TeeTimeGroupPlayer },
+      foreignKey: 'teetime_group_id',
+      otherKey: 'teetime_group_id',
+    });
   }
   static init(sequelize) {
     return super.init(
@@ -21,8 +28,6 @@ class TeeTimeGroup extends Base {
         course_id: Sequelize.INTEGER,
         round_id: Sequelize.INTEGER,
         group_num: Sequelize.INTEGER,
-        tee: Sequelize.INTEGER,
-        player_id: Sequelize.STRING,
       },
       {
         sequelize,

@@ -1,7 +1,7 @@
 const { Base } = require('./Base');
 const Sequelize = require('sequelize');
 
-class TeeTime extends Base {
+class TeeTimeGroupPlayer extends Base {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
@@ -9,27 +9,29 @@ class TeeTime extends Base {
    */
   static associate(models) {
     // define association here
-    TeeTime.hasMany(models.TeeTimeGroup, { as: 'groups', foreignKey: 'teetime_group_id', sourceKey: 'teetime_group_id' });
   }
   static init(sequelize) {
     return super.init(
       {
-        course_id: Sequelize.INTEGER,
-        round_id: Sequelize.INTEGER,
-        teetime_group_id: Sequelize.INTEGER,
-        tee: Sequelize.INTEGER,
-        time: Sequelize.STRING,
+        teetime_group_id: {
+          type: Sequelize.INTEGER,
+          primaryKey: true,
+        },
+        player_id: {
+          type: Sequelize.INTEGER,
+          primaryKey: true,
+        },
       },
       {
         sequelize,
-        modelName: 'TeeTime',
+        modelName: 'TeeTimeGroupPlayer',
         freezeTableName: true,
-        tableName: 'teetimes',
+        tableName: 'teetimegroupplayers',
         timestamps: true,
       }
     );
   }
 }
 module.exports = {
-  TeeTime,
+  TeeTimeGroupPlayer,
 };

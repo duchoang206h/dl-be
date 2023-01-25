@@ -7,3 +7,4 @@ module.exports.holeService = require('./hole.service');
 module.exports.courseService = require('./course.service');
 module.exports.roundService = require('./round.service');
 module.exports.scoreService = require('./score.service');
+module.exports.teetimeService = require('./teetime.service');

@@ -9,6 +9,11 @@ router.post('/', auth, validate(courseValidation.createCourse), courseController
 router.post('/:courseId/users', auth, isSuperAdmin, userController.createUser);
 router.get('/:courseId', courseController.getCourseById);
 router.post('/:courseId/players/import', /* auth, checkAminPermission, */ upload.any(), playerController.importPlayers);
+router.post(
+  '/:courseId/rounds/:roundNum/teetime/import',
+  /* auth, checkAminPermission, */ upload.any(),
+  playerController.importPlayers
+);
 router.get('/', auth, isSuperAdmin, courseController.getAllCourse);
 router.get('/:courseId/players', playerController.getAllPlayer);
 router.get('/:courseId/players/:playerId', playerController.getPlayer);

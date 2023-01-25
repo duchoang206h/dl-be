@@ -3,8 +3,6 @@ const Joi = require('joi');
 const playerSchema = Joi.object({
   code: Joi.required(),
   avatar: Joi.any(),
-  'name-golfer': Joi.string().required(),
-  club: Joi.string(),
   group: Joi.string(),
   flightname: Joi.any(),
   path1: Joi.any(),
@@ -23,6 +21,13 @@ const playerSchema = Joi.object({
   status_day: Joi.any(),
   note: Joi.any(),
 });
+const teetimeSchema = Joi.object({
+  'name-golfer': Joi.string().required(),
+  group: Joi.number().required(),
+  tee: Joi.number().required(),
+  teetime: Joi.string().required(),
+});
 module.exports = {
   playerSchema,
+  teetimeSchema,
 };

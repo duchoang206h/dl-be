@@ -12,26 +12,23 @@ const { TeeTimeGroup } = require('./TeeTimeGroup');
 const { TeeTime } = require('./Teetime');
 const { User } = require('./User');
 const { Token } = require('./Token');
+const { TeeTimeGroupPlayer } = require('./TeetimeGroupPlayer');
 const db = {};
 const models = {
   Course,
   GolfCourse,
   Hole,
   Penalty,
+  TeeTimeGroup,
+  TeeTime,
+  TeeTimeGroupPlayer,
   Player,
   Round,
   Score,
-  TeeTime,
-  TeeTimeGroup,
   User,
   Token,
 };
 const sequelize = new Sequelize(process.env.DB_URL, { dialect: 'mysql' });
-//
-/* Hole.hasMany(Score, { foreignKey: 'hole_id', as: 'scores' });
-Round.hasMany(Score, { foreignKey: 'round_id', as: 'scores' });
-Course.hasMany(Score, { foreignKey: 'course_id', as: 'scores' });
-Player.hasMany(Score, { foreignKey: 'player_id', as: 'scores' }); */
 Object.keys(models).forEach((x) => {
   models[x].init(sequelize);
 });
@@ -45,15 +42,5 @@ db.Sequelize = Sequelize;
 module.exports = {
   sequelize,
   Sequelize,
-  Course,
-  GolfCourse,
-  Hole,
-  Penalty,
-  Player,
-  Round,
-  Score,
-  TeeTime,
-  TeeTimeGroup,
-  User,
-  Token,
+  ...models,
 };
