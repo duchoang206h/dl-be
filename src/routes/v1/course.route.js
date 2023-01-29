@@ -47,6 +47,8 @@ router.get('/:courseId/statistic/rounds/:roundNum', scoreController.getHoleStati
 router.get('/:courseId/statistic/rounds', scoreController.getHoleStatisticByRoundNum);
 router.get('/:courseId/statistic', scoreController.getAllStatistic);
 router.get('/:courseId/statistic/players/:playerId', scoreController.getAllStatisticByPlayerId);
+//teetime
+router.get('/:courseId/teetimes/rounds/:roundNum', teetimeController.getTeetime);
 
 // seed
 router.get('/:courseId/seed', (req, res) => {

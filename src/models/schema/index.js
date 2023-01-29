@@ -28,7 +28,7 @@ const models = {
   User,
   Token,
 };
-const sequelize = new Sequelize(process.env.DB_URL, { dialect: 'mysql' });
+const sequelize = new Sequelize(process.env.DB_URL, { dialect: 'mysql', logging: false });
 Object.keys(models).forEach((x) => {
   models[x].init(sequelize);
 });

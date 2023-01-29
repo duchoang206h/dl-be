@@ -15,11 +15,15 @@ class Player extends Base {
       foreignKey: 'course_id',
       targetKey: 'course_id',
     });
-    Player.belongsToMany(models.TeeTimeGroup, {
+    Player.belongsTo(models.TeeTimeGroupPlayer, {
+      foreignKey: 'player_id',
+      targetKey: 'player_id',
+    });
+    /* Player.belongsToMany(models.TeeTimeGroup, {
       through: { model: models.TeeTimeGroupPlayer },
       foreignKey: 'player_id',
       otherKey: 'player_id',
-    });
+    }); */
   }
   static init(sequelize) {
     return super.init(
