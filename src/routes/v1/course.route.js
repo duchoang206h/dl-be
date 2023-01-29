@@ -1,9 +1,18 @@
 const express = require('express');
 const validate = require('../../middlewares/validate');
+const fs = require('fs');
 const { courseValidation, holeValidation } = require('../../validations');
-const { courseController, holeController, userController, playerController, scoreController } = require('../../controllers');
+const {
+  courseController,
+  holeController,
+  userController,
+  playerController,
+  scoreController,
+  teetimeController,
+} = require('../../controllers');
 const { checkAminPermission, auth, isSuperAdmin } = require('../../middlewares/auth');
 const { upload } = require('../../middlewares/upload');
+const path = require('path');
 const router = express.Router();
 router.post('/', auth, validate(courseValidation.createCourse), courseController.createCourse);
 router.post('/:courseId/users', auth, isSuperAdmin, userController.createUser);
@@ -12,7 +21,7 @@ router.post('/:courseId/players/import', /* auth, checkAminPermission, */ upload
 router.post(
   '/:courseId/rounds/:roundNum/teetime/import',
   /* auth, checkAminPermission, */ upload.any(),
-  playerController.importPlayers
+  teetimeController.importTeetime
 );
 router.get('/', auth, isSuperAdmin, courseController.getAllCourse);
 router.get('/:courseId/players', playerController.getAllPlayer);
@@ -38,4 +47,11 @@ router.get('/:courseId/statistic/rounds/:roundNum', scoreController.getHoleStati
 router.get('/:courseId/statistic/rounds', scoreController.getHoleStatisticByRoundNum);
 router.get('/:courseId/statistic', scoreController.getAllStatistic);
 router.get('/:courseId/statistic/players/:playerId', scoreController.getAllStatisticByPlayerId);
+//teetime
+router.get('/:courseId/teetimes/rounds/:roundNum', teetimeController.getTeetime);
+
+// seed
+router.get('/:courseId/seed', (req, res) => {
+  res.download(path.resolve(__dirname, '..', '..', 'models/teetime_round_1.xlsx'), 'teetime_round_1.xlsx');
+});
 module.exports = router;

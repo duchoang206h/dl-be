@@ -9,17 +9,29 @@ class TeeTimeGroupPlayer extends Base {
    */
   static associate(models) {
     // define association here
+    TeeTimeGroupPlayer.belongsTo(models.TeeTimeGroup, {
+      foreignKey: 'teetime_group_id',
+      targetKey: 'teetime_group_id',
+    });
+    TeeTimeGroupPlayer.hasOne(models.Player, {
+      as: 'players',
+      foreignKey: 'player_id',
+      sourceKey: 'player_id',
+    });
   }
   static init(sequelize) {
     return super.init(
       {
-        teetime_group_id: {
+        id: {
           type: Sequelize.INTEGER,
           primaryKey: true,
+          autoIncrement: true,
+        },
+        teetime_group_id: {
+          type: Sequelize.INTEGER,
         },
         player_id: {
           type: Sequelize.INTEGER,
-          primaryKey: true,
         },
       },
       {

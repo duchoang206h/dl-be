@@ -4,3 +4,4 @@ module.exports.holeController = require('./hole.controller');
 module.exports.courseController = require('./course.controller');
 module.exports.scoreController = require('./score.controller');
 module.exports.playerController = require('./player.controller');
+module.exports.teetimeController = require('./teetime.controller');

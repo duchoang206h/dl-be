@@ -9,7 +9,7 @@ class TeeTime extends Base {
    */
   static associate(models) {
     // define association here
-    TeeTime.hasMany(models.TeeTimeGroup, { as: 'groups', foreignKey: 'teetime_group_id', sourceKey: 'teetime_group_id' });
+    TeeTime.belongsTo(models.TeeTimeGroup, { foreignKey: 'teetime_group_id', sourceKey: 'teetime_group_id', as: 'groups' });
   }
   static init(sequelize) {
     return super.init(

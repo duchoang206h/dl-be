@@ -1,4 +1,4 @@
-const reader = require('xlsx');
+const XLSX = require('xlsx');
 const { validate } = require('../utils/validate');
 const { BadRequestError, InternalServerError } = require('../utils/ApiError');
 
@@ -10,8 +10,8 @@ const { BadRequestError, InternalServerError } = require('../utils/ApiError');
  */
 const getDataFromXlsx = async (data, schema, readAllSheet = false) => {
   try {
-    const file = reader.read(data);
-    const temp = reader.utils.sheet_to_json(file.Sheets[file.SheetNames[0]]);
+    const file = XLSX.read(data);
+    const temp = XLSX.utils.sheet_to_json(file.Sheets[file.SheetNames[0]]);
     // validate input
     console.log(temp);
     for (const data of temp) {
@@ -24,6 +24,13 @@ const getDataFromXlsx = async (data, schema, readAllSheet = false) => {
     return [null, new InternalServerError(error)];
   }
 };
+const writeToXlsx = async (data, fileName) => {
+  const worksheet = XLSX.utils.json_to_sheet(data);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet);
+  XLSX.writeFile(workbook, fileName);
+};
 module.exports = {
   getDataFromXlsx,
+  writeToXlsx,
 };

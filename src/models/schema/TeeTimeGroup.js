@@ -10,11 +10,21 @@ class TeeTimeGroup extends Base {
   static associate(models) {
     TeeTimeGroup.belongsTo(models.TeeTime, { foreignKey: 'teetime_group_id', targetKey: 'teetime_group_id' });
     // define association here
-    TeeTimeGroup.belongsToMany(models.Player, {
+    /*  TeeTimeGroup.belongsToMany(models.Player, {
       as: 'players',
       through: { model: models.TeeTimeGroupPlayer },
       foreignKey: 'teetime_group_id',
       otherKey: 'teetime_group_id',
+    }); */
+    TeeTimeGroup.hasMany(models.TeeTimeGroupPlayer, {
+      as: 'group_players',
+      foreignKey: 'teetime_group_id',
+      sourceKey: 'teetime_group_id',
+    });
+    TeeTimeGroup.hasOne(models.TeeTime, {
+      as: 'teetime',
+      foreignKey: 'teetime_group_id',
+      targetKey: 'teetime_group_id',
     });
   }
   static init(sequelize) {
