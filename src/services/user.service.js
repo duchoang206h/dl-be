@@ -78,7 +78,9 @@ const deleteUserById = async (userId) => {
 };
 const createUser = async (createBody) => {
   const cloneBody = { ...createBody, password: hashPassword(createBody.password) };
-  return await User.create(cloneBody);
+  const user = await User.create(cloneBody, { raw: true });
+  user.password = null;
+  return user;
 };
 
 module.exports = {
