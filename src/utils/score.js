@@ -12,6 +12,15 @@ const getScoreType = (score, par) => {
     case -2:
       scoreType = SCORE_TYPE.EAGLE;
       break;
+    case -3:
+      scoreType = SCORE_TYPE.EAGLE;
+      break;
+    case -4:
+      scoreType = SCORE_TYPE.EAGLE;
+      break;
+    case -5:
+      scoreType = SCORE_TYPE.EAGLE;
+      break;
     case 1:
       scoreType = SCORE_TYPE.BOGEY;
       break;
