@@ -33,25 +33,39 @@ const getPlayerScoresByRoundAndHole = async (scoreBody) => {
   });
 };
 const createManyScore = async (scoreBodyArr, { courseId, playerId, roundNum }) => {
-  const result = await Promise.all(
-    scoreBodyArr.map(async (scoreBody) => {
-      const { hole_num, num_putt } = scoreBody;
-      const [hole, round] = await Promise.all([
-        holeService.getHoleByNumAndCourse(hole_num, courseId),
-        roundService.getRoundByNumAndCourse(roundNum, courseId),
-      ]);
-      const scoreType = getScoreType(num_putt, hole.par);
-      return Score.create({
-        num_putt,
-        course_id: courseId,
-        round_id: round.round_id,
-        hole_id: hole.hole_id,
-        player_id: playerId,
-        score_type: scoreType,
-      });
-    })
-  );
-  return result;
+  const t = await sequelize.transaction()();
+  try {
+    const result = await Promise.all(
+      scoreBodyArr.map(async (scoreBody) => {
+        const { hole_num, num_putt } = scoreBody;
+        const [hole, round] = await Promise.all([
+          holeService.getHoleByNumAndCourse(hole_num, courseId),
+          roundService.getRoundByNumAndCourse(roundNum, courseId),
+        ]);
+        const scoreType = getScoreType(num_putt, hole.par);
+        const existScore = await Score.count({
+          where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId },
+        });
+        if (existScore) throw BadRequestError();
+        return Score.create(
+          {
+            num_putt,
+            course_id: courseId,
+            round_id: round.round_id,
+            hole_id: hole.hole_id,
+            player_id: playerId,
+            score_type: scoreType,
+          },
+          { transaction: t }
+        );
+      })
+    );
+    await t.commit();
+    return result;
+  } catch (error) {
+    await t.rollback();
+    throw new InternalServerError();
+  }
 };
 const updateScore = async (scoreBody) => {
   const { course_id, round_num, hole_num, player_id, num_putt } = scoreBody;
@@ -66,7 +80,7 @@ const updateScore = async (scoreBody) => {
   );
 };
 const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
-  const t = Sequelize.Transaction();
+  const t = await sequelize.transaction()();
   try {
     for (const score of scores) {
       if (score.num_putt <= 0) throw new BadRequestError();
