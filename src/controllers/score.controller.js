@@ -12,7 +12,9 @@ const getPlayerScoreByAllRound = catchAsync(async (req, res) => {
 const getAllPlayerScoreByRound = catchAsync(async (req, res) => {
   const round = await roundService.getRoundByNumAndCourse(req.params.roundNum, req.params.courseId);
   if (!round) return res.status(httpStatus.NOT_FOUND).send();
-  const scores = await scoreService.getAllPlayerScoreByRoundId(round.round_id, req.params.courseId);
+  const scores = await scoreService.getAllPlayerScoreByRoundId(round.round_id, req.params.courseId, {
+    name: req.query.name,
+  });
   return res.status(httpStatus.OK).send({ result: scores });
 });
 const getHoleStatisticByRoundNum = catchAsync(async (req, res) => {
