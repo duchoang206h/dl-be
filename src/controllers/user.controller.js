@@ -4,8 +4,12 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { userService } = require('../services');
 const { ROLE } = require('../config/constant');
+const { User } = require('../models/schema');
+const { USER_EXIST } = require('../utils/errorMessage');
 
 const createUser = catchAsync(async (req, res) => {
+  const existUser = await User.count({ where: { username: req.body.username } });
+  if (existUser) return res.status(httpStatus.BAD_REQUEST).send({ message: USER_EXIST });
   const createData = { ...req.body, is_super: false, role: ROLE.COURSE_USER, course_id: req.params.courseId };
   const user = await userService.createUser(createData);
   res.status(httpStatus.CREATED).send(user);

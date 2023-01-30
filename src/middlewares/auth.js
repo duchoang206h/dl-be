@@ -47,6 +47,7 @@ const auth = async (req, res, next) => {
 const isSuperAdmin = async (req, res, next) => {
   try {
     const user = await getUserById(req.userId);
+    req.user = user;
     if (user && user.is_super) return next();
     return res.status(httpStatus.FORBIDDEN).send();
   } catch (error) {
@@ -58,9 +59,7 @@ const checkAminPermission = async (req, res, next) => {
     const user = await getUserById(req.userId);
     if (user && user.is_super) return next();
     else if (user && user.course_id == req.params.courseId) return next();
-    else {
-      return res.status(httpStatus.FORBIDDEN).send();
-    }
+    return res.status(httpStatus.FORBIDDEN).send();
   } catch (error) {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
   }
