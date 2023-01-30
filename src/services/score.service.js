@@ -1,7 +1,17 @@
-const { holeService, roundService } = require('.');
-const { SCORE_TYPE } = require('../config/constant');
-const { Score, Round, Hole, sequelize, Player } = require('../models/schema');
+const { Op } = require('sequelize');
+const moment = require('moment');
+const { holeService, roundService, courseService } = require('.');
+const {
+  SCORE_TYPE,
+  PAR_PER_ROUND,
+  DATE_FORMAT,
+  HOLE_PER_COURSE,
+  FINISH_ALL_ROUNDS,
+  EVENT_ZERO,
+} = require('../config/constant');
+const { Score, Round, Hole, sequelize, Player, TeeTimeGroupPlayer, TeeTimeGroup } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
+const { dateWithTimezone } = require('../utils/date');
 const { getScoreType, calculateScoreAverage } = require('../utils/score');
 
 const createScore = async (scoreBody) => {};
@@ -120,35 +130,109 @@ const getHoleStatisticByRound = async ({ courseId, roundId }) => {
   }));
   return result;
 };
-const getAllPlayerScoreByRoundId = async (roundId, courseId) => {
-  let players = await Player.findAll({
+const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }) => {
+  const where = name
+    ? {
+        course_id: courseId,
+        fullname: {
+          [Op.like]: `%${name}%`,
+        },
+      }
+    : {
+        course_id: courseId,
+      };
+  const [round, course] = await Promise.all([Round.findByPk(roundId, { raw: true }), courseService.getCourseById(courseId)]);
+  const lastRounds = await Round.findAll({
     where: {
       course_id: courseId,
-    },
-    attributes: { exclude: ['createdAt', 'updatedAt'] },
-    include: {
-      model: Score,
-      as: 'scores',
-      attributes: ['num_putt', 'score_type'],
-      raw: true,
-      where: {
-        round_id: roundId,
-        course_id: courseId,
+      round_num: {
+        [Op.lt]: round.round_num,
       },
-      include: [{ model: Hole, attributes: ['hole_num'] }],
     },
+    attributes: ['round_id'],
+    raw: true,
   });
-  players = players.map((player) => {
-    player = player.toJSON();
-    player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
-    const total = player.scores.reduce((pre, current) => pre + current.num_putt, 0);
-    const _in = player.scores.slice(0, 9).reduce((pre, current) => pre + current.num_putt, 0);
-    const out = player.scores.slice(9).reduce((pre, current) => pre + current.num_putt, 0);
-    player['in'] = _in;
-    player['total'] = total;
-    player['out'] = out;
-    return player;
+  let players = await Player.findAll({
+    where,
+    attributes: { exclude: ['createdAt', 'updatedAt'] },
+    include: [
+      {
+        model: Score,
+        as: 'scores',
+        attributes: ['num_putt', 'score_type'],
+        where: {
+          round_id: roundId,
+          course_id: courseId,
+        },
+        include: [{ model: Hole, attributes: ['hole_num'] }],
+      },
+      { model: TeeTimeGroupPlayer, as: 'teetime_group_player', include: [{ model: TeeTimeGroup }] },
+    ],
   });
+  players = await Promise.all(
+    players.map(async (player) => {
+      player = player.toJSON();
+      player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
+      player.scores = player.scores.map((score) => {
+        return {
+          num_putt: score.num_putt,
+          score_type: score.score_type,
+          hole_num: score.Hole.hole_num,
+        };
+      });
+      const total = player.scores.reduce((pre, current) => pre + current.num_putt, 0);
+      const _in = player.scores.slice(0, 9).reduce((pre, current) => pre + current.num_putt, 0);
+      const out = player.scores.slice(9).reduce((pre, current) => pre + current.num_putt, 0);
+
+      player['in'] = _in;
+      player['total'] = total;
+      player['out'] = out;
+      const today = moment(course.end_date).isBefore(moment())
+        ? Score.sum('num_putt', {
+            where: {
+              player_id: player.player_id,
+              course_id: courseId,
+              round_id: round.round_id,
+              createdAt: {
+                [Op.gte]: dateWithTimezone(),
+                [Op.lt]: moment(dateWithTimezone(), DATE_FORMAT).add(1, 'days'),
+              },
+            },
+          })
+        : total - PAR_PER_ROUND;
+      const score =
+        (await Score.sum('num_putt', {
+          where: {
+            player_id: player.player_id,
+            course_id: courseId,
+            round_id: {
+              [Op.in]: lastRounds.map(({ round_id }) => round_id),
+            },
+          },
+        })) -
+        (round.round_num - 1) * PAR_PER_ROUND +
+        today;
+      return {
+        in: _in,
+        total,
+        out,
+        today,
+        score: score == 0 ? EVENT_ZERO : score,
+        scores: player.scores,
+        group_num: player.teetime_group_player.TeeTimeGroup.group_num,
+        flag: player.flag,
+        player_id: player.player_id,
+        fullname: player.fullname,
+        country: player.country,
+        age: player.age,
+        sex: player.sex,
+        code: player.code,
+        club: player.club,
+        group: player.group,
+        avatar: player.avatar,
+      };
+    })
+  );
   return players;
 };
 const getPlayerScoresByAllRound = async (courseId, playerId) => {
@@ -203,16 +287,19 @@ const getPlayerScore = async (courseId, playerId) => {
     roundService.getAllRoundByCourse(courseId),
   ]);
   player = player.toJSON();
-  const scores = await Promise.all(
-    rounds.map(async (round) => {
-      const score = await Score.findAll({
-        where: { player_id: player.player_id, round_id: round.round_id, course_id: courseId },
-        attributes: ['num_putt', 'score_type'],
-        include: [{ model: Hole, attributes: ['hole_num'] }],
-      });
-      return { scores: score, round: round.round_num };
-    })
-  );
+  const [scores, course] = await Promise.all([
+    Promise.all(
+      rounds.map(async (round) => {
+        const score = await Score.findAll({
+          where: { player_id: player.player_id, round_id: round.round_id, course_id: courseId },
+          attributes: ['num_putt', 'score_type'],
+          include: [{ model: Hole, attributes: ['hole_num'] }],
+        });
+        return { scores: score, round: round.round_num };
+      })
+    ),
+    courseService.getCourseById(courseId),
+  ]);
   player['rounds'] = [];
   for (const score of scores) {
     player['rounds'].push({
@@ -221,6 +308,38 @@ const getPlayerScore = async (courseId, playerId) => {
       total: score.scores.reduce((pre, current) => pre + current.num_putt, 0),
     });
   }
+  const _today = dateWithTimezone();
+  console.log(_today);
+  const lastRound = await roundService.getRoundByNumAndCourse(course.total_round, courseId);
+  console.log({ check: moment(_today, DATE_FORMAT).isBefore(moment(course.end_date)) });
+  player['score'] = PAR_PER_ROUND * course.total_round - player['rounds'].reduce((pre, current) => pre + current.total, 0);
+  const [thru, todayScore] = await Promise.all([
+    Score.count({ where: { player_id: player.player_id } }),
+    moment(_today, DATE_FORMAT).isBefore(moment(course.end_date))
+      ? Score.findAll({
+          where: {
+            player_id: playerId,
+            updatedAt: {
+              [Op.gte]: _today,
+              [Op.lt]: moment(_today).add(1, 'days').toDate(), // tomorrow
+            },
+          },
+          include: [{ model: Hole }],
+        })
+      : Score.findAll({
+          where: {
+            player_id: playerId,
+            round_id: lastRound.round_id,
+          },
+          include: [{ model: Hole }],
+        }),
+  ]);
+  const today = todayScore.reduce((pre, score) => {
+    score.toJSON();
+    return pre + score.num_putt - score.Hole.par;
+  }, 0);
+  player['thru'] = thru == HOLE_PER_COURSE * course.total_round ? FINISH_ALL_ROUNDS : thru;
+  player['thru'] = thru == HOLE_PER_COURSE * course.total_round ? FINISH_ALL_ROUNDS : thru;
   return player;
 };
 module.exports = {

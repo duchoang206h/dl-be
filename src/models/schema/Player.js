@@ -18,6 +18,7 @@ class Player extends Base {
     Player.belongsTo(models.TeeTimeGroupPlayer, {
       foreignKey: 'player_id',
       targetKey: 'player_id',
+      as: 'teetime_group_player',
     });
     /* Player.belongsToMany(models.TeeTimeGroup, {
       through: { model: models.TeeTimeGroupPlayer },

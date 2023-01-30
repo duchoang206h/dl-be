@@ -25,7 +25,6 @@ class Course extends Base {
         },
         name: Sequelize.STRING,
         type: Sequelize.STRING,
-        event_date: Sequelize.STRING,
         total_prize: Sequelize.FLOAT,
         description: Sequelize.STRING,
         total_round: {
@@ -36,6 +35,13 @@ class Course extends Base {
           type: Sequelize.INTEGER,
           allowNull: false,
         },
+        event_date: Sequelize.STRING,
+        start_date: Sequelize.DATEONLY,
+        end_date: Sequelize.DATEONLY,
+        logo: Sequelize.STRING,
+        address: Sequelize.STRING,
+        banner: Sequelize.STRING,
+        color: Sequelize.STRING,
       },
       {
         sequelize,
