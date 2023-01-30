@@ -181,8 +181,8 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
         };
       });
       const total = player.scores.reduce((pre, current) => pre + current.num_putt, 0);
-      const _in = player.scores.slice(0, 9).reduce((pre, current) => pre + current.num_putt, 0);
-      const out = player.scores.slice(9).reduce((pre, current) => pre + current.num_putt, 0);
+      const out = player.scores.slice(0, 9).reduce((pre, current) => pre + current.num_putt, 0);
+      const _in = player.scores.slice(9).reduce((pre, current) => pre + current.num_putt, 0);
 
       player['in'] = _in;
       player['total'] = total;

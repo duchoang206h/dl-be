@@ -52,6 +52,13 @@ const generateTeetime = () => {
 };
 const seed = async () => {
   try {
+    console.log('---------------start');
+   /*  await User.create({
+      username: 'duchoang206h',
+      password: hashPassword('123456'),
+      is_super: true,
+      role: 'admin',
+    }); */
     let arr = new Array(40).fill(null);
     const players = await Promise.all(
       arr.map(() =>
@@ -85,18 +92,11 @@ const seed = async () => {
         }
       }
     }
-    //await Promise.all(promises);
+    await Promise.all(promises);
     console.log('---------------end');
   } catch (error) {
     console.log(error);
   }
-  console.log('---------------start');
-  /* await User.create({
-    username: 'duchoang206h',
-    password: hashPassword('123456'),
-    is_super: true,
-    role: 'admin',
-  }); */
 };
 const exportXlsx = async () => {
   const teetime = generateTeetime();
