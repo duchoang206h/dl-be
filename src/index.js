@@ -6,7 +6,7 @@ const { seed, exportXlsx } = require('./models/seed');
 
 let server;
 db.sequelize.authenticate().then(() => {
-  //exportXlsx();
+  exportXlsx();
   //seed();
   if (process.env.NODE_ENV == 'development') {
     db.sequelize.sync();
