@@ -60,7 +60,7 @@ router.post(
   checkAminPermission,
   scoreController.createManyScore
 );
-router.put('/:courseId/scores/players/:playerId', auth, checkAminPermission, scoreController.updateScore);
+router.put('/:courseId/scores/players/:playerId/rounds/:roundNum', auth, checkAminPermission, scoreController.updateScore);
 // statistic
 router.get('/:courseId/statistic/rounds/:roundNum', scoreController.getHoleStatisticByRoundNum);
 router.get('/:courseId/statistic/rounds', scoreController.getHoleStatisticByRoundNum);

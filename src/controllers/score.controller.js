@@ -65,6 +65,7 @@ const updateScore = catchAsync(async (req, res) => {
   const scores = await scoreService.updateManyScore(req.body.scores, {
     courseId: req.params.courseId,
     playerId: req.params.playerId,
+    roundNum: req.params.roundNum,
   });
   res.status(httpStatus.OK).send({
     result: scores,

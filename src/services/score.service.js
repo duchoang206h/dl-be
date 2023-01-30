@@ -9,10 +9,11 @@ const {
   FINISH_ALL_ROUNDS,
   EVENT_ZERO,
 } = require('../config/constant');
-const { Score, Round, Hole, sequelize, Player, TeeTimeGroupPlayer, TeeTimeGroup } = require('../models/schema');
+const { Score, Round, Hole, sequelize, Player, TeeTimeGroupPlayer, TeeTimeGroup, Sequelize } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
 const { getScoreType, calculateScoreAverage } = require('../utils/score');
+const { InternalServerError, BadRequestError } = require('../utils/ApiError');
 
 const createScore = async (scoreBody) => {};
 const getPlayerScoresByRoundAndHole = async (scoreBody) => {
@@ -64,21 +65,35 @@ const updateScore = async (scoreBody) => {
     { where: { course_id, round_id: round.round_id, hole_id: hole.hole_id, player_id } }
   );
 };
-const updateManyScore = async (scores, { courseId, playerId }) => {
-  return await Promise.all(
-    scores.map(async (score) => {
-      const { round_num, hole_num, num_putt } = score;
-      const [hole, round] = await Promise.all([
-        holeService.getHoleByNumAndCourse(hole_num, courseId),
-        roundService.getRoundByNumAndCourse(round_num, courseId),
-      ]);
-      const scoreType = getScoreType(num_putt, hole.par);
-      return Score.update(
-        { num_putt, score_type: scoreType },
-        { where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId } }
-      );
-    })
-  );
+const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
+  const t = Sequelize.Transaction();
+  try {
+    for (const score of scores) {
+      if (score.num_putt <= 0) throw new BadRequestError();
+    }
+    const result = await Promise.all(
+      scores.map(async (score) => {
+        const { hole_num, num_putt } = score;
+        const [hole, round] = await Promise.all([
+          holeService.getHoleByNumAndCourse(hole_num, courseId),
+          roundService.getRoundByNumAndCourse(roundNum, courseId),
+        ]);
+        const scoreType = getScoreType(num_putt, hole.par);
+        return Score.update(
+          { num_putt, score_type: scoreType },
+          {
+            where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId },
+            transaction: t,
+          }
+        );
+      })
+    );
+    await t.commit();
+    return result;
+  } catch (error) {
+    await t.rollback();
+    throw new InternalServerError();
+  }
 };
 const getScoresByPlayerAndRound = async ({ playerId, roundId, courseId }) => {
   return Score.findAll({
