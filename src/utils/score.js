@@ -60,7 +60,39 @@ const calculateScoreAverage = (holePar, statisticObject, totalPlayer) => {
   }
   return +(sumScore / totalPlayer).toFixed(2);
 };
+const getRank = (total, scores) => {
+  scores.sort((a, b) => a - b);
+  const duplicates = {};
+  for (const score of scores) {
+    if (duplicates.hasOwnProperty(score)) duplicates[score]++;
+    else duplicates[score] = 1;
+  }
+  const scoresShort = Object.keys(duplicates)
+    .map((score) => Number(score))
+    .sort((a, b) => a - b);
+  const ranks = {};
+  for (let i = 0; i < scoresShort.length; i++) {
+    ranks[scoresShort[i]] = i == 0 ? 1 : previousRankCount(i, duplicates, scoresShort);
+  }
+  return ranks[total];
+};
+const previousRankCount = (i, duplicates, scoresShort) => {
+  let sum = 0;
+  for (let j = 0; j < i; j++) {
+    sum += duplicates[scoresShort[j]];
+  }
+  return sum + 1;
+};
+//[1, 2, 3, 6, 3, 4, 3, 2];
+// [1,2,2,3,3,3,4,6]
+// { 1:1, 2:2, 3:3, 4;1, 6:1 }
+// 1->1
+// 2->2 2
+//3->4 4 4 4
+// 4-> 8
+// 6->9
 module.exports = {
   getScoreType,
   calculateScoreAverage,
+  getRank,
 };
