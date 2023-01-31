@@ -12,7 +12,7 @@ const {
 const { Score, Round, Hole, sequelize, Player, TeeTimeGroupPlayer, TeeTimeGroup, Sequelize } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
-const { getScoreType, calculateScoreAverage } = require('../utils/score');
+const { getScoreType, calculateScoreAverage, getRank } = require('../utils/score');
 const { InternalServerError, BadRequestError } = require('../utils/ApiError');
 
 const createScore = async (scoreBody) => {};
@@ -262,6 +262,11 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
       };
     })
   );
+  const scores = players.map(({ total }) => total);
+  players = players.map((player) => {
+    return { ...player, pos: getRank(player.total, scores) };
+  });
+  players.sort((a, b) => a.pos - b.pos);
   return players;
 };
 const getPlayerScoresByAllRound = async (courseId, playerId) => {
@@ -305,6 +310,17 @@ const getAllPlayerScore = async (courseId) => {
       return player;
     })
   );
+  const scores = players.map(({ rounds }) => rounds.reduce((pre, cur) => pre + cur.total, 0));
+  players = players.map((player) => {
+    return {
+      ...player,
+      pos: getRank(
+        player.rounds.reduce((pre, cur) => pre + cur.total, 0),
+        scores
+      ),
+    };
+  });
+  players.sort((a, b) => a.pos - b.pos);
   return players;
 };
 const getPlayerScore = async (courseId, playerId) => {
