@@ -33,6 +33,13 @@ const LEADERBOARD_IMAGES = {
   'ẢNH THEO ĐIỂM SỐ Âm': 'ẢNH THEO ĐIỂM SỐ Âm',
   'ẢNH THEO ĐIỂM SỐ Dương': 'ẢNH THEO ĐIỂM SỐ Dương',
 };
+const PLAYER_STATUS = {
+  NORMAL: 'Normal',
+  OUT_CUT: 'Out cut',
+  WITHDRAW: 'Withdraw',
+  DISQUALIFIED: 'Disqualified',
+  RETD: 'RETD',
+};
 const SCORE_CARD_IMAGES = {
   logo: 'Logo giải đấu',
   main: 'ẢNH MAIN',
@@ -54,4 +61,5 @@ module.exports = {
   FINISH_ALL_ROUNDS,
   EVENT_ZERO,
   SCORE_CARD_IMAGES,
+  PLAYER_STATUS,
 };

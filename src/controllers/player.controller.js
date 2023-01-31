@@ -38,4 +38,11 @@ const getPlayer = catchAsync(async (req, res) => {
   const player = await playerService.getPlayer(req.params.courseId, req.params.playerId);
   return res.status(httpStatus.OK).json({ result: player });
 });
-module.exports = { importPlayers, getAllPlayer, getPlayer };
+const updatePlayer = catchAsync(async (req, res) => {
+  const player = await playerService.updatePlayer(req.body, {
+    courseId: req.params.courseId,
+    playerId: req.params.playerId,
+  });
+  return res.status(httpStatus.OK).json({ result: player });
+});
+module.exports = { importPlayers, getAllPlayer, getPlayer, updatePlayer };

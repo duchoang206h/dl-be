@@ -1,3 +1,4 @@
+const { PLAYER_STATUS } = require('../../config/constant');
 const { getFlag } = require('../../utils/country');
 const { Base } = require('./Base');
 const Sequelize = require('sequelize');
@@ -59,11 +60,14 @@ class Player extends Base {
         putting: Sequelize.STRING,
         best: Sequelize.STRING,
         is_show: Sequelize.BOOLEAN,
-
+        status: {
+          type: Sequelize.STRING,
+          defaultValue: PLAYER_STATUS.NORMAL,
+        },
         flag: {
           type: Sequelize.VIRTUAL,
           get() {
-            return getFlag(this.country);
+            return this.country ? getFlag(this.country) : null;
           },
         },
       },
