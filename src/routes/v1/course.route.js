@@ -9,6 +9,7 @@ const {
   playerController,
   scoreController,
   teetimeController,
+  uploadController,
 } = require('../../controllers');
 const { checkAminPermission, auth, isSuperAdmin } = require('../../middlewares/auth');
 const { upload } = require('../../middlewares/upload');
@@ -72,6 +73,10 @@ router.get('/:courseId/statistic', scoreController.getAllStatistic);
 router.get('/:courseId/statistic/players/:playerId', scoreController.getAllStatisticByPlayerId);
 //teetime
 router.get('/:courseId/teetimes/rounds/:roundNum', teetimeController.getTeetime);
+
+// upload
+router.get('/images/types', uploadController.getAllImages);
+router.post('/:courseId/images/upload', auth, checkAminPermission, upload.any(), uploadController.upload);
 
 // seed
 router.get('/:courseId/seed', (req, res) => {
