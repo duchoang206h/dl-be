@@ -49,6 +49,17 @@ class Player extends Base {
         club: Sequelize.STRING,
         group: Sequelize.STRING,
         avatar: Sequelize.STRING,
+        status_day: Sequelize.STRING,
+        note: Sequelize.STRING,
+        birth: Sequelize.STRING,
+        height: Sequelize.STRING,
+        turnpro: Sequelize.STRING,
+        weight: Sequelize.STRING,
+        driverev: Sequelize.STRING,
+        putting: Sequelize.STRING,
+        best: Sequelize.STRING,
+        is_show: Sequelize.BOOLEAN,
+
         flag: {
           type: Sequelize.VIRTUAL,
           get() {
