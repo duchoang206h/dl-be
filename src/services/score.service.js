@@ -132,9 +132,10 @@ const getScoresByPlayerAndRound = async ({ playerId, roundId, courseId }) => {
   });
 };
 const getHoleStatisticByRound = async ({ courseId, roundId }) => {
+  const course = await courseService.getCourseById(courseId);
   const [holes, totalPlayer] = await Promise.all([
     Hole.findAll({
-      where: { course_id: courseId },
+      where: { golf_course_id: course.golf_course_id },
       raw: true,
       attributes: { exclude: ['createdAt', 'updatedAt'] },
     }),
