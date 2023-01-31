@@ -15,6 +15,16 @@ const importPlayers = catchAsync(async (req, res) => {
     group: player['group'],
     sex: player['sex'],
     age: player['age'],
+    status_day: player['status_day'],
+    note: player['note'],
+    birth: player['birth'],
+    height: player['height'],
+    turnpro: player['turnpro'],
+    weight: player['weight'],
+    driverev: player['driverev'],
+    putting: player['putting'],
+    best: player['best'],
+    is_show: player['is_show'],
     course_id: req.params.courseId,
   }));
   await playerService.createManyPlayer(players);
