@@ -13,7 +13,6 @@ const getDataFromXlsx = async (data, schema, readAllSheet = false) => {
     const file = XLSX.read(data);
     const temp = XLSX.utils.sheet_to_json(file.Sheets[file.SheetNames[0]]);
     // validate input
-    console.log(temp);
     for (const data of temp) {
       const validateError = validate(data, schema);
       if (validateError) return [null, new BadRequestError(validateError)];

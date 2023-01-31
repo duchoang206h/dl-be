@@ -4,7 +4,8 @@ const { teetimeSchema } = require('../validations/xlsx.validation');
 const { getDataFromXlsx } = require('../services/xlsxService');
 const { teetimeService } = require('../services');
 const { Player } = require('../models/schema');
-const { TEETIME_MUST_BE_INCLUDE_ALL_PLAYERS } = require('../utils/errorMessage');
+const { TEETIME_MUST_BE_INCLUDE_ALL_PLAYERS, INVALID_GROUP_TIME, INVALID_GROUP_TEE } = require('../utils/errorMessage');
+const { BadRequestError } = require('../utils/ApiError');
 
 const importTeetime = catchAsync(async (req, res) => {
   if (req.files.length <= 0) return res.status(httpStatus.BAD_REQUEST).send();
@@ -15,10 +16,21 @@ const importTeetime = catchAsync(async (req, res) => {
   if (error) throw error;
   const teetimes = data.map((teetime) => ({
     'name-golfer': teetime['name-golfer'],
-    group: teetime['group'],
+    group: teetime['flightname'],
     tee: teetime['tee'],
     time: teetime['time'],
   }));
+  const times = {};
+  const tees = {};
+  for (const teetime of teetimes) {
+    if (times.hasOwnProperty(teetime['group'])) {
+      if (times[teetime['group']] != teetime.time) throw new BadRequestError(INVALID_GROUP_TIME);
+    } else times[teetime['group']] = teetime.time;
+    if (tees.hasOwnProperty(teetime['group'])) {
+      if (tees[teetime['group']] != teetime.tee) throw new BadRequestError(INVALID_GROUP_TEE);
+    } else tees[teetime['group']] = teetime.tee;
+  }
+
   const [_, createError] = await teetimeService.createManyTeetime(teetimes, {
     courseId: req.params.courseId,
     roundNum: req.params.roundNum,

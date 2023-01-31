@@ -32,7 +32,7 @@ const playerSchema = Joi.object({
 });
 const teetimeSchema = Joi.object({
   'name-golfer': Joi.string().required(),
-  group: Joi.number().required(),
+  flightname: Joi.number().required(),
   tee: Joi.number().required(),
   time: Joi.string().required(),
 });

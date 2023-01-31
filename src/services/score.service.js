@@ -8,12 +8,14 @@ const {
   HOLE_PER_COURSE,
   FINISH_ALL_ROUNDS,
   EVENT_ZERO,
+  MAX_NUM_PUTT,
 } = require('../config/constant');
 const { Score, Round, Hole, sequelize, Player, TeeTimeGroupPlayer, TeeTimeGroup, Sequelize } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
 const { getScoreType, calculateScoreAverage, getRank } = require('../utils/score');
-const { InternalServerError, BadRequestError } = require('../utils/ApiError');
+const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
+const { NUM_PUTT_INVALID } = require('../utils/errorMessage');
 
 const createScore = async (scoreBody) => {};
 const getPlayerScoresByRoundAndHole = async (scoreBody) => {
@@ -35,6 +37,9 @@ const getPlayerScoresByRoundAndHole = async (scoreBody) => {
 const createManyScore = async (scoreBodyArr, { courseId, playerId, roundNum }) => {
   const t = await sequelize.transaction();
   try {
+    for (const score of scoreBodyArr) {
+      if (score.num_putt <= 0 || score.num_putt > MAX_NUM_PUTT) throw new BadRequestError(NUM_PUTT_INVALID);
+    }
     const result = await Promise.all(
       scoreBodyArr.map(async (scoreBody) => {
         const { hole_num, num_putt } = scoreBody;
@@ -64,7 +69,8 @@ const createManyScore = async (scoreBodyArr, { courseId, playerId, roundNum }) =
     return result;
   } catch (error) {
     await t.rollback();
-    throw new InternalServerError();
+    if (error instanceof ApiError) throw error;
+    else throw new InternalServerError();
   }
 };
 const updateScore = async (scoreBody) => {
@@ -83,7 +89,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
   const t = await sequelize.transaction();
   try {
     for (const score of scores) {
-      if (score.num_putt <= 0) throw new BadRequestError();
+      if (score.num_putt <= 0 || score.num_putt > MAX_NUM_PUTT) throw new BadRequestError(NUM_PUTT_INVALID);
     }
     const result = await Promise.all(
       scores.map(async (score) => {
@@ -106,7 +112,8 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
     return result;
   } catch (error) {
     await t.rollback();
-    throw new InternalServerError();
+    if (error instanceof ApiError) throw error;
+    else throw new InternalServerError();
   }
 };
 const getScoresByPlayerAndRound = async ({ playerId, roundId, courseId }) => {

@@ -40,6 +40,7 @@ const PLAYER_STATUS = {
   DISQUALIFIED: 'Disqualified',
   RETD: 'RETD',
 };
+const MAX_NUM_PUTT = 50;
 const SCORE_CARD_IMAGES = {
   logo: 'Logo giải đấu',
   main: 'ẢNH MAIN',
@@ -62,4 +63,5 @@ module.exports = {
   EVENT_ZERO,
   SCORE_CARD_IMAGES,
   PLAYER_STATUS,
+  MAX_NUM_PUTT,
 };
