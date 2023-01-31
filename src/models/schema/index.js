@@ -12,9 +12,11 @@ const { TeeTimeGroup } = require('./TeeTimeGroup');
 const { TeeTime } = require('./Teetime');
 const { User } = require('./User');
 const { Token } = require('./Token');
+const { Image } = require('./Image');
 const { TeeTimeGroupPlayer } = require('./TeetimeGroupPlayer');
 const db = {};
 const models = {
+  Image,
   Course,
   GolfCourse,
   Hole,

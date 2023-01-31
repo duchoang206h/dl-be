@@ -21,6 +21,29 @@ const PAR_PER_ROUND = 72;
 const HOLE_PER_COURSE = 18;
 const FINISH_ALL_ROUNDS = 'F';
 const EVENT_ZERO = 'E';
+const LEADERBOARD_IMAGES = {
+  'ẢNH BXH': 'ẢNH BXH',
+  'Màu Eagle': 'Màu Eagle',
+  'Màu Birdie': 'Màu Birdie',
+  'Màu Bogey': 'Màu Bogey',
+  'Màu Double Bogey +': 'Màu Double Bogey +',
+  'Màu Eagle Mini': 'Màu Eagle Mini',
+  'Màu Birdie Mini': 'Màu Birdie Mini',
+  'Màu Double Bogey + Mini': 'Màu Double Bogey + Mini',
+  'ẢNH THEO ĐIỂM SỐ Âm': 'ẢNH THEO ĐIỂM SỐ Âm',
+  'ẢNH THEO ĐIỂM SỐ Dương': 'ẢNH THEO ĐIỂM SỐ Dương',
+};
+const SCORE_CARD_IMAGES = {
+  logo: 'Logo giải đấu',
+  main: 'ẢNH MAIN',
+  negative_score: 'Ảnh theo điểm số âm',
+  positive_score: 'Ảnh theo điểm SỐ Dương',
+  equal_score: 'Ảnh theo điểm số bằng',
+  eagle_color: 'Màu Eagle',
+  birdie_color: 'Màu Birdie',
+  bogey_color: 'Màu Bogey',
+  double_bogey_color: 'Màu Double Bogey +',
+};
 module.exports = {
   COURSE_TYPE,
   SCORE_TYPE,
@@ -30,4 +53,5 @@ module.exports = {
   HOLE_PER_COURSE,
   FINISH_ALL_ROUNDS,
   EVENT_ZERO,
+  SCORE_CARD_IMAGES,
 };

@@ -15,6 +15,7 @@ const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const { ApiError } = require('./utils/ApiError');
 const { jwt } = require('./config/config');
+const path = require('path');
 
 const app = express();
 
@@ -58,6 +59,7 @@ if (config.env === 'production') {
   })
 ); */
 // v1 api routes
+app.use('/static', express.static(path.join(__dirname, '../data')));
 app.use('/v1', routes);
 
 // send back a 404 error for any unknown api request
