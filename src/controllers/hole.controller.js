@@ -4,6 +4,7 @@ const { holeService, courseService } = require('../services');
 const { Hole } = require('../models/schema');
 const { holeSchema } = require('../validations/xlsx.validation');
 const { getDataFromXlsx } = require('../services/xlsxService');
+const { BadRequestError } = require('../utils/ApiError');
 const createHole = catchAsync(async (req, res) => {
   const courseId = req.params.courseId;
   const course = courseService.getCourseById(courseId);
@@ -54,13 +55,16 @@ const getHolesByCourseIdAndHoleNum = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).send({ result: holes });
 });
 const importHoles = catchAsync(async (req, res) => {
+  if (req.files.length <= 0) throw new BadRequestError();
   const [data, error] = await getDataFromXlsx(req.files[0].buffer, holeSchema);
+  console.log(error);
   if (error) throw error;
   const holes = data.map((hole) => ({
     hole_num: hole['hole'],
     par: hole['par'],
     yards: hole['yards'],
   }));
+
   const _holes = await holeService.createManyHole(holes, req.params.golfCourseId);
   res.status(httpStatus.CREATED).send({ result: _holes });
 });

@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
-const { Hole, sequelize } = require('../models/schema');
-const { ApiError, InternalServerError } = require('../utils/ApiError');
+const { Hole, sequelize, GolfCourse } = require('../models/schema');
+const { ApiError, InternalServerError, BadRequestError } = require('../utils/ApiError');
+const { INVALID_TOTAL_PAR, INVALID_TOTAL_HOLE } = require('../utils/errorMessage');
 
 const updateHole = async (updateBody, { holeNum, courseId }) => {
   await Hole.update(updateBody, { where: { hole_num: holeNum, course_id: courseId } });
@@ -20,6 +21,10 @@ const getHolesByCourseId = async (courseId) =>
 const createManyHole = async (holes, golfCourseId) => {
   const t = await sequelize.transaction();
   try {
+    const golfCourse = await GolfCourse.findByPk(golfCourseId, { raw: true });
+    if (golfCourse.total_hole != holes.length) throw new BadRequestError(INVALID_TOTAL_HOLE(golfCourse.total_hole));
+    if (golfCourse.total_par != holes.reduce((pre, cur) => pre + cur.par, 0))
+      throw new BadRequestError(INVALID_TOTAL_PAR(golfCourse.total_par));
     const _holes = await Promise.all(
       holes.map(async (hole) => {
         const { hole_num, yards, par } = hole;
@@ -33,6 +38,7 @@ const createManyHole = async (holes, golfCourseId) => {
   } catch (error) {
     console.log(error);
     await t.rollback();
+    if (error instanceof ApiError) throw error;
     throw new InternalServerError();
   }
 };

@@ -7,6 +7,8 @@ const USER_EXIST = 'Username has existed';
 const NUM_PUTT_INVALID = 'Putt must greater than 0 and less than 50';
 const INVALID_GROUP_TIME = 'Times must be the same';
 const INVALID_GROUP_TEE = 'Tees must be the same';
+const INVALID_TOTAL_HOLE = (hole) => `Golf score must have enough ${hole} holes`;
+const INVALID_TOTAL_PAR = (PAR) => `Golf score must have enough ${PAR} par`;
 module.exports = {
   TOKEN_EXPIRED,
   TOKEN_INVALID,
@@ -17,4 +19,6 @@ module.exports = {
   NUM_PUTT_INVALID,
   INVALID_GROUP_TIME,
   INVALID_GROUP_TEE,
+  INVALID_TOTAL_HOLE,
+  INVALID_TOTAL_PAR,
 };
