@@ -1,7 +1,7 @@
 const { writeToXlsx } = require('../services/xlsxService');
 const { hashPassword } = require('../utils/hash');
 const { getScoreType } = require('../utils/score');
-const { Player, Hole, Score, Round, User } = require('./schema');
+const { Player, Hole, Score, Round, User, GolfCourse } = require('./schema');
 const { faker } = require('@faker-js/faker');
 const putts = [3, 4, 5];
 const randomPutt = () => {
@@ -53,11 +53,18 @@ const generateTeetime = () => {
 const seed = async () => {
   try {
     console.log('---------------start');
-   /*  await User.create({
+    /* await User.create({
       username: 'duchoang206h',
       password: hashPassword('123456'),
       is_super: true,
       role: 'admin',
+    });
+    await GolfCourse.create({
+      name: 'San golf 1',
+      address: 'Da Nang',
+      total_hole: 18,
+      total_par: 72,
+      slope: 120,
     }); */
     let arr = new Array(40).fill(null);
     const players = await Promise.all(
@@ -72,7 +79,7 @@ const seed = async () => {
         )
       )
     );
-    const holes = await Hole.findAll({ where: { course_id: 1 }, raw: true });
+    const holes = await Hole.findAll({ where: { golf_course_id: 1 }, raw: true });
     const rounds = await Round.findAll({ where: { course_id: 1 }, raw: true });
     const promises = [];
     for (const p of players) {

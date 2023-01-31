@@ -4,11 +4,16 @@ const playerRoute = require('./player.route');
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 const courseRoute = require('./course.route');
+const golfCourseRoute = require('./golf_course.route');
 const authRoute = require('./auth.route');
 const defaultRoutes = [
   {
     path: '/players',
     route: playerRoute,
+  },
+  {
+    path: '/golfcourses',
+    route: golfCourseRoute,
   },
   {
     path: '/courses',

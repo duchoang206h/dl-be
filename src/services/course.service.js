@@ -1,4 +1,4 @@
-const { Course, Hole, Round, Player } = require('../models/schema');
+const { Course, Hole, Round, Player, GolfCourse } = require('../models/schema');
 const { Op } = require('sequelize');
 const createCourse = async (data) => {
   const course = {
@@ -13,7 +13,12 @@ const getCourseById = async (id) =>
   Course.findByPk(id, {
     attributes: { exclude: ['createdAt', 'updatedAt'] },
     include: [
-      { model: Hole, as: 'holes', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+      {
+        model: GolfCourse,
+        as: 'golf_course',
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+        include: [{ model: Hole, as: 'holes' }],
+      },
       { model: Round, as: 'rounds', attributes: { exclude: ['createdAt', 'updatedAt'] } },
       { model: Player, as: 'players', attributes: { exclude: ['createdAt', 'updatedAt'] } },
     ],
@@ -36,7 +41,12 @@ const getAllCourseByOffsetLimit = async ({
     attributes: { exclude: ['createdAt', 'updatedAt'] },
     where,
     include: [
-      { model: Hole, as: 'holes', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+      {
+        model: GolfCourse,
+        as: 'golf_course',
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+        include: [{ model: Hole, as: 'holes' }],
+      },
       { model: Round, as: 'rounds', attributes: { exclude: ['createdAt', 'updatedAt'] } },
       { model: Player, as: 'players', attributes: { exclude: ['createdAt', 'updatedAt'] } },
     ],

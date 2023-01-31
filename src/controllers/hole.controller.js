@@ -61,7 +61,7 @@ const importHoles = catchAsync(async (req, res) => {
     par: hole['par'],
     yards: hole['yards'],
   }));
-  const _holes = await holeService.createManyHole(holes, req.params.courseId);
+  const _holes = await holeService.createManyHole(holes, req.params.golfCourseId);
   res.status(httpStatus.CREATED).send({ result: _holes });
 });
 module.exports = {
