@@ -1,7 +1,7 @@
 const express = require('express');
 const validate = require('../../middlewares/validate');
 const fs = require('fs');
-const { courseValidation, holeValidation } = require('../../validations');
+const { courseValidation, holeValidation, playerValidation } = require('../../validations');
 const {
   courseController,
   holeController,
@@ -15,7 +15,7 @@ const { checkAminPermission, auth, isSuperAdmin } = require('../../middlewares/a
 const { upload } = require('../../middlewares/upload');
 const path = require('path');
 const httpStatus = require('http-status');
-const { COURSE_TYPE } = require('../../config/constant');
+const { COURSE_TYPE, PLAYER_STATUS } = require('../../config/constant');
 const router = express.Router();
 router.post('/', auth, isSuperAdmin, validate(courseValidation.createCourse), courseController.createCourse);
 router.post('/:courseId/users', auth, isSuperAdmin, userController.createUser);
@@ -77,6 +77,17 @@ router.get('/:courseId/teetimes/rounds/:roundNum', teetimeController.getTeetime)
 // upload
 router.get('/images/types', uploadController.getAllImages);
 router.post('/:courseId/images/upload', auth, checkAminPermission, upload.any(), uploadController.upload);
+
+//player
+
+router.put(
+  '/:courseId/players/:playerId',
+  auth,
+  checkAminPermission,
+  validate(playerValidation.updatePlayer),
+  playerController.updatePlayer
+);
+router.get('/:courseId/players/status/all', (_, res) => res.status(httpStatus.OK).send({ result: PLAYER_STATUS }));
 
 // seed
 router.get('/:courseId/seed', (req, res) => {

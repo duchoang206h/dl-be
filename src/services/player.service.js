@@ -14,8 +14,14 @@ const getPlayer = async (courseId, playerId) => {
     attributes: { exclude: ['createdAt', 'updatedAt'] },
   });
 };
+const updatePlayer = async (updateBody, { playerId, courseId }) => {
+  console.log(updateBody);
+  const player = await Player.update(updateBody, { where: { player_id: playerId, course_id: courseId }, returning: true });
+  return player;
+};
 module.exports = {
   createManyPlayer,
   getAllPlayer,
   getPlayer,
+  updatePlayer,
 };
