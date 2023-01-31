@@ -13,6 +13,8 @@ const {
 const { checkAminPermission, auth, isSuperAdmin } = require('../../middlewares/auth');
 const { upload } = require('../../middlewares/upload');
 const path = require('path');
+const httpStatus = require('http-status');
+const { COURSE_TYPE } = require('../../config/constant');
 const router = express.Router();
 router.post('/', auth, isSuperAdmin, validate(courseValidation.createCourse), courseController.createCourse);
 router.post('/:courseId/users', auth, isSuperAdmin, userController.createUser);
@@ -26,6 +28,7 @@ router.post(
   teetimeController.importTeetime
 );
 router.get('/', auth, courseController.getAllCourse);
+router.get('/types/all', (_, res) => res.status(httpStatus.OK).send({ result: COURSE_TYPE }));
 router.get('/:courseId/players', playerController.getAllPlayer);
 router.get('/:courseId/players/:playerId', playerController.getPlayer);
 //create hole
@@ -36,6 +39,7 @@ router.post(
   validate(holeValidation.createHoleMany),
   holeController.createManyHole
 );
+router.post('/:courseId/holes/import', auth, checkAminPermission, upload.any(), holeController.importHoles);
 router.put(
   '/:courseId/holes/:holeNum',
   auth,

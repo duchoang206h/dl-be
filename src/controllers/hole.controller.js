@@ -2,6 +2,8 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { holeService, courseService } = require('../services');
 const { Hole } = require('../models/schema');
+const { holeSchema } = require('../validations/xlsx.validation');
+const { getDataFromXlsx } = require('../services/xlsxService');
 const createHole = catchAsync(async (req, res) => {
   const courseId = req.params.courseId;
   const course = courseService.getCourseById(courseId);
@@ -51,10 +53,22 @@ const getHolesByCourseIdAndHoleNum = catchAsync(async (req, res) => {
   const holes = await holeService.getHoleByNumAndCourse(holeNum, courseId);
   return res.status(httpStatus.OK).send({ result: holes });
 });
+const importHoles = catchAsync(async (req, res) => {
+  const [data, error] = await getDataFromXlsx(req.files[0].buffer, holeSchema);
+  if (error) throw error;
+  const holes = data.map((hole) => ({
+    hole_num: hole['hole'],
+    par: hole['par'],
+    yards: hole['yards'],
+  }));
+  const _holes = await holeService.createManyHole(holes, req.params.courseId);
+  res.status(httpStatus.CREATED).send({ result: _holes });
+});
 module.exports = {
   createHole,
   updateHole,
   getHolesByCourseId,
   getHolesByCourseIdAndHoleNum,
   createManyHole,
+  importHoles,
 };
