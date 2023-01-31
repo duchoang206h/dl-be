@@ -36,7 +36,13 @@ const teetimeSchema = Joi.object({
   tee: Joi.number().required(),
   time: Joi.string().required(),
 });
+const holeSchema = Joi.object({
+  hole: Joi.number().required(),
+  par: Joi.number().required(),
+  yards: Joi.number().required(),
+});
 module.exports = {
   playerSchema,
   teetimeSchema,
+  holeSchema,
 };
