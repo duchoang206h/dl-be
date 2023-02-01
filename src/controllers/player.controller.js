@@ -31,7 +31,7 @@ const importPlayers = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).send();
 });
 const getAllPlayer = catchAsync(async (req, res) => {
-  const players = await playerService.getAllPlayer(req.query);
+  const players = await playerService.getAllPlayer(req.params.courseId, req.query);
   return res.status(httpStatus.OK).json({ result: players });
 });
 const getPlayer = catchAsync(async (req, res) => {
