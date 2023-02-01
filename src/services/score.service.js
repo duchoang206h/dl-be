@@ -290,6 +290,9 @@ const getPlayerScoresByAllRound = async (courseId, playerId) => {
 };
 const getAllPlayerScore = async (courseId) => {
   const rounds = await roundService.getAllRoundByCourse(courseId);
+  console.log(rounds);
+  const course = await courseService.getCourseById(courseId);
+  const lastRound = await roundService.getRoundByNumAndCourse(course.total_round, courseId);
   let players = await Player.findAll({
     where: { course_id: courseId },
     attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
@@ -315,10 +318,48 @@ const getAllPlayerScore = async (courseId) => {
           total: score.scores.reduce((pre, current) => pre + current.num_putt, 0),
         });
       }
+      const _today = dateWithTimezone();
+      console.log(_today);
+      console.log({ check: moment(_today, DATE_FORMAT).isBefore(moment(course.end_date)) });
+      player['score'] =
+        PAR_PER_ROUND * course.total_round - player['rounds'].reduce((pre, current) => pre + current.total, 0);
+      const [thru, todayScore, lastRoundScore] = await Promise.all([
+        Score.count({ where: { player_id: player.player_id } }),
+        Score.findAll({
+          where: {
+            player_id: player.player_id,
+            updatedAt: {
+              [Op.gte]: _today,
+              [Op.lt]: moment(_today).add(1, 'days').toDate(), // tomorrow
+            },
+          },
+          include: [{ model: Hole }],
+        }),
+        Score.findAll({
+          where: {
+            player_id: player.player_id,
+            round_id: lastRound.round_id,
+          },
+          include: [{ model: Hole }],
+        }),
+      ]);
+      const today = todayScore.length
+        ? todayScore.reduce((pre, score) => {
+            score.toJSON();
+            return pre + score.num_putt - score.Hole.par;
+          }, 0)
+        : lastRoundScore.reduce((pre, score) => {
+            score.toJSON();
+            return pre + score.num_putt - score.Hole.par;
+          }, 0);
+      player['thru'] = thru == HOLE_PER_COURSE * course.total_round ? FINISH_ALL_ROUNDS : thru;
+      player['thru'] = thru == HOLE_PER_COURSE * course.total_round ? FINISH_ALL_ROUNDS : thru;
+      player['today'] = today == 0 ? EVENT_ZERO : today;
       return player;
     })
   );
   const scores = players.map(({ rounds }) => rounds.reduce((pre, cur) => pre + cur.total, 0));
+
   players = players.map((player) => {
     return {
       ...player,
