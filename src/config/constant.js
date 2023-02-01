@@ -52,6 +52,134 @@ const SCORE_CARD_IMAGES = {
   bogey_color: 'Màu Bogey',
   double_bogey_color: 'Màu Double Bogey +',
 };
+const DEFAULT_SCORES = [
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 1,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 2,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 4,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 3,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 5,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 6,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 7,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 8,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 9,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 10,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 11,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 12,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 13,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 14,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 15,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 16,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 17,
+    },
+  },
+  {
+    num_putt: 0,
+    score_type: null,
+    Hole: {
+      hole_num: 18,
+    },
+  },
+];
 module.exports = {
   COURSE_TYPE,
   SCORE_TYPE,
@@ -64,4 +192,5 @@ module.exports = {
   SCORE_CARD_IMAGES,
   PLAYER_STATUS,
   MAX_NUM_PUTT,
+  DEFAULT_SCORES,
 };

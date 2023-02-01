@@ -9,6 +9,7 @@ const {
   FINISH_ALL_ROUNDS,
   EVENT_ZERO,
   MAX_NUM_PUTT,
+  DEFAULT_SCORES,
 } = require('../config/constant');
 const { Score, Round, Hole, sequelize, Player, TeeTimeGroupPlayer, TeeTimeGroup, Sequelize } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
@@ -91,28 +92,36 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
     for (const score of scores) {
       if (score.num_putt <= 0 || score.num_putt > MAX_NUM_PUTT) throw new BadRequestError(NUM_PUTT_INVALID);
     }
-    const course = await courseService.getCourseById(courseId);
+    const [course, round] = await Promise.all([
+      courseService.getCourseById(courseId),
+      roundService.getRoundByNumAndCourse(roundNum, courseId),
+    ]);
     const result = await Promise.all(
       scores.map(async (score) => {
         const { hole_num, num_putt } = score;
-        const [hole, round] = await Promise.all([
-          holeService.getHoleByNumAndGolfCourseId(hole_num, course.golf_course_id),
-          roundService.getRoundByNumAndCourse(roundNum, courseId),
-        ]);
+        const [hole] = await Promise.all([holeService.getHoleByNumAndGolfCourseId(hole_num, course.golf_course_id)]);
         const scoreType = getScoreType(num_putt, hole.par);
-        return Score.upsert(
-          {
-            num_putt,
-            score_type: scoreType,
+        const [exist, created] = await Score.findOrCreate({
+          where: {
             course_id: courseId,
             round_id: round.round_id,
             hole_id: hole.hole_id,
             player_id: playerId,
           },
-          {
-            transaction: t,
-          }
-        );
+          defaults: {
+            num_putt,
+            score_type: scoreType,
+          },
+          transaction: t,
+        });
+        if (exist)
+          await Score.update(
+            { num_putt, score_type: scoreType },
+            {
+              where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId },
+              transaction: t,
+            }
+          );
       })
     );
     await t.commit();
@@ -407,12 +416,13 @@ const getPlayerScore = async (courseId, playerId) => {
           attributes: ['num_putt', 'score_type'],
           include: [{ model: Hole, attributes: ['hole_num'] }],
         });
-        return { scores: score, round: round.round_num };
+        return { scores: score.length ? score : DEFAULT_SCORES, round: round.round_num };
       })
     ),
     courseService.getCourseById(courseId),
   ]);
   player['rounds'] = [];
+
   for (const score of scores) {
     player['rounds'].push({
       round: score.round,
