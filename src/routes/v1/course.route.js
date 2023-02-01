@@ -22,12 +22,13 @@ router.post(
   '/:courseId/upload',
   auth,
   checkAminPermission,
-  validate(courseValidation.uploadPhoto),
   upload.any(),
+  validate(courseValidation.uploadPhoto),
   courseController.uploadPhoto
 );
 router.post('/:courseId/users', auth, isSuperAdmin, userController.createUser);
 router.get('/:courseId', courseController.getCourseById);
+router.put('/:courseId', auth, checkAminPermission, courseController.updateCourse);
 router.post('/:courseId/players/import', auth, checkAminPermission, upload.any(), playerController.importPlayers);
 router.post(
   '/:courseId/rounds/:roundNum/teetime/import',

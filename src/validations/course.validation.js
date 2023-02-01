@@ -14,6 +14,19 @@ const createCourse = {
     color: Joi.string().required(),
   }),
 };
+const updateCourse = {
+  body: Joi.object().keys({
+    name: Joi.string(),
+    type: Joi.string(),
+    start_date: Joi.string(),
+    end_date: Joi.string(),
+    total_prize: Joi.string(),
+    description: Joi.string(),
+    total_round: Joi.number(),
+    golf_course_id: Joi.number(),
+    color: Joi.string(),
+  }),
+};
 const uploadPhoto = {
   body: Joi.object().keys({
     type: Joi.string().allow('logo', 'main_photo').required(),
@@ -22,4 +35,5 @@ const uploadPhoto = {
 module.exports = {
   createCourse,
   uploadPhoto,
+  updateCourse,
 };

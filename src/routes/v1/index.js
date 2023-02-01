@@ -6,6 +6,7 @@ const config = require('../../config/config');
 const courseRoute = require('./course.route');
 const golfCourseRoute = require('./golf_course.route');
 const authRoute = require('./auth.route');
+const livestreamRoute = require('./livestream.route');
 const defaultRoutes = [
   {
     path: '/players',
@@ -23,6 +24,7 @@ const defaultRoutes = [
     path: '/auth',
     route: authRoute,
   },
+  { path: '/livestream', route: livestreamRoute },
 ];
 
 const devRoutes = [

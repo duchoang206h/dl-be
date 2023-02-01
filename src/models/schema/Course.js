@@ -36,8 +36,20 @@ class Course extends Base {
         start_date: Sequelize.DATEONLY,
         end_date: Sequelize.DATEONLY,
         logo: Sequelize.STRING,
+        logo_url: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return process.env.APP_URL + '/static/images/' + this.logo;
+          },
+        },
         address: Sequelize.STRING,
         main_photo: Sequelize.STRING,
+        main_photo_url: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return process.env.APP_URL + '/static/images/' + this.main_photo;
+          },
+        },
         color: Sequelize.STRING,
       },
       {

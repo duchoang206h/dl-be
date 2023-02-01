@@ -49,6 +49,13 @@ class Hole extends Base {
             return yardToMeter(this.yards);
           },
         },
+        main_photo: Sequelize.STRING,
+        main_photo_url: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return process.env.APP_URL + '/static/images/' + this.main_photo;
+          },
+        },
       },
       {
         sequelize,

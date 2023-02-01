@@ -6,10 +6,10 @@ const { seed, exportXlsx } = require('./models/seed');
 
 let server;
 db.sequelize.authenticate().then(() => {
-  exportXlsx();
+  //exportXlsx();
   //seed();
   if (process.env.NODE_ENV == 'development') {
-    db.sequelize.sync();
+    //db.sequelize.sync();
   }
   logger.info('Connected to mysql');
   server = app.listen(config.port, () => {
