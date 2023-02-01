@@ -52,10 +52,11 @@ const getAllCourseByOffsetLimit = async ({
     ],
   });
 };
-
+const updateCourse = async (courseId, updates) => Course.update(updates, { where: { course_id: courseId } });
 module.exports = {
   createCourse,
   getCourseById,
   getAllCourseByOffsetLimit,
   existCourse,
+  updateCourse,
 };

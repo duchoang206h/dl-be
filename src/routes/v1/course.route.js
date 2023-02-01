@@ -18,6 +18,14 @@ const httpStatus = require('http-status');
 const { COURSE_TYPE, PLAYER_STATUS } = require('../../config/constant');
 const router = express.Router();
 router.post('/', auth, isSuperAdmin, validate(courseValidation.createCourse), courseController.createCourse);
+router.post(
+  '/:courseId/upload',
+  auth,
+  checkAminPermission,
+  validate(courseValidation.uploadPhoto),
+  upload.any(),
+  courseController.uploadPhoto
+);
 router.post('/:courseId/users', auth, isSuperAdmin, userController.createUser);
 router.get('/:courseId', courseController.getCourseById);
 router.post('/:courseId/players/import', auth, checkAminPermission, upload.any(), playerController.importPlayers);

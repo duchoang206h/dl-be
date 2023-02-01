@@ -37,7 +37,7 @@ class Course extends Base {
         end_date: Sequelize.DATEONLY,
         logo: Sequelize.STRING,
         address: Sequelize.STRING,
-        banner: Sequelize.STRING,
+        main_photo: Sequelize.STRING,
         color: Sequelize.STRING,
       },
       {
