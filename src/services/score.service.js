@@ -288,15 +288,25 @@ const getPlayerScoresByAllRound = async (courseId, playerId) => {
   }
   return scores;
 };
-const getAllPlayerScore = async (courseId) => {
+const getAllPlayerScore = async (courseId, { name }) => {
   const rounds = await roundService.getAllRoundByCourse(courseId);
   console.log(rounds);
   const course = await courseService.getCourseById(courseId);
   const lastRound = await roundService.getRoundByNumAndCourse(course.total_round, courseId);
-  let players = await Player.findAll({
-    where: { course_id: courseId },
-    attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
-  });
+  let players = name
+    ? await Player.findAll({
+        where: {
+          course_id: courseId,
+          fullname: {
+            [Op.like]: `%${name}%`,
+          },
+        },
+        attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+      })
+    : await Player.findAll({
+        where: { course_id: courseId },
+        attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+      });
   players = await Promise.all(
     players.map(async (player) => {
       player = player.toJSON();

@@ -83,7 +83,7 @@ const getPlayerScoreByRoundAndHole = catchAsync(async (req, res) => {
   });
 });
 const getAllStatistic = catchAsync(async (req, res) => {
-  const score = await scoreService.getAllPlayerScore(req.params.courseId);
+  const score = await scoreService.getAllPlayerScore(req.params.courseId, { name: req.query.name });
   res.status(httpStatus.OK).send({
     result: score,
   });
