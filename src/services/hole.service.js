@@ -14,10 +14,13 @@ const updateHole = async (updateBody, { holeNum, courseId }) => {
 const createHole = async (hole) => {
   return Hole.create(hole, { raw: true });
 };
-const getHoleByNumAndCourse = async (holeNum, courseId) =>
-  Hole.findOne({ where: { hole_num: holeNum, course_id: courseId }, attributes: { exclude: ['createdAt', 'updatedAt'] } });
-const getHolesByCourseId = async (courseId) =>
-  Hole.findAll({ where: { course_id: courseId }, attributes: { exclude: ['createdAt', 'updatedAt'] } });
+const getHoleByNumAndGolfCourseId = async (holeNum, golfCourseId) =>
+  Hole.findOne({
+    where: { hole_num: holeNum, golf_course_id: golfCourseId },
+    attributes: { exclude: ['createdAt', 'updatedAt'] },
+  });
+const getHolesByGolfCourse = async (golfCourseId) =>
+  Hole.findAll({ where: { golf_course_id: golfCourseId }, attributes: { exclude: ['createdAt', 'updatedAt'] } });
 const createManyHole = async (holes, golfCourseId) => {
   const t = await sequelize.transaction();
   try {
@@ -46,6 +49,6 @@ module.exports = {
   createManyHole,
   updateHole,
   createHole,
-  getHoleByNumAndCourse,
-  getHolesByCourseId,
+  getHoleByNumAndGolfCourseId,
+  getHolesByGolfCourse,
 };

@@ -48,8 +48,8 @@ router.put(
   validate(holeValidation.updateHole),
   holeController.updateHole
 );
-router.get('/:courseId/holes', holeController.getHolesByCourseId);
-router.get('/:courseId/holes/:holeNum', holeController.getHolesByCourseIdAndHoleNum);
+router.get('/:courseId/holes', holeController.getHolesByGolfCourse);
+router.get('/:courseId/holes/:holeNum', holeController.getHolesByGolfCourseAndHoleNum);
 
 //score
 router.get('/:courseId/scores/players/:playerId/rounds/:roundNum', scoreController.getPlayerScoreByRound);
