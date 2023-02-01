@@ -70,31 +70,19 @@ const getFlightImage = async ({ courseId, roundNum, flight }) => {
   return response;
 };
 const getGolferDetails = async ({ courseId, code }) => {
-  console.log({ courseId, roundNum, flight });
   const response = {};
   const course = await Course.findByPk(courseId);
-  const round = await Round.findOne({ where: { course_id: courseId, round_num: roundNum } });
-  console.log(round);
-  const [group] = await Promise.all([
-    TeeTimeGroup.findOne({
-      where: { group_num: flight, course_id: courseId, round_id: round.round_id },
-      include: [
-        { model: TeeTimeGroupPlayer, as: 'group_players', include: [{ model: Player, as: 'players' }] },
-        {
-          model: TeeTime,
-          as: 'teetime',
-        },
-      ],
-    }),
-  ]);
+  const player = await Player.findOne({ where: { code } });
   response['MAIN'] = course.main_photo_url;
-  response['GROUP'] = group.group_num;
-  response['TEE_TIME'] = group.teetime.time;
-  group.group_players.forEach((player, index) => {
-    response[`G${index + 1}`] = player.players.fullname;
-    response[`AVATAR${index + 1}`] = player.players.avatar;
-    response[`IMG_COUNTRY${index + 1}`] = player.players.flag;
-  });
+  response[`AVATAR`] = player.avatar;
+  response[`G1`] = player.fullname;
+  response[`BIRTH`] = player.birth;
+  response[`HEIGHT`] = player.height;
+  response[`TURNPRO`] = player.turnpro;
+  response[`WEIGHT`] = player.weight;
+  response[`DRIVEREV`] = player.driverev;
+  response[`PUTTING`] = player.putting;
+  response[`BEST`] = player.best;
   return response;
 };
 const getFlightStatic = async ({ courseId, flight, roundNum }) => {
@@ -136,6 +124,7 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
     where: { code },
     include: [{ model: Score, as: 'scores', where: { round_id: round.round_id }, include: [{ model: Hole }] }],
   });
+  const allScores = await Score.findAll({ where: { player_id: player.player_id }, include: [{ model: Hole }] });
   response['MAIN'] = course.main_photo_url;
   response['G1'] = player.fullname;
   //response['TOTALGROSS'] = score.;
@@ -149,10 +138,10 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
     response['OUT'] = player.scores.slice(0, 9).reduce((pre, cur) => cur.num_putt, 0);
     if (player.scores.length == 18) response['IN'] = player.scores.slice(9).reduce((pre, cur) => cur.num_putt, 0);
   }
-  //const [todayScore, totalScore] 
+  //const [todayScore, totalScore]
   response['TOTALGROSS'] = 72;
-  response['TOTALOVER'] = 72;
-  response['TOTALOVERALL'] = 72;
+  response['TOTALOVER'] = player.scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
+  response['TOTALOVERALL'] = allScores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
   return response;
 };
 module.exports = {
