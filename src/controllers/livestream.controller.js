@@ -32,9 +32,25 @@ const getGolferDetails = catchAsync(async (req, res) => {
   const response = await livestreamService.getGolferDetails({ courseId, code });
   res.status(httpStatus.OK).send(response);
 });
+const getFlightStatic = catchAsync(async (req, res) => {
+  const courseId = req.query.courseId;
+  const round = req.query.round;
+  const flight = req.query.flight;
+  const response = await livestreamService.getFlightStatic({ courseId, flight, roundNum: round });
+  res.status(httpStatus.OK).send(response);
+});
+const scorecardStatic = catchAsync(async (req, res) => {
+  const courseId = req.query.courseId;
+  const round = req.query.round;
+  const code = req.query.code;
+  const response = await livestreamService.scorecardStatic({ courseId, code, roundNum: round });
+  res.status(httpStatus.OK).send(response);
+});
 module.exports = {
   scorecards,
   getHoleStatistic,
   getFlightImage,
   getGolferDetails,
+  getFlightStatic,
+  scorecardStatic,
 };

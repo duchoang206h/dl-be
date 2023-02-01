@@ -12,6 +12,7 @@ const getAllImages = catchAsync(async (_, res) => {
   });
 });
 const upload = catchAsync(async (req, res) => {
+  console.log(req.files);
   if (req.files.length <= 0) return res.status(httpStatus.BAD_REQUEST).send();
   const path = await uploadSingleFile(req.files[0], req.body.type);
   const images = await storeImage({ courseId: req.params.courseId, path, type: req.body.type });

@@ -70,23 +70,95 @@ const getFlightImage = async ({ courseId, roundNum, flight }) => {
   return response;
 };
 const getGolferDetails = async ({ courseId, code }) => {
+  console.log({ courseId, roundNum, flight });
   const response = {};
   const course = await Course.findByPk(courseId);
-  const player = await Player.findOne({ where: { code } });
+  const round = await Round.findOne({ where: { course_id: courseId, round_num: roundNum } });
+  console.log(round);
+  const [group] = await Promise.all([
+    TeeTimeGroup.findOne({
+      where: { group_num: flight, course_id: courseId, round_id: round.round_id },
+      include: [
+        { model: TeeTimeGroupPlayer, as: 'group_players', include: [{ model: Player, as: 'players' }] },
+        {
+          model: TeeTime,
+          as: 'teetime',
+        },
+      ],
+    }),
+  ]);
   response['MAIN'] = course.main_photo_url;
-  response[`AVATAR`] = player.avatar;
-  response[`G1`] = player.fullname;
-  response[`BIRTH`] = player.birth;
-  response[`HEIGHT`] = player.height;
-  response[`TURNPRO`] = player.turnpro;
-  response[`WEIGHT`] = player.weight;
-  response[`DRIVEREV`] = player.driverev;
-  response[`PUTTING`] = player.putting;
-  response[`BEST`] = player.best;
+  response['GROUP'] = group.group_num;
+  response['TEE_TIME'] = group.teetime.time;
+  group.group_players.forEach((player, index) => {
+    response[`G${index + 1}`] = player.players.fullname;
+    response[`AVATAR${index + 1}`] = player.players.avatar;
+    response[`IMG_COUNTRY${index + 1}`] = player.players.flag;
+  });
+  return response;
+};
+const getFlightStatic = async ({ courseId, flight, roundNum }) => {
+  const response = {};
+  const course = await Course.findByPk(courseId);
+  const round = await Round.findOne({ where: { course_id: courseId, round_num: roundNum } });
+  console.log(round);
+  const [group] = await Promise.all([
+    TeeTimeGroup.findOne({
+      where: { group_num: flight, course_id: courseId, round_id: round.round_id },
+      include: [
+        {
+          model: TeeTimeGroupPlayer,
+          as: 'group_players',
+          include: [{ model: Player, as: 'players', include: [{ model: Score, as: 'scores' }] }],
+        },
+        {
+          model: TeeTime,
+          as: 'teetime',
+        },
+      ],
+    }),
+  ]);
+  /* response['MAIN'] = course.main_photo_url;
+  response['GROUP'] = group.group_num;
+  response['TEE_TIME'] = group.teetime.time;
+  group.group_players.forEach((player, index) => {
+    response[`G${index + 1}`] = player.players.fullname;
+    response[`AVATAR${index + 1}`] = player.players.avatar;
+    response[`IMG_COUNTRY${index + 1}`] = player.players.flag;
+  }); */
+  return group;
+};
+const scorecardStatic = async ({ courseId, code, roundNum }) => {
+  const response = {};
+  const course = await Course.findByPk(courseId);
+  const round = await Round.findOne({ where: { course_id: courseId, round_num: roundNum } });
+  const player = await Player.findOne({
+    where: { code },
+    include: [{ model: Score, as: 'scores', where: { round_id: round.round_id }, include: [{ model: Hole }] }],
+  });
+  response['MAIN'] = course.main_photo_url;
+  response['G1'] = player.fullname;
+  //response['TOTALGROSS'] = score.;
+  player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
+  player.scores.forEach((score, index) => {
+    score = score.toJSON();
+    console.log(score);
+    response[`G1SCORE${index + 1}`] = score.num_putt;
+  });
+  if (player.scores.length > 8) {
+    response['OUT'] = player.scores.slice(0, 9).reduce((pre, cur) => cur.num_putt, 0);
+    if (player.scores.length == 18) response['IN'] = player.scores.slice(9).reduce((pre, cur) => cur.num_putt, 0);
+  }
+  //const [todayScore, totalScore] 
+  response['TOTALGROSS'] = 72;
+  response['TOTALOVER'] = 72;
+  response['TOTALOVERALL'] = 72;
   return response;
 };
 module.exports = {
   getHoleStatistic,
   getFlightImage,
   getGolferDetails,
+  getFlightStatic,
+  scorecardStatic,
 };

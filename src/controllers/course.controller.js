@@ -21,7 +21,6 @@ const getAllCourse = catchAsync(async (req, res) => {
   else res.status(httpStatus.NOT_FOUND).json({ result: [] });
 });
 const uploadPhoto = catchAsync(async (req, res) => {
-  console.log(req.body.type);
   if (req.files.length <= 0) return res.status(httpStatus.BAD_REQUEST).send();
   const path = await uploadSingleFile(req.files[0], req.body.type);
   await courseService.updateCourse(req.params.courseId, { [req.body.type]: path });
