@@ -88,7 +88,7 @@ router.get('/:courseId/images/types', uploadController.getAllImages);
 router.post('/:courseId/images/upload', auth, checkAminPermission, upload.any(), uploadController.upload);
 
 //player
-
+router.get('/players/status', (_, res) => res.status(httpStatus.OK).send({ result: PLAYER_STATUS }));
 router.put(
   '/:courseId/players/:playerId',
   auth,
