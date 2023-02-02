@@ -1,9 +1,11 @@
 const express = require('express');
 const { livestreamController } = require('../../controllers');
 const router = express.Router();
-router.get('/holes', livestreamController.getHoleStatistic);
+router.get('/holes/bottom', livestreamController.getHoleBottomStatistic);
+router.get('/holes/top', livestreamController.getHoleTopStatistic);
 router.get('/flights/images', livestreamController.getFlightImage);
 router.get('/flights', livestreamController.getFlightStatic);
 router.get('/golfers', livestreamController.getGolferDetails);
 router.get('/scorecard', livestreamController.scorecardStatic);
+router.get('/leaderboard', livestreamController.getLeaderboard);
 module.exports = router;

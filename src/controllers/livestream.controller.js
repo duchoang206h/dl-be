@@ -5,11 +5,18 @@ const scorecards = catchAsync(async (req, res) => {
   const courseId = req.query.courseId;
   const playerId = req.query.playerId;
 });
-const getHoleStatistic = catchAsync(async (req, res) => {
+const getHoleBottomStatistic = catchAsync(async (req, res) => {
   const courseId = req.query.courseId;
   const holeNum = req.query.hole;
   const roundNum = req.query.round;
-  const response = await livestreamService.getHoleStatistic({ courseId, holeNum, roundNum });
+  const response = await livestreamService.getHoleStatistic({ courseId, holeNum, roundNum, type: 'bottom' });
+  res.status(httpStatus.OK).send(response);
+});
+const getHoleTopStatistic = catchAsync(async (req, res) => {
+  const courseId = req.query.courseId;
+  const holeNum = req.query.hole;
+  const roundNum = req.query.round;
+  const response = await livestreamService.getHoleStatistic({ courseId, holeNum, roundNum, type: 'top' });
   res.status(httpStatus.OK).send(response);
 });
 const getFlightStatistic = catchAsync(async (req, res) => {
@@ -46,11 +53,19 @@ const scorecardStatic = catchAsync(async (req, res) => {
   const response = await livestreamService.scorecardStatic({ courseId, code, roundNum: round });
   res.status(httpStatus.OK).send(response);
 });
+const getLeaderboard = catchAsync(async (req, res) => {
+  const courseId = req.query.courseId;
+  const round = req.query.round;
+  const response = await livestreamService.getLeaderboard({ courseId, roundNum: round });
+  res.status(httpStatus.OK).send(response);
+});
 module.exports = {
   scorecards,
-  getHoleStatistic,
+  getHoleBottomStatistic,
+  getHoleTopStatistic,
   getFlightImage,
   getGolferDetails,
   getFlightStatic,
   scorecardStatic,
+  getLeaderboard,
 };

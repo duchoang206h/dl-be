@@ -22,16 +22,34 @@ const HOLE_PER_COURSE = 18;
 const FINISH_ALL_ROUNDS = 'F';
 const EVENT_ZERO = 'E';
 const LEADERBOARD_IMAGES = {
-  'ẢNH BXH': 'ẢNH BXH',
-  'Màu Eagle': 'Màu Eagle',
-  'Màu Birdie': 'Màu Birdie',
-  'Màu Bogey': 'Màu Bogey',
-  'Màu Double Bogey +': 'Màu Double Bogey +',
-  'Màu Eagle Mini': 'Màu Eagle Mini',
-  'Màu Birdie Mini': 'Màu Birdie Mini',
-  'Màu Double Bogey + Mini': 'Màu Double Bogey + Mini',
-  'ẢNH THEO ĐIỂM SỐ Âm': 'ẢNH THEO ĐIỂM SỐ Âm',
-  'ẢNH THEO ĐIỂM SỐ Dương': 'ẢNH THEO ĐIỂM SỐ Dương',
+  main: {
+    name: 'ẢNH BXH',
+    type: 'LEADERBOARD_IMAGES.main',
+  },
+  negative_score: {
+    name: 'Ảnh theo điểm số âm',
+    type: 'LEADERBOARD_IMAGES.negative_score',
+  },
+  positive_score: {
+    name: 'Ảnh theo điểm số dương',
+    type: 'LEADERBOARD_IMAGES.positive_score',
+  },
+  equal_score: {
+    name: 'Ảnh theo điểm số bằng',
+    type: 'LEADERBOARD_IMAGES.equal_score',
+  },
+  negative_score_mini: {
+    name: 'Ảnh theo điểm số âm',
+    type: 'LEADERBOARD_IMAGES.negative_score_mini',
+  },
+  positive_score_mini: {
+    name: 'Ảnh theo điểm số dương',
+    type: 'LEADERBOARD_IMAGES.positive_score_mini',
+  },
+  equal_score_mini: {
+    name: 'Ảnh theo điểm số bằng',
+    type: 'LEADERBOARD_IMAGES.equal_score_mini',
+  },
 };
 const PLAYER_STATUS = {
   NORMAL: 'Normal',
@@ -41,16 +59,15 @@ const PLAYER_STATUS = {
   RETD: 'RETD',
 };
 const MAX_NUM_PUTT = 50;
-const SCORE_CARD_IMAGES = {
+const SCORECARD_IMAGES = {
   logo: 'Logo giải đấu',
   main: 'ẢNH MAIN',
   negative_score: 'Ảnh theo điểm số âm',
-  positive_score: 'Ảnh theo điểm SỐ Dương',
+  positive_score: 'Ảnh theo điểm số dương',
   equal_score: 'Ảnh theo điểm số bằng',
   eagle_color: 'Màu Eagle',
   birdie_color: 'Màu Birdie',
   bogey_color: 'Màu Bogey',
-  double_bogey_color: 'Màu Double Bogey +',
 };
 const DEFAULT_SCORES = [
   {
@@ -189,8 +206,9 @@ module.exports = {
   HOLE_PER_COURSE,
   FINISH_ALL_ROUNDS,
   EVENT_ZERO,
-  SCORE_CARD_IMAGES,
+  SCORECARD_IMAGES,
   PLAYER_STATUS,
   MAX_NUM_PUTT,
   DEFAULT_SCORES,
+  LEADERBOARD_IMAGES,
 };
