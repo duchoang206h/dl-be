@@ -37,10 +37,12 @@ const getAllCourseByOffsetLimit = async ({
   sort = 'ASC',
   type = '',
   name = '',
+  course_id = null,
 }) => {
   const where = {};
   if (type) where['type'] = type;
   if (name) where['name'] = { [Op.like]: `%${name}%` };
+  if(course_id) where['course_id'] = course_id;
   return await Course.getAllWithPaging({
     page,
     limit,
