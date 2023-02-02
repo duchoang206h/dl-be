@@ -22,11 +22,12 @@ const getCourseById = async (id) =>
         model: GolfCourse,
         as: 'golf_course',
         attributes: { exclude: ['createdAt', 'updatedAt'] },
-        include: [{ model: Hole, as: 'holes', order: [['hole_num', 'ASC']] }],
+        include: [{ model: Hole, as: 'holes' }],
       },
       { model: Round, as: 'rounds', attributes: { exclude: ['createdAt', 'updatedAt'] } },
       { model: Player, as: 'players', attributes: { exclude: ['createdAt', 'updatedAt'] } },
     ],
+    order: [[{ model: GolfCourse, as: 'golf_course' }, { model: Hole, as: 'holes' }, 'hole_num', 'ASC']],
   });
 const existCourse = async (id) => (await Course.count({ where: { course_id: id } })) > 0;
 const getAllCourseByOffsetLimit = async ({
