@@ -200,7 +200,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
     where: {
       course_id: courseId,
       round_num: {
-        [Op.lt]: round.round_num,
+        [Op.lte]: round.round_num,
       },
     },
     attributes: ['round_id'],
@@ -241,31 +241,26 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
       player['in'] = _in;
       player['total'] = total;
       player['out'] = out;
-      const today = moment(course.end_date).isBefore(moment())
-        ? Score.sum('num_putt', {
-            where: {
-              player_id: player.player_id,
-              course_id: courseId,
-              round_id: round.round_id,
-              createdAt: {
-                [Op.gte]: dateWithTimezone(),
-                [Op.lt]: moment(dateWithTimezone(), DATE_FORMAT).add(1, 'days'),
-              },
-            },
-          })
-        : total - PAR_PER_ROUND;
-      const score =
-        (await Score.sum('num_putt', {
-          where: {
-            player_id: player.player_id,
-            course_id: courseId,
-            round_id: {
-              [Op.in]: lastRounds.map(({ round_id }) => round_id),
-            },
+      const today = await Score.sum('num_putt', {
+        where: {
+          player_id: player.player_id,
+          course_id: courseId,
+          round_id: round.round_id,
+          createdAt: {
+            [Op.gte]: dateWithTimezone(),
+            [Op.lt]: moment(dateWithTimezone(), DATE_FORMAT).add(1, 'days'),
           },
-        })) -
-        (round.round_num - 1) * PAR_PER_ROUND +
-        today;
+        },
+      });
+      const score = await Score.findAll('num_putt', {
+        where: {
+          player_id: player.player_id,
+          course_id: courseId,
+          round_id: {
+            [Op.in]: lastRounds.map(({ round_id }) => round_id),
+          },
+        },
+      });
       return {
         in: _in,
         total,
