@@ -50,6 +50,100 @@ const LEADERBOARD_IMAGES = {
     name: 'Ảnh theo điểm số bằng',
     type: 'LEADERBOARD_IMAGES.equal_score_mini',
   },
+  birdie_color: {
+    name: 'Màu Birdie',
+    type: 'LEADERBOARD_IMAGES.birdie_color',
+  },
+  bogey_color: {
+    name: 'Màu Bogey',
+    type: 'LEADERBOARD_IMAGES.bogey_color',
+  },
+  double_bogey_color: {
+    name: 'Màu Double Bogey +',
+    type: 'LEADERBOARD_IMAGES.double_bogey_color',
+  },
+  eagle_color: {
+    name: 'Màu Eagle',
+    type: 'LEADERBOARD_IMAGES.eagle_color',
+  },
+  birdie_mini_color: {
+    name: 'Màu Birdie Mini',
+    type: 'LEADERBOARD_IMAGES.birdie_mini_color',
+  },
+  bogey_mini_color: {
+    name: 'Màu Bogey Mini',
+    type: 'LEADERBOARD_IMAGES.bogey_mini_color',
+  },
+  double_bogey_mini_color: {
+    name: 'Màu Double Bogey + Mini',
+    type: 'LEADERBOARD_IMAGES.double_bogey_mini_color',
+  },
+  eagle_mini_color: {
+    name: 'Màu Eagle Mini',
+    type: 'LEADERBOARD_IMAGES.eagle_mini_color',
+  },
+};
+const LEADERBOARD_MINI_IMAGES = {
+  main: {
+    name: 'ẢNH BXH',
+    type: 'LEADERBOARD_MINI_IMAGES.main',
+  },
+  negative_score: {
+    name: 'Ảnh theo điểm số âm',
+    type: 'LEADERBOARD_MINI_IMAGES.negative_score',
+  },
+  positive_score: {
+    name: 'Ảnh theo điểm số dương',
+    type: 'LEADERBOARD_MINI_IMAGES.positive_score',
+  },
+  equal_score: {
+    name: 'Ảnh theo điểm số bằng',
+    type: 'LEADERBOARD_MINI_IMAGES.equal_score',
+  },
+  negative_score_mini: {
+    name: 'Ảnh theo điểm số âm',
+    type: 'LEADERBOARD_MINI_IMAGES.negative_score_mini',
+  },
+  positive_score_mini: {
+    name: 'Ảnh theo điểm số dương',
+    type: 'LEADERBOARD_MINI_IMAGES.positive_score_mini',
+  },
+  equal_score_mini: {
+    name: 'Ảnh theo điểm số bằng',
+    type: 'LEADERBOARD_MINI_IMAGES.equal_score_mini',
+  },
+  birdie_color: {
+    name: 'Màu Birdie',
+    type: 'LEADERBOARD_IMAGES.birdie_color',
+  },
+  bogey_color: {
+    name: 'Màu Bogey',
+    type: 'LEADERBOARD_MINI_IMAGES.bogey_color',
+  },
+  double_bogey_color: {
+    name: 'Màu Double Bogey +',
+    type: 'LEADERBOARD_MINI_IMAGES.double_bogey_color',
+  },
+  eagle_color: {
+    name: 'Màu Eagle',
+    type: 'LEADERBOARD_MINI_IMAGES.eagle_color',
+  },
+  birdie_mini_color: {
+    name: 'Màu Birdie Mini',
+    type: 'LEADERBOARD_MINI_IMAGES.birdie_mini_color',
+  },
+  bogey_mini_color: {
+    name: 'Màu Bogey Mini',
+    type: 'LEADERBOARD_IMAGES.bogey_mini_color',
+  },
+  double_bogey_mini_color: {
+    name: 'Màu Double Bogey + Mini',
+    type: 'LEADERBOARD_IMAGES.double_bogey_mini_color',
+  },
+  eagle_mini_color: {
+    name: 'Màu Eagle Mini',
+    type: 'LEADERBOARD_MINI_IMAGES.eagle_mini_color',
+  },
 };
 const PLAYER_STATUS = {
   NORMAL: 'Normal',
@@ -60,14 +154,124 @@ const PLAYER_STATUS = {
 };
 const MAX_NUM_PUTT = 50;
 const SCORECARD_IMAGES = {
-  logo: 'Logo giải đấu',
-  main: 'ẢNH MAIN',
-  negative_score: 'Ảnh theo điểm số âm',
-  positive_score: 'Ảnh theo điểm số dương',
-  equal_score: 'Ảnh theo điểm số bằng',
-  eagle_color: 'Màu Eagle',
-  birdie_color: 'Màu Birdie',
-  bogey_color: 'Màu Bogey',
+  logo: {
+    name: 'Logo giải đấu',
+    type: 'SCORECARD_IMAGES.logo',
+  },
+  main: {
+    name: 'Ảnh main',
+    type: 'SCORECARD_IMAGES.main',
+  },
+  negative_score: {
+    name: 'Ảnh theo điểm số âm',
+    type: 'SCORECARD_IMAGES.negative_score',
+  },
+  positive_score: { name: 'Ảnh theo điểm số dương', type: 'SCORECARD_IMAGES.positive_score' },
+  equal_score: { name: 'Ảnh theo điểm số bằng', type: 'SCORECARD_IMAGES.equal_score' },
+  eagle_color: { name: 'Màu Eagle', type: 'SCORECARD_IMAGES.eagle_color' },
+  birdie_color: { name: 'Màu Birdie', type: 'SCORECARD_IMAGES.birdie_color' },
+  bogey_color: { name: 'Màu Bogey', type: 'SCORECARD_IMAGES.bogey_color' },
+  double_bogey_color: { name: 'Màu Double Bogey +', type: 'SCORECARD_IMAGES.double_bogey_color' },
+};
+const HOLE_TOP_IMAGES = {
+  main: {
+    name: 'Ảnh main',
+    type: 'HOLE_TOP_IMAGES.main',
+  },
+};
+const HOLE_BOTTOM_IMAGES = {
+  main: {
+    name: 'Ảnh main',
+    type: 'HOLE_BOTTOM_IMAGES.main',
+  },
+};
+const GOLFER_INFO_IMAGES = {
+  main: {
+    name: 'Ảnh main',
+    type: 'GOLFER_INFO_IMAGES.main',
+  },
+  logo: {
+    name: 'Logo giải đấu',
+    type: 'GOLFER_INFO_IMAGES.logo',
+  },
+};
+const FLIGHT_INFOR_IMAGES = {
+  main: {
+    name: 'Ảnh main',
+    type: 'FLIGHT_INFOR_IMAGES.logo',
+  },
+  logo: {
+    name: 'Logo giải đấu',
+    type: 'FLIGHT_INFOR_IMAGES.logo',
+  },
+};
+const GROUP_RANK_IMAGES = {
+  main: {
+    name: 'ẢNH BXH',
+    type: 'GROUP_RANK_IMAGES.main',
+  },
+  negative_score: {
+    name: 'Ảnh theo điểm số âm',
+    type: 'GROUP_RANK_IMAGES.negative_score',
+  },
+  positive_score: {
+    name: 'Ảnh theo điểm số dương',
+    type: 'GROUP_RANK_IMAGES.positive_score',
+  },
+  equal_score: {
+    name: 'Ảnh theo điểm số bằng',
+    type: 'GROUP_RANK_IMAGES.equal_score',
+  },
+  birdie_color: {
+    name: 'Màu Birdie',
+    type: 'GROUP_RANK_IMAGES.birdie_color',
+  },
+  bogey_color: {
+    name: 'Màu Bogey',
+    type: 'GROUP_RANK_IMAGES.bogey_color',
+  },
+  double_bogey_color: {
+    name: 'Màu Double Bogey +',
+    type: 'GROUP_RANK_IMAGES.double_bogey_color',
+  },
+  eagle_color: {
+    name: 'Màu Eagle',
+    type: 'GROUP_RANK_IMAGES.eagle_color',
+  },
+};
+const GOLFER_IN_HOLE_IMAGES = {
+  main: {
+    name: 'ẢNH BXH',
+    type: 'GOLFER_IN_HOLE_IMAGES.main',
+  },
+  negative_score: {
+    name: 'Ảnh theo điểm số âm',
+    type: 'GOLFER_IN_HOLE_IMAGES.negative_score',
+  },
+  positive_score: {
+    name: 'Ảnh theo điểm số dương',
+    type: 'GOLFER_IN_HOLE_IMAGES.positive_score',
+  },
+  equal_score: {
+    name: 'Ảnh theo điểm số bằng',
+    type: 'GOLFER_IN_HOLE_IMAGES.equal_score',
+  },
+  birdie_color: {
+    name: 'Màu Birdie',
+    type: 'GOLFER_IN_HOLE_IMAGES.birdie_color',
+  },
+  bogey_color: {
+    name: 'Màu Bogey',
+    type: 'GOLFER_IN_HOLE_IMAGES.bogey_color',
+  },
+  double_bogey_color: {
+    name: 'Màu Double Bogey +',
+    type: 'GOLFER_IN_HOLE_IMAGES.double_bogey_color',
+  },
+  eagle_color: {
+    name: 'Màu Eagle',
+    type: 'GOLFER_IN_HOLE_IMAGES.eagle_color',
+  },
 };
 const DEFAULT_SCORES = [
   {
@@ -211,4 +415,11 @@ module.exports = {
   MAX_NUM_PUTT,
   DEFAULT_SCORES,
   LEADERBOARD_IMAGES,
+  FLIGHT_INFOR_IMAGES,
+  GOLFER_INFO_IMAGES,
+  GROUP_RANK_IMAGES,
+  HOLE_BOTTOM_IMAGES,
+  HOLE_TOP_IMAGES,
+  GOLFER_IN_HOLE_IMAGES,
+  LEADERBOARD_MINI_IMAGES,
 };
