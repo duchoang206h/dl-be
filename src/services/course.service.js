@@ -22,7 +22,7 @@ const getCourseById = async (id) =>
         model: GolfCourse,
         as: 'golf_course',
         attributes: { exclude: ['createdAt', 'updatedAt'] },
-        include: [{ model: Hole, as: 'holes' }],
+        include: [{ model: Hole, as: 'holes', order: [['hole_num', 'ASC']] }],
       },
       { model: Round, as: 'rounds', attributes: { exclude: ['createdAt', 'updatedAt'] } },
       { model: Player, as: 'players', attributes: { exclude: ['createdAt', 'updatedAt'] } },
