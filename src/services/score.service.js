@@ -307,7 +307,6 @@ const getPlayerScoresByAllRound = async (courseId, playerId) => {
 };
 const getAllPlayerScore = async (courseId, { name }) => {
   const rounds = await roundService.getAllRoundByCourse(courseId);
-  console.log(rounds);
   const course = await courseService.getCourseById(courseId);
   const lastRound = await roundService.getRoundByNumAndCourse(course.total_round, courseId);
   let players = name
@@ -332,9 +331,13 @@ const getAllPlayerScore = async (courseId, { name }) => {
           const scores = await Score.findAll({
             where: { player_id: player.player_id, round_id: round.round_id, course_id: courseId },
             attributes: ['num_putt', 'score_type'],
-            include: [{ model: Hole, attributes: ['hole_num'] }],
+            include: [{ model: Hole, attributes: ['hole_num', 'par'] }],
           });
-          return { scores, round: round.round_num };
+          return {
+            scores,
+            round: round.round_num,
+            topar: scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0),
+          };
         })
       );
       player['rounds'] = [];
@@ -343,13 +346,15 @@ const getAllPlayerScore = async (courseId, { name }) => {
           round: score.round,
           scores: score.scores,
           total: score.scores.reduce((pre, current) => pre + current.num_putt, 0),
+          topar: score.topar,
         });
       }
       const _today = dateWithTimezone();
       console.log(_today);
-      console.log({ check: moment(_today, DATE_FORMAT).isBefore(moment(course.end_date)) });
-      player['score'] =
-        PAR_PER_ROUND * course.total_round - player['rounds'].reduce((pre, current) => pre + current.total, 0);
+      player['score'] = player['rounds'].reduce(
+        (pre, current) => pre + current.scores.reduce((p, c) => p + c.num_putt - c.Hole.par, 0),
+        0
+      );
       const [thru, todayScore, lastRoundScore] = await Promise.all([
         Score.count({ where: { player_id: player.player_id } }),
         Score.findAll({
@@ -379,7 +384,6 @@ const getAllPlayerScore = async (courseId, { name }) => {
             score.toJSON();
             return pre + score.num_putt - score.Hole.par;
           }, 0);
-      player['thru'] = thru == HOLE_PER_COURSE * course.total_round ? FINISH_ALL_ROUNDS : thru;
       player['thru'] = thru == HOLE_PER_COURSE * course.total_round ? FINISH_ALL_ROUNDS : thru;
       player['today'] = today == 0 ? EVENT_ZERO : today;
       return player;
