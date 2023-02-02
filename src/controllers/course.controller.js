@@ -16,7 +16,7 @@ const getAllCourse = catchAsync(async (req, res) => {
   const user = await User.findOne({ where: { user_id: req.userId }, raw: true });
   const course = user.is_super
     ? await courseService.getAllCourseByOffsetLimit(req.query)
-    : [await courseService.getAllCourseByOffsetLimit({ course_id: user.course_id })];
+    : await courseService.getAllCourseByOffsetLimit({ course_id: user.course_id });
   if (course) res.status(httpStatus.OK).json({ result: course });
   else res.status(httpStatus.NOT_FOUND).json({ result: [] });
 });
