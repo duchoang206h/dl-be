@@ -83,6 +83,25 @@ const previousRankCount = (i, duplicates, scoresShort) => {
   }
   return sum + 1;
 };
+/// [1,2,3,4] 6
+const getDefaultScore = (scores) => {
+  let cloneScores = [...scores];
+  cloneScores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
+  const scoreReach = cloneScores.length;
+  if (scoreReach < 18) {
+    for (let i = cloneScores.length + 1; i <= 18; i++) {
+      cloneScores.push({
+        Hole: {
+          hole_num: i,
+        },
+        num_putt: 0,
+        score_type: null,
+      });
+    }
+    return cloneScores;
+  }
+  return cloneScores;
+};
 //[1, 2, 3, 6, 3, 4, 3, 2];
 // [1,2,2,3,3,3,4,6]
 // { 1:1, 2:2, 3:3, 4;1, 6:1 }
@@ -95,4 +114,5 @@ module.exports = {
   getScoreType,
   calculateScoreAverage,
   getRank,
+  getDefaultScore,
 };

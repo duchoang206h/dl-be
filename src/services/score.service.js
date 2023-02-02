@@ -14,7 +14,7 @@ const {
 const { Score, Round, Hole, sequelize, Player, TeeTimeGroupPlayer, TeeTimeGroup, Sequelize } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
-const { getScoreType, calculateScoreAverage, getRank } = require('../utils/score');
+const { getScoreType, calculateScoreAverage, getRank, getDefaultScore } = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
 const { NUM_PUTT_INVALID } = require('../utils/errorMessage');
 
@@ -416,7 +416,7 @@ const getPlayerScore = async (courseId, playerId) => {
           attributes: ['num_putt', 'score_type'],
           include: [{ model: Hole, attributes: ['hole_num'] }],
         });
-        return { scores: score.length ? score : DEFAULT_SCORES, round: round.round_num };
+        return { scores: getDefaultScore(score), round: round.round_num };
       })
     ),
     courseService.getCourseById(courseId),
