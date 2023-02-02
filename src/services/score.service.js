@@ -464,8 +464,7 @@ const getPlayerScore = async (courseId, playerId) => {
     score.toJSON();
     return pre + score.num_putt - score.Hole.par;
   }, 0);
-  player['thru'] = thru == HOLE_PER_COURSE * course.total_round ? FINISH_ALL_ROUNDS : thru;
-  player['thru'] = thru == HOLE_PER_COURSE * course.total_round ? FINISH_ALL_ROUNDS : thru;
+  player['thru'] = thru % HOLE_PER_COURSE == HOLE_PER_COURSE ? FINISH_ALL_ROUNDS : thru;
   player['today'] = today == 0 ? EVENT_ZERO : today;
   return player;
 };
