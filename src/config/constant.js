@@ -8,7 +8,7 @@ const COURSE_TYPE = {
 const SCORE_TYPE = {
   PAR: 'PAR',
   BIRDIE: 'Birdie',
-  EAGLE: 'Eagle',
+  EAGLE: 'Eagle or Better',
   BOGEY: 'Bogey',
   D_BOGEY: 'D.Bogey+',
 };
