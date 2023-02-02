@@ -1,8 +1,13 @@
 const { Course, Hole, Round, Player, GolfCourse } = require('../models/schema');
+const moment = require('moment');
 const { Op } = require('sequelize');
 const createCourse = async (data) => {
   const course = {
-    ...data,
+    ...{
+      ...data,
+      start_date: moment(data.start_date, 'DD/MM/YYYY').toDate(),
+      end_date: moment(data.end_date, 'DD/MM/YYYY').toDate(),
+    },
     rounds: new Array(data.total_round).fill(null).map((_, index) => {
       return { round_num: index + 1 };
     }),
