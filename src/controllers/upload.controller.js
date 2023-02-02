@@ -3,8 +3,10 @@ const { SCORECARD_IMAGES, LEADERBOARD_IMAGES } = require('../config/constant');
 const catchAsync = require('../utils/catchAsync');
 const { uploadMulter, uploadSingleFile, storeImage } = require('../services/upload.service');
 const fs = require('fs');
+const { Image } = require('../models/schema');
 
-const getAllImages = catchAsync(async (_, res) => {
+const getAllImages = catchAsync(async (req, res) => {
+  const images = await Image.findAll({ where: { course_id: req.params.courseId } });
   res.status(httpStatus.OK).send({
     result: {
       SCORECARD_IMAGES,

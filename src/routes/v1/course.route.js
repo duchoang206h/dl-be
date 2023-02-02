@@ -84,7 +84,7 @@ router.get('/:courseId/statistic/players/:playerId', scoreController.getAllStati
 router.get('/:courseId/teetimes/rounds/:roundNum', teetimeController.getTeetime);
 
 // upload
-router.get('/images/types', uploadController.getAllImages);
+router.get('/:courseId/images/types', uploadController.getAllImages);
 router.post('/:courseId/images/upload', auth, checkAminPermission, upload.any(), uploadController.upload);
 
 //player

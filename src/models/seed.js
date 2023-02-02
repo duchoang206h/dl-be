@@ -107,7 +107,7 @@ const seed = async () => {
 };
 const exportXlsx = async () => {
   const teetime = generateTeetime();
-  const players = await Player.findAll({ where: { course_id: 10 }, attributes: ['fullname'], raw: true });
+  const players = await Player.findAll({ where: { course_id: 14 }, attributes: ['fullname'], raw: true });
   const teetimes = players.map(({ fullname }) => {
     return {
       'name-golfer': fullname,
