@@ -12,7 +12,17 @@ const {
   DEFAULT_SCORES,
   PLAYER_STATUS,
 } = require('../config/constant');
-const { Score, Round, Hole, sequelize, Player, TeeTimeGroupPlayer, TeeTimeGroup, Sequelize } = require('../models/schema');
+const {
+  Score,
+  Round,
+  Hole,
+  sequelize,
+  Player,
+  TeeTimeGroupPlayer,
+  TeeTimeGroup,
+  Sequelize,
+  CurrentScore,
+} = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
 const { getScoreType, calculateScoreAverage, getRank, getDefaultScore } = require('../utils/score');
@@ -44,27 +54,58 @@ const createManyScore = async (scoreBodyArr, { courseId, playerId, roundNum }) =
     }
     const result = await Promise.all(
       scoreBodyArr.map(async (scoreBody) => {
-        const { hole_num, num_putt } = scoreBody;
+        const { hole_num, num_putt, finished } = scoreBody;
         const [hole, round] = await Promise.all([
           holeService.getHoleByNumAndGolfCourseId(hole_num, courseId),
           roundService.getRoundByNumAndCourse(roundNum, courseId),
         ]);
+
         const scoreType = getScoreType(num_putt, hole.par);
-        const existScore = await Score.count({
-          where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId },
-        });
-        if (existScore) throw BadRequestError();
-        return Score.create(
-          {
-            num_putt,
-            course_id: courseId,
-            round_id: round.round_id,
-            hole_id: hole.hole_id,
-            player_id: playerId,
-            score_type: scoreType,
-          },
-          { transaction: t }
-        );
+        if (finished === undefined || finished === true) {
+          const existScore = await Score.count({
+            where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId },
+          });
+          if (existScore) throw BadRequestError();
+          return Score.create(
+            {
+              num_putt,
+              course_id: courseId,
+              round_id: round.round_id,
+              hole_id: hole.hole_id,
+              player_id: playerId,
+              score_type: scoreType,
+            },
+            { transaction: t }
+          );
+        } else {
+          //// create current scores
+          const currentScore = await CurrentScore.findOne({
+            where: {
+              player_id: playerId,
+              course_id: courseId,
+            },
+          });
+          if (currentScore) {
+            return await CurrentScore.update(
+              {
+                hole_id: hole.hole_id,
+                round_num: roundNum,
+                num_putt,
+                score_type: scoreType,
+              },
+              { where: { player_id: playerId, course_id: courseId } }
+            );
+          } else {
+            return CurrentScore.create({
+              hole_id: hole.hole_id,
+              round_num: roundNum,
+              num_putt,
+              score_type: scoreType,
+              player_id: playerId,
+              course_id: courseId,
+            });
+          }
+        }
       })
     );
     await t.commit();
@@ -186,18 +227,42 @@ const getHoleStatisticByRound = async ({ courseId, roundId }) => {
   return result;
 };
 const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }) => {
-  const where = name
-    ? {
-        course_id: courseId,
-        fullname: {
-          [Op.like]: `%${name}%`,
+  let [players, searchPlayers] = await Promise.all([
+    Player.findAll({
+      where: { course_id: courseId, status: PLAYER_STATUS.NORMAL },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+      include: [
+        {
+          model: Score,
+          as: 'scores',
+          attributes: ['num_putt', 'score_type'],
+          where: {
+            round_id: roundId,
+            course_id: courseId,
+          },
+          include: [{ model: Hole, attributes: ['hole_num'] }],
         },
-        status: PLAYER_STATUS.NORMAL,
-      }
-    : {
+        { model: TeeTimeGroupPlayer, as: 'teetime_group_player', include: [{ model: TeeTimeGroup }] },
+      ],
+    }),
+    Player.findAll({
+      where: {
         course_id: courseId,
+
         status: PLAYER_STATUS.NORMAL,
-      };
+        [Op.or]: [
+          {
+            fullname: {
+              [Op.like]: `%${name}%`,
+            },
+          },
+          {
+            code: name,
+          },
+        ],
+      },
+    }),
+  ]);
   const [round, course] = await Promise.all([Round.findByPk(roundId, { raw: true }), courseService.getCourseById(courseId)]);
   const lastRounds = await Round.findAll({
     where: {
@@ -208,23 +273,6 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
     },
     attributes: ['round_id'],
     raw: true,
-  });
-  let players = await Player.findAll({
-    where,
-    attributes: { exclude: ['createdAt', 'updatedAt'] },
-    include: [
-      {
-        model: Score,
-        as: 'scores',
-        attributes: ['num_putt', 'score_type'],
-        where: {
-          round_id: roundId,
-          course_id: courseId,
-        },
-        include: [{ model: Hole, attributes: ['hole_num'] }],
-      },
-      { model: TeeTimeGroupPlayer, as: 'teetime_group_player', include: [{ model: TeeTimeGroup }] },
-    ],
   });
   players = await Promise.all(
     players.map(async (player) => {
@@ -298,6 +346,11 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
     return { ...player, pos: getRank(player.total, scores) };
   });
   players.sort((a, b) => a.pos - b.pos);
+  const searchPlayerIds = searchPlayers.map((player) => player.player_id);
+  console.log(searchPlayerIds);
+  if (name || searchPlayers.length) {
+    return players.filter((player) => searchPlayerIds.includes(player.player_id));
+  }
   return players;
 };
 const getPlayerScoresByAllRound = async (courseId, playerId) => {
@@ -315,20 +368,30 @@ const getAllPlayerScore = async (courseId, { name }) => {
   const rounds = await roundService.getAllRoundByCourse(courseId);
   const course = await courseService.getCourseById(courseId);
   const lastRound = await roundService.getRoundByNumAndCourse(course.total_round, courseId);
-  let players = name
-    ? await Player.findAll({
-        where: {
-          course_id: courseId,
-          fullname: {
-            [Op.like]: `%${name}%`,
+  let [players, searchPlayers] = await Promise.all([
+    Player.findAll({
+      where: { course_id: courseId },
+      attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+    }),
+    name
+      ? Player.findAll({
+          where: {
+            course_id: courseId,
+            [Op.or]: [
+              {
+                fullname: {
+                  [Op.like]: `%${name}%`,
+                },
+              },
+              {
+                code: name,
+              },
+            ],
           },
-        },
-        attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
-      })
-    : await Player.findAll({
-        where: { course_id: courseId },
-        attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
-      });
+          attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+        })
+      : [],
+  ]);
   let normalPlayers = players.filter((player) => player.status === PLAYER_STATUS.NORMAL);
   let outCutPlayers = players.filter((player) => player.status !== PLAYER_STATUS.NORMAL);
   const _today = dateWithTimezone();
@@ -490,14 +553,19 @@ const getAllPlayerScore = async (courseId, { name }) => {
     ...player,
     pos: normalPlayers[_nomalPlayers.length - 1].pos + player.pos,
   }));
-  console.log(_nomalPlayers);
-  return [..._nomalPlayers, ..._outcutPlayers];
+  let result = [..._nomalPlayers, ..._outcutPlayers];
+  const searchPlayerIds = searchPlayers.map((player) => player.player_id);
+  if (name || searchPlayers.length) {
+    result = result.filter((player) => searchPlayerIds.includes(player.player_id));
+  }
+  return result;
 };
 const getPlayerScore = async (courseId, playerId) => {
   let [player, rounds] = await Promise.all([
     Player.findOne({
       where: { course_id: courseId, player_id: playerId },
       attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+      include: [{ model: CurrentScore, as: 'current_score', include: [{ model: Hole, as: 'hole' }] }],
     }),
     roundService.getAllRoundByCourse(courseId),
   ]);

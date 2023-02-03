@@ -20,6 +20,11 @@ class Hole extends Base {
       targetKey: 'golf_course_id',
       as: 'golf_course',
     });
+    Hole.hasMany(models.CurrentScore, {
+      foreignKey: 'hole_id',
+      sourceKey: 'hole_id',
+      as: 'current_scores',
+    });
   }
 
   static init(sequelize) {

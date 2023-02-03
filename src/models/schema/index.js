@@ -14,6 +14,7 @@ const { User } = require('./User');
 const { Token } = require('./Token');
 const { Image } = require('./Image');
 const { TeeTimeGroupPlayer } = require('./TeetimeGroupPlayer');
+const { CurrentScore } = require('./CurrentScore');
 const db = {};
 const models = {
   Image,
@@ -29,6 +30,7 @@ const models = {
   Score,
   User,
   Token,
+  CurrentScore,
 };
 const sequelize = new Sequelize(process.env.DB_URL, { dialect: 'mysql', logging: false });
 Object.keys(models).forEach((x) => {

@@ -21,6 +21,11 @@ class Player extends Base {
       targetKey: 'player_id',
       as: 'teetime_group_player',
     });
+    Player.hasOne(models.CurrentScore, {
+      foreignKey: 'player_id',
+      sourceKey: 'player_id',
+      as: 'current_score',
+    });
     /* Player.belongsToMany(models.TeeTimeGroup, {
       through: { model: models.TeeTimeGroupPlayer },
       foreignKey: 'player_id',

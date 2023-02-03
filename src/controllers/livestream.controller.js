@@ -57,6 +57,7 @@ const getLeaderboard = catchAsync(async (req, res) => {
   const courseId = req.query.courseId;
   const round = req.query.round;
   const type = req.query.type;
+  console.log(type);
   const response = await livestreamService.getLeaderboard({ courseId, roundNum: round, type });
   res.status(httpStatus.OK).send(response);
 });
