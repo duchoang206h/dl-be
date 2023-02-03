@@ -20,6 +20,7 @@ const updatePlayer = {
     driverev: Joi.string(),
     putting: Joi.string(),
     best: Joi.string(),
+    ranking: Joi.number(),
   }),
 };
 module.exports = {

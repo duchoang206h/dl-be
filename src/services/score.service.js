@@ -192,9 +192,11 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
         fullname: {
           [Op.like]: `%${name}%`,
         },
+        status: PLAYER_STATUS.NORMAL,
       }
     : {
         course_id: courseId,
+        status: PLAYER_STATUS.NORMAL,
       };
   const [round, course] = await Promise.all([Round.findByPk(roundId, { raw: true }), courseService.getCourseById(courseId)]);
   const lastRounds = await Round.findAll({
