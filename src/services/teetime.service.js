@@ -12,7 +12,7 @@ const createManyTeetime = async (teetimes, { courseId, roundNum }) => {
     for (const teetime of teetimes) {
       const existGroupIndex = groups.findIndex((group) => group.group_num == teetime.group);
       const player = await Player.findOne({
-        where: { fullname: teetime['name-golfer'] },
+        where: { fullname: teetime['name-golfer'], course_id: courseId },
         raw: true,
         attributes: ['player_id'],
       });
