@@ -1,10 +1,17 @@
 const { Op } = require('sequelize');
 const { courseService, playerService } = require('.');
-const { SCORE_TYPE, HOLE_PER_COURSE, EVENT_ZERO, FINISH_ALL_ROUNDS, LEADERBOARD_IMAGES } = require('../config/constant');
+const {
+  SCORE_TYPE,
+  HOLE_PER_COURSE,
+  EVENT_ZERO,
+  FINISH_ALL_ROUNDS,
+  LEADERBOARD_IMAGES,
+  SCORECARD_IMAGES,
+} = require('../config/constant');
 const { Player, Course, Score, Round, Hole, sequelize, TeeTimeGroup, Image } = require('../models/schema');
 const { TeeTime } = require('../models/schema/Teetime');
 const { TeeTimeGroupPlayer } = require('../models/schema/TeetimeGroupPlayer');
-const { getRank } = require('../utils/score');
+const { getRank, getScoreImage, getTotalOverImage } = require('../utils/score');
 const { dateWithTimezone } = require('../utils/date');
 const moment = require('moment');
 
@@ -37,6 +44,7 @@ const getHoleStatistic = async ({ courseId, roundNum, holeNum, type }) => {
   response['HOLE'] = 'Hole ' + hole.hole_num;
   response['PAR_HOLE'] = hole.par;
   response['YARDS'] = hole.yards;
+
   if (type == 'top') return response;
   response['MAIN'] = hole.main_photo_url;
   response['MAIN1'] = hole.main_photo_url;
@@ -94,7 +102,6 @@ const getFlightStatic = async ({ courseId, flight, roundNum }) => {
   const response = {};
   const course = await Course.findByPk(courseId);
   const round = await Round.findOne({ where: { course_id: courseId, round_num: roundNum } });
-  console.log(round);
   const [group] = await Promise.all([
     TeeTimeGroup.findOne({
       where: { group_num: flight, course_id: courseId, round_id: round.round_id },
@@ -122,31 +129,56 @@ const getFlightStatic = async ({ courseId, flight, roundNum }) => {
   return group;
 };
 const scorecardStatic = async ({ courseId, code, roundNum }) => {
-  const response = {};
-  const course = await Course.findByPk(courseId);
-  const round = await Round.findOne({ where: { course_id: courseId, round_num: roundNum } });
+  const [course, round, images] = await Promise.all([
+    Course.findByPk(courseId),
+    Round.findOne({ where: { course_id: courseId, round_num: roundNum } }),
+    Image.findAll({
+      where: {
+        course_id: courseId,
+        type: {
+          [Op.like]: 'SCORECARD_IMAGES%',
+        },
+      },
+    }),
+  ]);
+  console.log(images);
   const player = await Player.findOne({
-    where: { code },
+    where: { code, course_id: courseId },
     include: [{ model: Score, as: 'scores', where: { round_id: round.round_id }, include: [{ model: Hole }] }],
   });
-  const allScores = await Score.findAll({ where: { player_id: player.player_id }, include: [{ model: Hole }] });
-  response['MAIN'] = course.main_photo_url;
-  response['G1'] = player.fullname;
-  //response['TOTALGROSS'] = score.;
+  const allScores = await Score.findAll({
+    where: { player_id: player.player_id, course_id: courseId },
+    include: [{ model: Hole }],
+  });
+
+  let response = {};
+  response['MAIN'] = images.find((img) => img.type == SCORECARD_IMAGES.main.type).url;
+  response[`G1`] = player.fullname;
+
   player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
+
+  //TOTALOVER
+  const totalOver = player.scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
+  response['TOTALOVER'] = totalOver;
+  //TOTALOVERALL
+  const totalOverAll = allScores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
+  response['TOTALOVERALL'] = totalOverAll;
+  // TOTALGROSS
+  const totalGross = allScores.reduce((pre, cur) => pre + cur.num_putt, 0);
+  response['TOTALGROSS'] = totalGross;
+
   player.scores.forEach((score, index) => {
     score = score.toJSON();
-    console.log(score);
     response[`G1SCORE${index + 1}`] = score.num_putt;
+    response[`G1IMG${index + 1}`] = getScoreImage(images, score.score_type);
   });
+  /// iamge TOTALOVER
+  response['STT_TOTALOVER'] = getTotalOverImage(images, totalOver);
   if (player.scores.length > 8) {
-    response['OUT'] = player.scores.slice(0, 9).reduce((pre, cur) => cur.num_putt, 0);
+    response['OUT'] = player.scores.slice(0, 9).reduce((pre, cur) => pre + cur.num_putt, 0);
     if (player.scores.length == 18) response['IN'] = player.scores.slice(9).reduce((pre, cur) => cur.num_putt, 0);
   }
   //const [todayScore, totalScore]
-  response['TOTALGROSS'] = 72;
-  response['TOTALOVER'] = player.scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
-  response['TOTALOVERALL'] = allScores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
   return response;
 };
 
@@ -265,6 +297,8 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
   });
   return response;
 };
+const getGroupRanking = async ({ courseId }) => {};
+const golferInHole = async ({ courseId, code }) => {};
 module.exports = {
   getHoleStatistic,
   getFlightImage,

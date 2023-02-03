@@ -56,7 +56,8 @@ const scorecardStatic = catchAsync(async (req, res) => {
 const getLeaderboard = catchAsync(async (req, res) => {
   const courseId = req.query.courseId;
   const round = req.query.round;
-  const response = await livestreamService.getLeaderboard({ courseId, roundNum: round });
+  const type = req.query.type;
+  const response = await livestreamService.getLeaderboard({ courseId, roundNum: round, type });
   res.status(httpStatus.OK).send(response);
 });
 module.exports = {

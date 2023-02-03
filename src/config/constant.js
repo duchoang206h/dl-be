@@ -169,6 +169,9 @@ const SCORECARD_IMAGES = {
   positive_score: { name: 'Ảnh theo điểm số dương', type: 'SCORECARD_IMAGES.positive_score' },
   equal_score: { name: 'Ảnh theo điểm số bằng', type: 'SCORECARD_IMAGES.equal_score' },
   eagle_color: { name: 'Màu Eagle', type: 'SCORECARD_IMAGES.eagle_color' },
+
+  par_color: { name: 'Màu Par', type: 'SCORECARD_IMAGES.par_color' },
+
   birdie_color: { name: 'Màu Birdie', type: 'SCORECARD_IMAGES.birdie_color' },
   bogey_color: { name: 'Màu Bogey', type: 'SCORECARD_IMAGES.bogey_color' },
   double_bogey_color: { name: 'Màu Double Bogey +', type: 'SCORECARD_IMAGES.double_bogey_color' },

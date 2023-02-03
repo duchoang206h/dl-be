@@ -60,6 +60,81 @@ const calculateScoreAverage = (holePar, statisticObject, totalPlayer) => {
   }
   return +(sumScore / totalPlayer).toFixed(2);
 };
+const getScoreImage = (images, scoreType) => {
+  let imageUrl = null;
+  console.log({ scoreType });
+  switch (scoreType) {
+    case SCORE_TYPE.EAGLE: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('eagle_color')) return true;
+        return false;
+      });
+      imageUrl = image.url;
+      break;
+    }
+    case SCORE_TYPE.BIRDIE: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('birdie_color')) return true;
+        return false;
+      });
+      imageUrl = image.url;
+      break;
+    }
+    case SCORE_TYPE.BIRDIE: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('birdie_color')) return true;
+        return false;
+      });
+      imageUrl = image.url;
+      break;
+    }
+    case SCORE_TYPE.PAR: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('par_color')) return true;
+        return false;
+      });
+      imageUrl = image.url;
+      break;
+    }
+    case SCORE_TYPE.BOGEY: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('bogey_color')) return true;
+        return false;
+      });
+      imageUrl = image.url;
+      break;
+    }
+    case SCORE_TYPE.D_BOGEY: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('double_bogey_color')) return true;
+        return false;
+      });
+      imageUrl = image.url;
+      break;
+    }
+  }
+  return imageUrl;
+};
+const getTotalOverImage = (images, totalOver) => {
+  let imageUrl = null;
+  if (totalOver == 0) {
+    const image = images.find((img) => img.type.includes('equal_score'));
+    imageUrl = image.url;
+  } else if (totalOver > 0) {
+    const image = images.find((img) => img.type.includes('positive_score'));
+    imageUrl = image.url;
+  } else {
+    const image = images.find((img) => img.type.includes('negative_score'));
+    imageUrl = image.url;
+  }
+  return imageUrl;
+};
 const getRank = (total, scores) => {
   scores.sort((a, b) => a - b);
   const duplicates = {};
@@ -115,4 +190,6 @@ module.exports = {
   calculateScoreAverage,
   getRank,
   getDefaultScore,
+  getScoreImage,
+  getTotalOverImage,
 };
