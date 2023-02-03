@@ -224,6 +224,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
       { model: TeeTimeGroupPlayer, as: 'teetime_group_player', include: [{ model: TeeTimeGroup }] },
     ],
   });
+  console.log({ players });
   players = await Promise.all(
     players.map(async (player) => {
       player = player.toJSON();
@@ -268,6 +269,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
       ]);
       const today = todayScores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
       const score = totalScores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
+      console.log(player);
       return {
         in: _in,
         total,
@@ -275,7 +277,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
         today: today == 0 ? EVENT_ZERO : today,
         score: score == 0 ? EVENT_ZERO : score,
         scores: player.scores,
-        group_num: player.teetime_group_player.TeeTimeGroup.group_num,
+        group_num: player.teetime_group_player?.TeeTimeGroup?.group_num,
         flag: player.flag,
         player_id: player.player_id,
         fullname: player.fullname,

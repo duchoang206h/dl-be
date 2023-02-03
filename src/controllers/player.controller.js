@@ -34,6 +34,10 @@ const getAllPlayer = catchAsync(async (req, res) => {
   const players = await playerService.getAllPlayer(req.params.courseId, req.query);
   return res.status(httpStatus.OK).json({ result: players });
 });
+const uploadAvatar = catchAsync(async (req, res) => {
+  const players = await playerService.uploadAvatar(req.files[0]);
+  return res.status(httpStatus.OK).json({ result: players });
+});
 const getPlayer = catchAsync(async (req, res) => {
   const player = await playerService.getPlayer(req.params.courseId, req.params.playerId);
   return res.status(httpStatus.OK).json({ result: player });

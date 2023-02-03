@@ -1,7 +1,14 @@
 const { Course, User, Player } = require('../models/schema');
 const { Op } = require('sequelize');
+const { uploadSingleFile } = require('./upload.service');
 const createManyPlayer = async (data) => {
   await Player.bulkCreate(data);
+};
+const uploadAvatar = async (courseId, playerId, file) => {
+  const path = uploadSingleFile(file);
+  /* const player = await Player.update({ avatar: 
+  
+  }); */
 };
 const getAllPlayer = async (courseId, { page = 1, limit = 100, sort_by = 'createdAt', sort = 'ASC', name = '' }) => {
   const where = {
