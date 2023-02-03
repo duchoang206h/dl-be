@@ -35,7 +35,10 @@ const getAllPlayer = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json({ result: players });
 });
 const uploadAvatar = catchAsync(async (req, res) => {
-  const players = await playerService.uploadAvatar(req.files[0]);
+  const players = await playerService.uploadAvatar(req.files[0], {
+    courseId: req.params.courseId,
+    playerId: req.params.playerId,
+  });
   return res.status(httpStatus.OK).json({ result: players });
 });
 const getPlayer = catchAsync(async (req, res) => {
@@ -49,4 +52,4 @@ const updatePlayer = catchAsync(async (req, res) => {
   });
   return res.status(httpStatus.OK).json({ result: player });
 });
-module.exports = { importPlayers, getAllPlayer, getPlayer, updatePlayer };
+module.exports = { importPlayers, getAllPlayer, getPlayer, updatePlayer, uploadAvatar };

@@ -4,11 +4,10 @@ const { uploadSingleFile } = require('./upload.service');
 const createManyPlayer = async (data) => {
   await Player.bulkCreate(data);
 };
-const uploadAvatar = async (courseId, playerId, file) => {
-  const path = uploadSingleFile(file);
-  /* const player = await Player.update({ avatar: 
-  
-  }); */
+const uploadAvatar = async (file, { courseId, playerId }) => {
+  const path = await uploadSingleFile(file);
+  const players = await Player.update({ avatar: path }, { where: { course_id: courseId, player_id: playerId } });
+  return players;
 };
 const getAllPlayer = async (courseId, { page = 1, limit = 100, sort_by = 'createdAt', sort = 'ASC', name = '' }) => {
   const where = {
@@ -33,4 +32,5 @@ module.exports = {
   getAllPlayer,
   getPlayer,
   updatePlayer,
+  uploadAvatar,
 };

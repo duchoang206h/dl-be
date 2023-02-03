@@ -60,6 +60,10 @@ class Player extends Base {
         putting: Sequelize.STRING,
         best: Sequelize.STRING,
         is_show: Sequelize.BOOLEAN,
+        ranking: {
+          type: Sequelize.INTEGER,
+          defaultValue: 0,
+        },
         status: {
           type: Sequelize.STRING,
           defaultValue: PLAYER_STATUS.NORMAL,
@@ -68,6 +72,12 @@ class Player extends Base {
           type: Sequelize.VIRTUAL,
           get() {
             return this.country ? getFlag(this.country) : null;
+          },
+        },
+        avatar_url: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return process.env.APP_URL + '/static/images/' + this.avatar;
           },
         },
       },
