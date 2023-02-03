@@ -1,5 +1,15 @@
 const httpStatus = require('http-status');
-const { SCORECARD_IMAGES, LEADERBOARD_IMAGES } = require('../config/constant');
+const {
+  SCORECARD_IMAGES,
+  LEADERBOARD_IMAGES,
+  HOLE_BOTTOM_IMAGES,
+  HOLE_TOP_IMAGES,
+  GOLFER_INFO_IMAGES,
+  GOLFER_IN_HOLE_IMAGES,
+  FLIGHT_INFOR_IMAGES,
+  GROUP_RANK_IMAGES,
+  LEADERBOARD_MINI_IMAGES,
+} = require('../config/constant');
 const catchAsync = require('../utils/catchAsync');
 const { uploadMulter, uploadSingleFile, storeImage } = require('../services/upload.service');
 const fs = require('fs');
@@ -11,6 +21,13 @@ const getAllImages = catchAsync(async (req, res) => {
     result: {
       SCORECARD_IMAGES,
       LEADERBOARD_IMAGES,
+      HOLE_BOTTOM_IMAGES,
+      HOLE_TOP_IMAGES,
+      GOLFER_INFO_IMAGES,
+      GOLFER_IN_HOLE_IMAGES,
+      FLIGHT_INFOR_IMAGES,
+      GROUP_RANK_IMAGES,
+      LEADERBOARD_MINI_IMAGES,
     },
   });
 });
