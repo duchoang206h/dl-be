@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { courseService, playerService } = require('.');
+const { courseService, playerService, roundService } = require('.');
 const {
   SCORE_TYPE,
   HOLE_PER_COURSE,
@@ -7,11 +7,18 @@ const {
   FINISH_ALL_ROUNDS,
   LEADERBOARD_IMAGES,
   SCORECARD_IMAGES,
+  FLIGHT_INFOR_IMAGES,
+  GOLFER_INFO_IMAGES,
+  GOLFER_IN_HOLE_IMAGES,
+  GROUP_RANK_IMAGES,
+  HOLE_BOTTOM_IMAGES,
+  LEADERBOARD_MINI_IMAGES,
+  HOLE_TOP_IMAGES,
 } = require('../config/constant');
 const { Player, Course, Score, Round, Hole, sequelize, TeeTimeGroup, Image } = require('../models/schema');
 const { TeeTime } = require('../models/schema/Teetime');
 const { TeeTimeGroupPlayer } = require('../models/schema/TeetimeGroupPlayer');
-const { getRank, getScoreImage, getTotalOverImage } = require('../utils/score');
+const { getRank, getScoreImage, getTotalOverImage, getTop } = require('../utils/score');
 const { dateWithTimezone } = require('../utils/date');
 const moment = require('moment');
 
@@ -55,12 +62,10 @@ const getHoleStatistic = async ({ courseId, roundNum, holeNum, type }) => {
   return response;
 };
 const getFlightImage = async ({ courseId, roundNum, flight }) => {
-  console.log({ courseId, roundNum, flight });
   const response = {};
   const course = await Course.findByPk(courseId);
   const round = await Round.findOne({ where: { course_id: courseId, round_num: roundNum } });
-  console.log(round);
-  const [group] = await Promise.all([
+  const [group, images] = await Promise.all([
     TeeTimeGroup.findOne({
       where: { group_num: flight, course_id: courseId, round_id: round.round_id },
       include: [
@@ -71,8 +76,16 @@ const getFlightImage = async ({ courseId, roundNum, flight }) => {
         },
       ],
     }),
+    Image.findAll({
+      where: {
+        course_id: courseId,
+        type: {
+          [Op.like]: 'FLIGHT_INFOR_IMAGES%',
+        },
+      },
+    }),
   ]);
-  response['MAIN'] = course.main_photo_url;
+  response['MAIN'] = images.find((img) => img.type === FLIGHT_INFOR_IMAGES.main.type)?.url;
   response['GROUP'] = group.group_num;
   response['TEE_TIME'] = group.teetime.time;
   group.group_players.forEach((player, index) => {
@@ -84,9 +97,19 @@ const getFlightImage = async ({ courseId, roundNum, flight }) => {
 };
 const getGolferDetails = async ({ courseId, code }) => {
   const response = {};
-  const course = await Course.findByPk(courseId);
-  const player = await Player.findOne({ where: { code } });
-  response['MAIN'] = course.main_photo_url;
+  const [course, player, images] = await Promise.all([
+    Course.findByPk(courseId),
+    Player.findOne({ where: { code } }),
+    Image.findAll({
+      where: {
+        course_id: courseId,
+        type: {
+          [Op.like]: 'SCORECARD_IMAGES%',
+        },
+      },
+    }),
+  ]);
+  response['MAIN'] = images.find((img) => img.type === GOLFER_INFO_IMAGES.main.type)?.url;
   response[`AVATAR`] = player.avatar;
   response[`G1`] = player.fullname;
   response[`BIRTH`] = player.birth;
@@ -102,7 +125,104 @@ const getFlightStatic = async ({ courseId, flight, roundNum }) => {
   const response = {};
   const course = await Course.findByPk(courseId);
   const round = await Round.findOne({ where: { course_id: courseId, round_num: roundNum } });
-  const [group] = await Promise.all([
+  const rounds = await roundService.getAllRoundByCourse(courseId);
+  const lastRound = await roundService.getRoundByNumAndCourse(course.total_round, courseId);
+  let [players] = await Promise.all([
+    Player.findAll({
+      where: { course_id: courseId },
+      attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+      include: [{ model: Score, as: 'scores' }],
+    }),
+  ]);
+  const _today = dateWithTimezone();
+  players = await Promise.all(
+    players.map(async (player) => {
+      player = player.toJSON();
+      const scores = await Promise.all(
+        rounds.map(async (round) => {
+          const scores = await Score.findAll({
+            where: { player_id: player.player_id, round_id: round.round_id, course_id: courseId },
+            attributes: ['num_putt', 'score_type'],
+            include: [{ model: Hole, attributes: ['hole_num', 'par'] }],
+          });
+          return {
+            scores,
+            round: round.round_num,
+            topar: scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0),
+          };
+        })
+      );
+      player['rounds'] = [];
+      for (const score of scores) {
+        player['rounds'].push({
+          round: score.round,
+          scores: score.scores,
+          total: score.scores.reduce((pre, current) => pre + current.num_putt, 0),
+          topar: score.topar,
+        });
+      }
+      player['score'] = player['rounds'].reduce(
+        (pre, current) => pre + current.scores.reduce((p, c) => p + c.num_putt - c.Hole.par, 0),
+        0
+      );
+      player['total'] = player['rounds'].reduce((pre, current) => pre + current.total, 0);
+
+      const [thru, todayScore, lastRoundScore] = await Promise.all([
+        Score.count({ where: { player_id: player.player_id } }),
+        Score.findAll({
+          where: {
+            player_id: player.player_id,
+            updatedAt: {
+              [Op.gte]: _today,
+              [Op.lt]: moment(_today).add(1, 'days').toDate(), // tomorrow
+            },
+          },
+          include: [{ model: Hole }],
+        }),
+        Score.findAll({
+          where: {
+            player_id: player.player_id,
+            round_id: lastRound.round_id,
+          },
+          include: [{ model: Hole }],
+        }),
+      ]);
+      const today = todayScore.length
+        ? todayScore.reduce((pre, score) => {
+            score.toJSON();
+            return pre + score.num_putt - score.Hole.par;
+          }, 0)
+        : lastRoundScore.reduce((pre, score) => {
+            score.toJSON();
+            return pre + score.num_putt - score.Hole.par;
+          }, 0);
+      player['thru'] = thru > 0 && thru % HOLE_PER_COURSE == 0 ? FINISH_ALL_ROUNDS : thru % HOLE_PER_COURSE;
+      player['today'] = today == 0 ? EVENT_ZERO : today;
+      return player;
+    })
+  );
+  const scores = players.map(({ score }) => score);
+
+  players = players.map((player) => {
+    return {
+      ...player,
+      pos: getRank(player.score, scores),
+    };
+  });
+  players.sort((a, b) => a.pos - b.pos);
+  const ranks = [];
+  players.forEach((player) => {
+    if (player.ranking) ranks.push(player.ranking);
+  });
+  ranks.sort((a, b) => b - a);
+  players = players.map((player) => {
+    return {
+      ...player,
+      pos: getTop(player.pos, player.ranking, ranks),
+    };
+  });
+
+  const [group, images] = await Promise.all([
     TeeTimeGroup.findOne({
       where: { group_num: flight, course_id: courseId, round_id: round.round_id },
       include: [
@@ -117,16 +237,29 @@ const getFlightStatic = async ({ courseId, flight, roundNum }) => {
         },
       ],
     }),
+    Image.findAll({
+      where: {
+        course_id: courseId,
+        type: {
+          [Op.like]: 'GROUP_RANK_IMAGES%',
+        },
+      },
+    }),
   ]);
-  /* response['MAIN'] = course.main_photo_url;
-  response['GROUP'] = group.group_num;
+  response['MAIN'] = images.find((img) => img.type == GROUP_RANK_IMAGES.main.type)?.url;
+  response['MAIN1'] = images.find((img) => img.type == GROUP_RANK_IMAGES.main1.type)?.url;
+  response['GROUP'] = 'GROUP ' + group.group_num;
   response['TEE_TIME'] = group.teetime.time;
-  group.group_players.forEach((player, index) => {
-    response[`G${index + 1}`] = player.players.fullname;
-    response[`AVATAR${index + 1}`] = player.players.avatar;
-    response[`IMG_COUNTRY${index + 1}`] = player.players.flag;
-  }); */
-  return group;
+  players.forEach((player, index) => {
+    response[`G${index + 1}`] = player.fullname;
+    response[`AVATAR${index + 1}`] = player.avatar;
+    response[`IMG_COUNTRY${index + 1}`] = player.flag;
+    response[`OVER${index + 1}`] = player.today;
+    response[`RANK_STT${index + 1}`] = player.pos;
+    response[`TOTALOVER${index + 1}`] = player.score;
+    response[`TOTALGROSS${index + 1}`] = player.total;
+  });
+  return response;
 };
 const scorecardStatic = async ({ courseId, code, roundNum }) => {
   const [course, round, images] = await Promise.all([
@@ -141,7 +274,6 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
       },
     }),
   ]);
-  console.log(images);
   const player = await Player.findOne({
     where: { code, course_id: courseId },
     include: [{ model: Score, as: 'scores', where: { round_id: round.round_id }, include: [{ model: Hole }] }],
@@ -152,7 +284,7 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
   });
 
   let response = {};
-  response['MAIN'] = images.find((img) => img.type == SCORECARD_IMAGES.main.type).url;
+  response['MAIN'] = images.find((img) => img.type == SCORECARD_IMAGES.main.type)?.url;
   response[`G1`] = player.fullname;
 
   player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
@@ -183,12 +315,22 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
 };
 
 const getLeaderboard = async ({ roundNum, courseId, type }) => {
-  const round = await Round.findOne({ where: { round_num: roundNum, course_id: courseId } });
-  const course = await courseService.getCourseById(courseId);
-  let players = await Player.findAll({
-    where: { course_id: courseId },
-    attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
-  });
+  let [round, course, players, images] = await Promise.all([
+    Round.findOne({ where: { round_num: roundNum, course_id: courseId } }),
+    courseService.getCourseById(courseId),
+    Player.findAll({
+      where: { course_id: courseId },
+      attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+    }),
+    Image.findAll({
+      where: {
+        type: {
+          [Op.startsWith]: type === 'mini' ? 'LEADERBOARD_MINI_IMAGES%' : 'LEADERBOARD_IMAGES%',
+        },
+        course_id: courseId,
+      },
+    }),
+  ]);
   players = await Promise.all(
     players.map(async (player) => {
       player = player.toJSON();
@@ -247,39 +389,49 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
   });
   players.sort((a, b) => a.pos - b.pos);
   let response = {};
-  const images = await Image.findAll({
-    where: {
-      type: {
-        [Op.startsWith]: 'LEADERBOARD_IMAGES',
-      },
-      course_id: courseId,
-    },
-  });
-  response['MAIN'] = course.main_photo_url;
+  response['MAIN'] = images.find(
+    (img) => img.type == (type === 'mini' ? LEADERBOARD_MINI_IMAGES.main.type : LEADERBOARD_IMAGES.main.type)
+  )?.url;
+  response['MAIN1'] = images.find(
+    (img) => img.type == (type === 'mini' ? LEADERBOARD_MINI_IMAGES.main1.type : LEADERBOARD_IMAGES.main1.type)
+  )?.url;
   const negative_score_image = images.find((image) => {
     image.toJSON();
-    return image.type == LEADERBOARD_IMAGES.negative_score.type;
-  }).url;
+    return (
+      image.type == (type === 'mini' ? LEADERBOARD_MINI_IMAGES.negative_score.type : LEADERBOARD_IMAGES.negative_score.type)
+    );
+  })?.url;
   const equal_score_image = images.find((image) => {
     image.toJSON();
-    return image.type == LEADERBOARD_IMAGES.equal_score.type;
-  }).url;
+    return image.type == (type === 'mini' ? LEADERBOARD_MINI_IMAGES.eagle_color.type : LEADERBOARD_IMAGES.eagle_color.type);
+  })?.url;
   const positive_score_image = images.find((image) => {
     image.toJSON();
-    return image.type == LEADERBOARD_IMAGES.positive_score.type;
-  }).url;
+    return (
+      image.type == (type === 'mini' ? LEADERBOARD_MINI_IMAGES.positive_score.type : LEADERBOARD_IMAGES.positive_score.type)
+    );
+  })?.url;
   const negative_score_image_mini = images.find((image) => {
     image.toJSON();
-    return image.type == LEADERBOARD_IMAGES.negative_score_mini.type;
-  }).url;
+    return (
+      image.type ==
+      (type === 'mini' ? LEADERBOARD_MINI_IMAGES.negative_score_mini.type : LEADERBOARD_IMAGES.negative_score_mini.type)
+    );
+  })?.url;
   const equal_score_image_mini = images.find((image) => {
     image.toJSON();
-    return image.type == LEADERBOARD_IMAGES.equal_score_mini.type;
-  }).url;
+    return (
+      image.type ==
+      (type === 'mini' ? LEADERBOARD_MINI_IMAGES.equal_score_mini.type : LEADERBOARD_IMAGES.equal_score_mini.type)
+    );
+  })?.url;
   const positive_score_image_mini = images.find((image) => {
     image.toJSON();
-    return image.type == LEADERBOARD_IMAGES.positive_score_mini.type;
-  }).url;
+    return (
+      image.type ==
+      (type === 'mini' ? LEADERBOARD_MINI_IMAGES.positive_score_mini.type : LEADERBOARD_IMAGES.positive_score_mini.type)
+    );
+  })?.url;
   players.forEach((player, index) => {
     response[`G${index + 1}`] = player.fullname;
     response[`IMG_COUNTRY${index + 1}`] = player.flag;

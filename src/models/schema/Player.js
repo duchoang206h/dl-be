@@ -53,7 +53,6 @@ class Player extends Base {
         sex: Sequelize.BOOLEAN,
         code: {
           type: Sequelize.STRING,
-          unique: true,
         },
         club: Sequelize.STRING,
         group: Sequelize.STRING,
@@ -95,6 +94,7 @@ class Player extends Base {
         freezeTableName: true,
         tableName: 'players',
         timestamps: true,
+        indexes: [{ fields: ['course_id', 'code'] }, { fields: ['course_id', 'fullname'] }],
       }
     );
   }

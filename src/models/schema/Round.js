@@ -32,6 +32,11 @@ class Round extends Base {
         freezeTableName: true,
         tableName: 'rounds',
         timestamps: true,
+        indexes: [
+          {
+            fields: ['course_id', 'round_num'],
+          },
+        ],
       }
     );
   }

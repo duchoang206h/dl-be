@@ -42,6 +42,7 @@ class Image extends Base {
         freezeTableName: true,
         tableName: 'images',
         timestamps: true,
+        indexes: [{ fields: ['course_id', 'type'] }],
       }
     );
   }

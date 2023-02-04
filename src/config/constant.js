@@ -26,6 +26,11 @@ const LEADERBOARD_IMAGES = {
     name: 'ẢNH BXH',
     type: 'LEADERBOARD_IMAGES.main',
   },
+  main1: {
+    name: 'ẢNH BXH 1',
+    type: 'LEADERBOARD_MINI_IMAGES.main1',
+    url: null,
+  },
   negative_score: {
     name: 'Ảnh theo điểm số âm',
     type: 'LEADERBOARD_IMAGES.negative_score',
@@ -87,6 +92,11 @@ const LEADERBOARD_MINI_IMAGES = {
   main: {
     name: 'ẢNH BXH',
     type: 'LEADERBOARD_MINI_IMAGES.main',
+    url: null,
+  },
+  main1: {
+    name: 'ẢNH BXH 1',
+    type: 'LEADERBOARD_MINI_IMAGES.main1',
     url: null,
   },
   negative_score: {
@@ -234,8 +244,13 @@ const FLIGHT_INFOR_IMAGES = {
 };
 const GROUP_RANK_IMAGES = {
   main: {
-    name: 'ẢNH BXH',
+    name: 'ẢNH MAIN',
     type: 'GROUP_RANK_IMAGES.main',
+    url: null,
+  },
+  main1: {
+    name: 'ẢNH MAIN 1',
+    type: 'GROUP_RANK_IMAGES.main1',
     url: null,
   },
   negative_score: {
@@ -276,8 +291,13 @@ const GROUP_RANK_IMAGES = {
 };
 const GOLFER_IN_HOLE_IMAGES = {
   main: {
-    name: 'ẢNH BXH',
+    name: 'ẢNH MAIN',
     type: 'GOLFER_IN_HOLE_IMAGES.main',
+    url: null,
+  },
+  main1: {
+    name: 'ẢNH MAIN1',
+    type: 'GOLFER_IN_HOLE_IMAGES.main1',
     url: null,
   },
   negative_score: {
