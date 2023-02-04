@@ -160,12 +160,15 @@ const getRank = (total, scores) => {
 // ranks  { 1: 1, 2: 2, 3: 2 }
 // [2,2,1]
 const getTop = (pos, ranking, ranks) => {
-  if (ranking) return ranking;
-  if (!ranking) {
-    const index = ranks.findIndex((r) => r == pos);
-    if (index < 0) return pos;
-    return ranks.length + 1;
+  if (ranks.length === 3) {
+    if (ranking) return ranking;
+    if (!ranking) {
+      const index = ranks.findIndex((r) => r == pos);
+      if (index < 0) return pos;
+      return ranks.length + 1;
+    }
   }
+  return pos;
 };
 const previousRankCount = (i, duplicates, scoresShort) => {
   let sum = 0;
