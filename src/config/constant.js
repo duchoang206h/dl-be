@@ -16,7 +16,7 @@ const ROLE = {
   ADMIN: 'admin',
   COURSE_USER: 'course_user',
 };
-const DATE_FORMAT = 'DD-MM-YYYY';
+const DATE_FORMAT = 'DD/MM/YYYY';
 const PAR_PER_ROUND = 72;
 const HOLE_PER_COURSE = 18;
 const FINISH_ALL_ROUNDS = 'F';
