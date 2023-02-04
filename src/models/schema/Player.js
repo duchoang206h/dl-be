@@ -51,7 +51,10 @@ class Player extends Base {
         },
         age: Sequelize.INTEGER,
         sex: Sequelize.BOOLEAN,
-        code: Sequelize.STRING,
+        code: {
+          type: Sequelize.STRING,
+          unique: true,
+        },
         club: Sequelize.STRING,
         group: Sequelize.STRING,
         avatar: Sequelize.STRING,

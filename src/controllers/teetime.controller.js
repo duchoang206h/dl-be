@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { teetimeSchema } = require('../validations/xlsx.validation');
 const { getDataFromXlsx } = require('../services/xlsxService');
-const { teetimeService } = require('../services');
+const { teetimeService, cacheService } = require('../services');
 const { Player } = require('../models/schema');
 const { TEETIME_MUST_BE_INCLUDE_ALL_PLAYERS, INVALID_GROUP_TIME, INVALID_GROUP_TEE } = require('../utils/errorMessage');
 const { BadRequestError } = require('../utils/ApiError');
@@ -41,6 +41,8 @@ const importTeetime = catchAsync(async (req, res) => {
 });
 const getTeetime = catchAsync(async (req, res) => {
   const teetimes = await teetimeService.getTeetimeByCourseAndRound(req.params.courseId, req.params.roundNum);
+  cacheService.setCache(req.originalUrl, teetimes);
+
   return res.status(httpStatus.OK).send({ result: teetimes });
 });
 module.exports = {

@@ -151,6 +151,22 @@ const getRank = (total, scores) => {
   }
   return ranks[total];
 };
+//1 1
+//2 2
+//2 3
+//2/4
+//2 4
+//5
+// ranks  { 1: 1, 2: 2, 3: 2 }
+// [2,2,1]
+const getTop = (pos, ranking, ranks) => {
+  if (ranking) return ranking;
+  if (!ranking) {
+    const index = ranks.findIndex((r) => r == pos);
+    if (index < 0) return pos;
+    return ranks.length + 1;
+  }
+};
 const previousRankCount = (i, duplicates, scoresShort) => {
   let sum = 0;
   for (let j = 0; j < i; j++) {
@@ -192,4 +208,5 @@ module.exports = {
   getDefaultScore,
   getScoreImage,
   getTotalOverImage,
+  getTop,
 };

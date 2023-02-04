@@ -16,6 +16,7 @@ const { errorConverter, errorHandler } = require('./middlewares/error');
 const { ApiError } = require('./utils/ApiError');
 const { jwt } = require('./config/config');
 const path = require('path');
+const { cacheMiddleware } = require('./middlewares/cache');
 
 const app = express();
 
@@ -46,7 +47,7 @@ app.options('*', cors());
 // jwt authentication
 app.use(passport.initialize());
 //passport.use('jwt', jwtStrategy);
-
+//app.use(cacheMiddleware);
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production') {
   app.use('/v1/auth', authLimiter);

@@ -25,7 +25,7 @@ const {
 } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
-const { getScoreType, calculateScoreAverage, getRank, getDefaultScore } = require('../utils/score');
+const { getScoreType, calculateScoreAverage, getRank, getDefaultScore, getTop } = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
 const { NUM_PUTT_INVALID } = require('../utils/errorMessage');
 
@@ -140,30 +140,59 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
     ]);
     const result = await Promise.all(
       scores.map(async (score) => {
-        const { hole_num, num_putt } = score;
+        const { hole_num, num_putt, finished } = score;
         const [hole] = await Promise.all([holeService.getHoleByNumAndGolfCourseId(hole_num, course.golf_course_id)]);
         const scoreType = getScoreType(num_putt, hole.par);
-        const [exist, created] = await Score.findOrCreate({
-          where: {
-            course_id: courseId,
-            round_id: round.round_id,
-            hole_id: hole.hole_id,
-            player_id: playerId,
-          },
-          defaults: {
-            num_putt,
-            score_type: scoreType,
-          },
-          transaction: t,
-        });
-        if (exist)
-          await Score.update(
-            { num_putt, score_type: scoreType },
-            {
-              where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId },
-              transaction: t,
-            }
-          );
+        if (finished === undefined || finished === true) {
+          const [exist, created] = await Score.findOrCreate({
+            where: {
+              course_id: courseId,
+              round_id: round.round_id,
+              hole_id: hole.hole_id,
+              player_id: playerId,
+            },
+            defaults: {
+              num_putt,
+              score_type: scoreType,
+            },
+            transaction: t,
+          });
+          if (exist)
+            await Score.update(
+              { num_putt, score_type: scoreType },
+              {
+                where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId },
+                transaction: t,
+              }
+            );
+        } else {
+          const currentScore = await CurrentScore.findOne({
+            where: {
+              player_id: playerId,
+              course_id: courseId,
+            },
+          });
+          if (currentScore) {
+            return await CurrentScore.update(
+              {
+                hole_id: hole.hole_id,
+                round_num: roundNum,
+                num_putt,
+                score_type: scoreType,
+              },
+              { where: { player_id: playerId, course_id: courseId } }
+            );
+          } else {
+            return CurrentScore.create({
+              hole_id: hole.hole_id,
+              round_num: roundNum,
+              num_putt,
+              score_type: scoreType,
+              player_id: playerId,
+              course_id: courseId,
+            });
+          }
+        }
       })
     );
     await t.commit();
@@ -470,6 +499,17 @@ const getAllPlayerScore = async (courseId, { name }) => {
         };
       });
       normalPlayers.sort((a, b) => a.pos - b.pos);
+      const ranks = [];
+      normalPlayers.forEach((player) => {
+        if (player.ranking) ranks.push(player.ranking);
+      });
+      ranks.sort((a, b) => b - a);
+      normalPlayers = normalPlayers.map((player) => {
+        return {
+          ...player,
+          pos: getTop(player.pos, player.ranking, ranks),
+        };
+      });
       resolve(normalPlayers);
     }),
     new Promise(async (resolve, reject) => {

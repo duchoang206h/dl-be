@@ -3,6 +3,8 @@ const catchAsync = require('../utils/catchAsync');
 const { getDataFromXlsx } = require('../services/xlsxService');
 const { playerSchema } = require('../validations/xlsx.validation');
 const { playerService } = require('../services');
+const { BadRequestError } = require('../utils/ApiError');
+const { INVALID_GOLFER_CODE } = require('../utils/errorMessage');
 const importPlayers = catchAsync(async (req, res) => {
   const [data, error] = await getDataFromXlsx(req.files[0].buffer, playerSchema);
   if (error) throw error;
@@ -27,6 +29,11 @@ const importPlayers = catchAsync(async (req, res) => {
     is_show: player['is_show'],
     course_id: req.params.courseId,
   }));
+  const duplicatesCode = {};
+  players.forEach((player) => {
+    if (duplicatesCode.hasOwnProperty(player.code)) throw new BadRequestError(INVALID_GOLFER_CODE);
+    else duplicatesCode[player.code] = true;
+  });
   await playerService.createManyPlayer(players);
   res.status(httpStatus.CREATED).send();
 });
