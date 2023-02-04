@@ -401,6 +401,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
     Player.findAll({
       where: { course_id: courseId },
       attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+      include: [{ model: Score, as: 'scores' }],
     }),
     name
       ? Player.findAll({
@@ -418,16 +419,19 @@ const getAllPlayerScore = async (courseId, { name }) => {
             ],
           },
           attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+          include: [{ model: Score, as: 'scores' }],
         })
       : [],
   ]);
   let normalPlayers = players.filter((player) => player.status === PLAYER_STATUS.NORMAL);
   let outCutPlayers = players.filter((player) => player.status !== PLAYER_STATUS.NORMAL);
+  let scoredPlayers = normalPlayers.filter((player) => player.scores.length);
+  let nonScoredPlayers = normalPlayers.filter((player) => player.scores.length === 0);
   const _today = dateWithTimezone();
-  let [_nomalPlayers, _outcutPlayers] = await Promise.all([
+  let [_scoredPlayers, _nonScoredPlayers, _outcutPlayers] = await Promise.all([
     new Promise(async (resolve, reject) => {
-      normalPlayers = await Promise.all(
-        normalPlayers.map(async (player) => {
+      scoredPlayers = await Promise.all(
+        scoredPlayers.map(async (player) => {
           player = player.toJSON();
           const scores = await Promise.all(
             rounds.map(async (round) => {
@@ -490,28 +494,87 @@ const getAllPlayerScore = async (courseId, { name }) => {
           return player;
         })
       );
-      const scores = normalPlayers.map(({ score }) => score);
+      const scores = scoredPlayers.map(({ score }) => score);
 
-      normalPlayers = normalPlayers.map((player) => {
+      scoredPlayers = scoredPlayers.map((player) => {
         return {
           ...player,
           pos: getRank(player.score, scores),
         };
       });
-      normalPlayers.sort((a, b) => a.pos - b.pos);
+      scoredPlayers.sort((a, b) => a.pos - b.pos);
       const ranks = [];
-      normalPlayers.forEach((player) => {
+      scoredPlayers.forEach((player) => {
         if (player.ranking) ranks.push(player.ranking);
       });
       ranks.sort((a, b) => b - a);
-      normalPlayers = normalPlayers.map((player) => {
+      scoredPlayers = scoredPlayers.map((player) => {
         return {
           ...player,
           pos: getTop(player.pos, player.ranking, ranks),
         };
       });
-      resolve(normalPlayers);
+      resolve(scoredPlayers);
     }),
+    new Promise(async (resolve, reject) => {
+      nonScoredPlayers = await Promise.all(
+        nonScoredPlayers.map(async (player) => {
+          player = player.toJSON();
+          const scores = await Promise.all(
+            rounds.map(async (round) => {
+              const scores = await Score.findAll({
+                where: { player_id: player.player_id, round_id: round.round_id, course_id: courseId },
+                attributes: ['num_putt', 'score_type'],
+                include: [{ model: Hole, attributes: ['hole_num', 'par'] }],
+              });
+              return {
+                scores,
+                round: round.round_num,
+                topar: scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0),
+              };
+            })
+          );
+          player['rounds'] = [];
+          for (const score of scores) {
+            player['rounds'].push({
+              round: score.round,
+              scores: score.scores,
+              total: score.scores.reduce((pre, current) => pre + current.num_putt, 0),
+              topar: score.topar,
+            });
+          }
+          player['score'] = 0;
+
+          player['thru'] = 0;
+          player['today'] = null;
+          return player;
+        })
+      );
+      const scores = nonScoredPlayers.map(({ score }) => score);
+
+      nonScoredPlayers = nonScoredPlayers.map((player) => {
+        return {
+          ...player,
+          pos: getRank(player.score, scores),
+        };
+      });
+      nonScoredPlayers.sort((a, b) => a.pos - b.pos);
+      const ranks = [];
+      nonScoredPlayers.forEach((player) => {
+        if (player.ranking) ranks.push(player.ranking);
+      });
+      ranks.sort((a, b) => b - a);
+      nonScoredPlayers = nonScoredPlayers.map((player) => {
+        return {
+          ...player,
+          score: null,
+          today: null,
+          pos: getTop(player.pos, player.ranking, ranks),
+        };
+      });
+      resolve(nonScoredPlayers);
+    }),
+
     new Promise(async (resolve, reject) => {
       outCutPlayers = await Promise.all(
         outCutPlayers.map(async (player) => {
@@ -589,11 +652,15 @@ const getAllPlayerScore = async (courseId, { name }) => {
       resolve(outCutPlayers);
     }),
   ]);
+  _nonScoredPlayers = _nonScoredPlayers.map((player) => ({
+    ...player,
+    pos: _scoredPlayers[_scoredPlayers.length - 1].pos + player.pos,
+  }));
   _outcutPlayers = _outcutPlayers.map((player) => ({
     ...player,
-    pos: normalPlayers[_nomalPlayers.length - 1].pos + player.pos,
+    pos: _nonScoredPlayers[_nonScoredPlayers.length - 1].pos + player.pos,
   }));
-  let result = [..._nomalPlayers, ..._outcutPlayers];
+  let result = [..._scoredPlayers, ..._nonScoredPlayers, ..._outcutPlayers];
   const searchPlayerIds = searchPlayers.map((player) => player.player_id);
   if (name || searchPlayers.length) {
     result = result.filter((player) => searchPlayerIds.includes(player.player_id));
