@@ -10,3 +10,4 @@ yarn-error.log
 config/config.json
 # Code coverage
 coverage
+data
