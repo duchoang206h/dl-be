@@ -802,7 +802,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
   if (name || searchPlayers.length) {
     result = result.filter((player) => searchPlayerIds.includes(player.player_id));
   }
-  return { result, lastUpdatedAt: lastUpdatedAt.updatedAt };
+  return { result, lastUpdatedAt: lastUpdatedAt?.updatedAt };
 };
 const getPlayerScore = async (courseId, playerId) => {
   let [player, rounds] = await Promise.all([
