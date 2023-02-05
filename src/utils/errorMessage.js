@@ -10,6 +10,7 @@ const INVALID_GROUP_TEE = 'Tees must be the same';
 const INVALID_TOTAL_HOLE = (hole) => `Golf score must have enough ${hole} holes`;
 const INVALID_TOTAL_PAR = (PAR) => `Golf score must have enough ${PAR} par`;
 const INVALID_GOLFER_CODE = `Golfer code field must be unique`;
+const INVALID_GOLFER_NAME = `Golfer name field must be unique`;
 module.exports = {
   TOKEN_EXPIRED,
   TOKEN_INVALID,
@@ -23,4 +24,5 @@ module.exports = {
   INVALID_TOTAL_HOLE,
   INVALID_TOTAL_PAR,
   INVALID_GOLFER_CODE,
+  INVALID_GOLFER_NAME,
 };

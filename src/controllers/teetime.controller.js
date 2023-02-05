@@ -21,9 +21,14 @@ const importTeetime = catchAsync(async (req, res) => {
     tee: teetime['tee'],
     time: teetime['time'],
   }));
+  const playerNames = {};
   const times = {};
   const tees = {};
   for (const teetime of teetimes) {
+    if (playerNames.hasOwnProperty(teetime['name-golfer'])) throw new BadRequestError(INVALID_GOLFER_NAME);
+    else {
+      playerNames[teetime['name-golfer']] = true;
+    }
     if (times.hasOwnProperty(teetime['group'])) {
       if (times[teetime['group']] != teetime.time) throw new BadRequestError(INVALID_GROUP_TIME);
     } else times[teetime['group']] = teetime.time;
