@@ -4,7 +4,12 @@ const { teetimeSchema } = require('../validations/xlsx.validation');
 const { getDataFromXlsx } = require('../services/xlsxService');
 const { teetimeService, cacheService } = require('../services');
 const { Player } = require('../models/schema');
-const { TEETIME_MUST_BE_INCLUDE_ALL_PLAYERS, INVALID_GROUP_TIME, INVALID_GROUP_TEE } = require('../utils/errorMessage');
+const {
+  TEETIME_MUST_BE_INCLUDE_ALL_PLAYERS,
+  INVALID_GROUP_TIME,
+  INVALID_GROUP_TEE,
+  INVALID_GOLFER_NAME,
+} = require('../utils/errorMessage');
 const { BadRequestError } = require('../utils/ApiError');
 
 const importTeetime = catchAsync(async (req, res) => {
