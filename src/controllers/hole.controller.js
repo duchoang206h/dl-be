@@ -57,7 +57,6 @@ const getHolesByGolfCourseAndHoleNum = catchAsync(async (req, res) => {
 const importHoles = catchAsync(async (req, res) => {
   if (req.files.length <= 0) throw new BadRequestError();
   const [data, error] = await getDataFromXlsx(req.files[0].buffer, holeSchema);
-  console.log(error);
   if (error) throw error;
   const holes = data.map((hole) => ({
     hole_num: hole['hole'],

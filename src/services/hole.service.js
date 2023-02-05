@@ -32,7 +32,8 @@ const createManyHole = async (holes, golfCourseId) => {
       holes.map(async (hole) => {
         const { hole_num, yards, par } = hole;
         const existHole = await Hole.count({ where: { golf_course_id: golfCourseId, hole_num } });
-        if (existHole > 0) throw new ApiError(httpStatus.UNPROCESSABLE_ENTITY);
+        if (existHole > 0)
+          return await Hole.update({ yards, par }, { where: { golf_course_id: golfCourseId, hole_num }, transaction: t });
         return await Hole.create({ hole_num, yards, par, golf_course_id: golfCourseId }, { transaction: t });
       })
     );

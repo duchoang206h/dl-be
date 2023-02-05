@@ -60,6 +60,12 @@ const getLeaderboard = catchAsync(async (req, res) => {
   const response = await livestreamService.getLeaderboard({ courseId, roundNum: round, type });
   res.status(httpStatus.OK).send(response);
 });
+const getGolferInHoleStatistic = catchAsync(async (req, res) => {
+  const courseId = req.query.courseId;
+  const code = req.query.code;
+  const response = await livestreamService.getGolferInHoleStatistic({ courseId, code });
+  res.status(httpStatus.OK).send(response);
+});
 module.exports = {
   scorecards,
   getHoleBottomStatistic,

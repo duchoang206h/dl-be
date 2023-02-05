@@ -15,7 +15,7 @@ const {
   LEADERBOARD_MINI_IMAGES,
   HOLE_TOP_IMAGES,
 } = require('../config/constant');
-const { Player, Course, Score, Round, Hole, sequelize, TeeTimeGroup, Image } = require('../models/schema');
+const { Player, Course, Score, Round, Hole, sequelize, TeeTimeGroup, Image, CurrentScore } = require('../models/schema');
 const { TeeTime } = require('../models/schema/Teetime');
 const { TeeTimeGroupPlayer } = require('../models/schema/TeetimeGroupPlayer');
 const { getRank, getScoreImage, getTotalOverImage, getTop } = require('../utils/score');
@@ -450,7 +450,32 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
   return response;
 };
 const getGroupRanking = async ({ courseId }) => {};
-const golferInHole = async ({ courseId, code }) => {};
+const getGolferInHoleStatistic = async ({ courseId, code }) => {
+  const [course, player, images] = await Promise.all([
+    courseService.getCourseById(courseId),
+    Player.findOne({ where: { course_id: courseId, code } }),
+    Image.findAll({
+      where: {
+        course_id: courseId,
+        type: {
+          [Op.like]: 'GOLFER_IN_HOLE_IMAGES%',
+        },
+      },
+    }),
+  ]);
+  const currentScore = await CurrentScore.findOne({
+    where: { player_id: player.player_id, course_id: courseId },
+    include: [{ model: Hole, as: 'hole' }],
+  });
+  const response = {};
+  response['MAIN'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main.type)?.url;
+  response['MAIN1'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main1.type)?.url;
+  response['HOLE'] = 'Hole ' + currentScore?.hole.hole_num;
+  response['YARD'] = currentScore?.hole.yards;
+  response['PLAYER1'] = player.fullname;
+  response['COUNTRY'] = player.country;
+  response['IMG_COUNTRY'] = player.flag;
+};
 module.exports = {
   getHoleStatistic,
   getFlightImage,
@@ -458,4 +483,5 @@ module.exports = {
   getFlightStatic,
   scorecardStatic,
   getLeaderboard,
+  getGolferInHoleStatistic,
 };
