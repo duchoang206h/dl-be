@@ -1,3 +1,4 @@
+const { COUNTRY } = require('../config/constant');
 const { writeToXlsx } = require('../services/xlsxService');
 const { hashPassword } = require('../utils/hash');
 const { getScoreType } = require('../utils/score');
@@ -100,22 +101,47 @@ const seed = async () => {
       }
     }
     await Promise.all(promises);
-    console.log('---------------end');
   } catch (error) {
     console.log(error);
   }
 };
-const exportXlsx = async () => {
+const exportTeetimeXlsx = async (courseId) => {
   const teetime = generateTeetime();
-  const players = await Player.findAll({ where: { course_id: 14 }, attributes: ['fullname'], raw: true });
+  const players = await Player.findAll({ where: { course_id: courseId }, attributes: ['fullname'], raw: true });
   const teetimes = players.map(({ fullname }) => {
     return {
       'name-golfer': fullname,
-      group: teetime.group(),
+      flight: teetime.group(),
       tee: 1,
       time: teetime.time(),
     };
   });
-  writeToXlsx(teetimes, __dirname + '/teetime_round_1.xlsx');
+  writeToXlsx(teetimes, __dirname + '/teetime.xlsx');
 };
-module.exports = { seed, exportXlsx };
+const exportPlayerXlsx = async (totalPlayer) => {
+  let players = new Array(totalPlayer).fill(null);
+
+  players = players.map(() => {
+    return {
+      'name-golfer': faker.name.fullName(),
+      country: COUNTRY[Math.floor(Math.random() * (COUNTRY.length - 1 + 1))].code,
+      age: faker.datatype.number({ max: 30, min: 20 }),
+      sex: faker.datatype.number({ max: 1, min: 0 }),
+      code: Date.now().toString() + Math.floor(Math.random() * (10000 - 1 + 1)),
+      club: null,
+      group: null,
+      avatar: null,
+      status_day: null,
+      note: null,
+      birth: null,
+      height: null,
+      weight: null,
+      driverev: null,
+      putting: null,
+      best: null,
+      is_show: null,
+    };
+  });
+  writeToXlsx(players, __dirname + '/player.xlsx');
+};
+module.exports = { seed, exportPlayerXlsx, exportTeetimeXlsx };

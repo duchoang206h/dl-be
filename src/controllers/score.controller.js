@@ -87,10 +87,11 @@ const getPlayerScoreByRoundAndHole = catchAsync(async (req, res) => {
   });
 });
 const getAllStatistic = catchAsync(async (req, res) => {
-  const score = await scoreService.getAllPlayerScore(req.params.courseId, { name: req.query.name });
-  cacheService.setCache(req.originalUrl, score);
+  const { result, lastUpdatedAt } = await scoreService.getAllPlayerScore(req.params.courseId, { name: req.query.name });
+  cacheService.setCache(req.originalUrl, result);
   res.status(httpStatus.OK).send({
-    result: score,
+    result,
+    lastUpdatedAt,
   });
 });
 const getAllStatisticByPlayerId = catchAsync(async (req, res) => {

@@ -2,11 +2,10 @@ const db = require('./models/schema');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
-const { seed, exportXlsx } = require('./models/seed');
+const { seed } = require('./models/seed');
 
 let server;
 db.sequelize.authenticate().then(() => {
-  exportXlsx();
   //seed();
   if (process.env.NODE_ENV == 'development') {
     /* db.sequelize

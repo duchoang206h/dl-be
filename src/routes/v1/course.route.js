@@ -16,6 +16,7 @@ const { upload } = require('../../middlewares/upload');
 const path = require('path');
 const httpStatus = require('http-status');
 const { COURSE_TYPE, PLAYER_STATUS } = require('../../config/constant');
+const { exportPlayerXlsx, exportTeetimeXlsx } = require('../../models/seed');
 const router = express.Router();
 router.post('/', auth, isSuperAdmin, validate(courseValidation.createCourse), courseController.createCourse);
 router.post(
@@ -101,7 +102,14 @@ router.put(
 router.get('/:courseId/players/status/all', (_, res) => res.status(httpStatus.OK).send({ result: PLAYER_STATUS }));
 
 // seed
-router.get('/:courseId/seed', (req, res) => {
-  res.download(path.resolve(__dirname, '..', '..', 'models/teetime_round_1.xlsx'), 'teetime_round_1.xlsx');
+router.get('/seed/player', async (req, res) => {
+  const total = req.query.total;
+  await exportPlayerXlsx(Number(total));
+  res.download(path.resolve(__dirname, '..', '..', 'models/player.xlsx'), 'player.xlsx');
+});
+router.get('/seed/teetime', async (req, res) => {
+  const courseId = req.query.courseId;
+  await exportTeetimeXlsx(Number(courseId));
+  res.download(path.resolve(__dirname, '..', '..', 'models/teetime.xlsx'), 'teetime.xlsx');
 });
 module.exports = router;
