@@ -495,7 +495,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
               return {
                 scores,
                 round: round.round_num,
-                topar: scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0),
+                topar: scores.length ? scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0) : null,
               };
             })
           );
@@ -583,7 +583,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                 return {
                   scores,
                   round: round.round_num,
-                  topar: scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0),
+                  topar: scores.length ? scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0) : null,
                 };
               })
             );
@@ -645,7 +645,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
               return {
                 scores,
                 round: round.round_num,
-                topar: scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0),
+                topar: scores.length ? scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0) : null,
               };
             })
           );
@@ -795,13 +795,13 @@ const getAllPlayerScore = async (courseId, { name }) => {
       resolve(withdrawPlayers);
     }),
   ]);
-  const lastScoredPlayerPos = _scoredPlayers[_scoredPlayers.length - 1]?.pos || 0;
+  const lastScoredPlayerPos = _scoredPlayers[_scoredPlayers.length - 1]?.pos || 1;
   const lastScoredPlayerPosCount = _scoredPlayers.filter((player) => player.pos === lastScoredPlayerPos).length;
   _nonScoredPlayers = _nonScoredPlayers.map((player) => ({
     ...player,
     pos: lastScoredPlayerPos + lastScoredPlayerPosCount - 1 + player.pos,
   }));
-  const lastNonScoredPlayerPos = _nonScoredPlayers[_nonScoredPlayers.length - 1]?.pos || 0;
+  const lastNonScoredPlayerPos = _nonScoredPlayers[_nonScoredPlayers.length - 1]?.pos || 1;
   const lastNonScoredPlayerPosCount = _nonScoredPlayers.filter((player) => player.pos === lastNonScoredPlayerPos).length;
   _outcutPlayers = _outcutPlayers.map((player) => ({
     ...player,

@@ -75,7 +75,6 @@ class Player extends Base {
         is_show: Sequelize.BOOLEAN,
         ranking: {
           type: Sequelize.INTEGER,
-          defaultValue: 0,
         },
         status: {
           type: Sequelize.STRING,
