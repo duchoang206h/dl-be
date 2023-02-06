@@ -785,7 +785,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
   const lastScoredPlayerPosCount = _scoredPlayers.filter((player) => player.pos === lastScoredPlayerPos).length;
   _nonScoredPlayers = _nonScoredPlayers.map((player) => ({
     ...player,
-    pos: lastScoredPlayerPos + lastScoredPlayerPosCount + player.pos,
+    pos: lastScoredPlayerPos + lastScoredPlayerPosCount - 1 + player.pos,
   }));
   const lastNonScoredPlayerPos = _nonScoredPlayers[_nonScoredPlayers.length - 1]?.pos || 0;
   const lastNonScoredPlayerPosCount = _nonScoredPlayers.filter((player) => player.pos === lastNonScoredPlayerPos).length;
