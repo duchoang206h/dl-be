@@ -205,6 +205,25 @@ const SCORECARD_IMAGES = {
   bogey_color: { name: 'Màu Bogey', type: 'SCORECARD_IMAGES.bogey_color', url: null },
   double_bogey_color: { name: 'Màu Double Bogey +', type: 'SCORECARD_IMAGES.double_bogey_color', url: null },
 };
+const GOLFER_BOTTOM_IMAGES = {
+  main: {
+    name: 'Ảnh main',
+    type: 'GOLFER_BOTTOM_IMAGES.main',
+    url: null,
+  },
+  logo: {
+    name: 'logo',
+    type: 'GOLFER_BOTTOM_IMAGES.logo',
+    url: null,
+  },
+  negative_score: {
+    name: 'Ảnh theo điểm số âm',
+    type: 'GOLFER_BOTTOM_IMAGES.negative_score',
+    url: null,
+  },
+  positive_score: { name: 'Ảnh theo điểm số dương', type: 'GOLFER_BOTTOM_IMAGES.positive_score', url: null },
+  equal_score: { name: 'Ảnh theo điểm số bằng', type: 'GOLFER_BOTTOM_IMAGES.equal_score', url: null },
+};
 const HOLE_TOP_IMAGES = {
   main: {
     name: 'Ảnh main',
@@ -731,5 +750,6 @@ module.exports = {
   HOLE_TOP_IMAGES,
   GOLFER_IN_HOLE_IMAGES,
   LEADERBOARD_MINI_IMAGES,
+  GOLFER_BOTTOM_IMAGES,
   COUNTRY,
 };

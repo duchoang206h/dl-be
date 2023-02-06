@@ -14,6 +14,8 @@ const {
   HOLE_BOTTOM_IMAGES,
   LEADERBOARD_MINI_IMAGES,
   HOLE_TOP_IMAGES,
+  DATE_FORMAT,
+  GOLFER_BOTTOM_IMAGES,
 } = require('../config/constant');
 const { Player, Course, Score, Round, Hole, sequelize, TeeTimeGroup, Image, CurrentScore } = require('../models/schema');
 const { TeeTime } = require('../models/schema/Teetime');
@@ -119,6 +121,8 @@ const getGolferDetails = async ({ courseId, code }) => {
   response[`DRIVEREV`] = player.driverev;
   response[`PUTTING`] = player.putting;
   response[`BEST`] = player.best;
+  response[`BIRTHPLACE`] = player.birthplace;
+  response[`AGE`] = player.birthplace;
   return response;
 };
 const getFlightStatic = async ({ courseId, flight, roundNum }) => {
@@ -451,7 +455,7 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
 };
 const getGroupRanking = async ({ courseId }) => {};
 const getGolferInHoleStatistic = async ({ courseId, code }) => {
-  const [course, player, images, players, rounds] = await Promise.all([
+  let [course, player, images, players, rounds] = await Promise.all([
     courseService.getCourseById(courseId),
     Player.findOne({ where: { course_id: courseId, code } }),
     Image.findAll({
@@ -531,6 +535,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   });
   const response = {};
   const targetPlayer = players.find((p) => p.player_id === player.player_id);
+  console.log({});
   response['MAIN'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main.type)?.url;
   response['MAIN1'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main1.type)?.url;
   response['HOLE'] = 'Hole ' + currentScore?.hole.hole_num;
@@ -543,24 +548,92 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   response['OVER'] = targetPlayer.total;
   response['RANK_STT'] = targetPlayer.pos;
   for (const r of rounds) {
-    response[`ROUND${r.round_num}`] = await Score.sum('num_putt', {
-      where: { course_id: courseId, player_id: player.player_id, round_id: r.round_id },
-    });
+    console.log(r);
+    response[`ROUND${r.round_num}`] =
+      (await Score.sum('num_putt', {
+        where: { course_id: courseId, player_id: player.player_id, round_id: r.round_id },
+      })) || 0;
   }
-  response[`GAYOVER`] = currentScore.num_putt;
-  response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore.num_putt, currentScore.hole.par));
-  if (currentScore.hole.par > currentScore.num_putt)
-    for (let i = 1; i < currentScore.num_putt; i++) {
-      response[`STROKE${i}`];
-      response[`STTSTROKE${i}`] = getScoreImage(images, getScoreType(i, currentScore.hole.par));
+  response[`GAYOVER`] = currentScore?.num_putt;
+  response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore?.num_putt, currentScore?.hole?.par));
+  console.log('par', currentScore?.hole?.par);
+  console.log('num_putt', currentScore?.num_putt);
+  if (currentScore?.hole?.par > currentScore?.num_putt)
+    for (let i = 1; i < currentScore?.num_putt; i++) {
+      console.log(i);
+      response[`STROKE${i}`] = i;
+      response[`STTSTROKE${i}`] = getScoreImage(images, getScoreType(i, currentScore?.hole?.par));
     }
   else {
-    for (let i = 1; i <= currentScore.hole.par; i++) {
-      response[`STROKE${i}`];
+    for (let i = 1; i <= currentScore?.hole?.par; i++) {
+      response[`STROKE${i}`] = i;
+      response[`STTSTROKE${i}`] = getScoreImage(images, getScoreType(i, currentScore?.hole?.par));
     }
   }
   response['RESULT'] = null;
   response['RESULT2'] = null;
+  return response;
+};
+const getGolferBottom = async ({ code, courseId }) => {
+  const response = {};
+  const [course, player, images] = await Promise.all([
+    Course.findByPk(courseId),
+    Player.findOne({ where: { code } }),
+    Image.findAll({
+      where: {
+        course_id: courseId,
+        type: {
+          [Op.like]: 'GOLFER_BOTTOM_IMAGES%',
+        },
+      },
+    }),
+  ]);
+  console.log(images);
+  const today = moment(dateWithTimezone(), DATE_FORMAT).toDate();
+  const [todayScores, totalScores] = await Promise.all([
+    Score.findAll({
+      where: {
+        course_id: courseId,
+        player_id: player.player_id,
+        updatedAt: {
+          [Op.gte]: today,
+          [Op.lt]: moment(today).add(1, 'days'),
+        },
+      },
+      attributes: ['score_type', [sequelize.fn('count', sequelize.col('score_type')), 'total']],
+      group: ['score_type'],
+      raw: true,
+    }),
+    Score.findAll({
+      where: {
+        course_id: courseId,
+        player_id: player.player_id,
+      },
+      include: [{ model: Hole }],
+    }),
+  ]);
+  Object.values(SCORE_TYPE).forEach((type) => (response[type.toUpperCase()] = 0));
+  for (const score of todayScores) {
+    if (Object.values(SCORE_TYPE).includes(score.score_type)) {
+      response[score.score_type.toUpperCase()] = score.total;
+    }
+  }
+  response['BOGEY'] = response['BOGEY'] + response['D.BOGEY+'];
+  response['MAIN'] = images.find((img) => img.type === GOLFER_BOTTOM_IMAGES.main.type)?.url;
+  response[`AVATAR`] = player.avatar_url;
+  response[`IMG_COUNTRY1`] = player.flag;
+  response[`G1`] = player.fullname;
+
+  delete response['D.BOGEY+'];
+  console.log(images);
+  response[`TOTAL_OVER`] = totalScores.reduce((pre, cur) => pre + cur.Hole.par - cur.num_putt, 0);
+  response[`STT_TOTALOVER`] =
+    response[`TOTAL_OVER`] == 0
+      ? images.find((img) => img.type === GOLFER_BOTTOM_IMAGES.equal_score.type)?.url
+      : response[`TOTAL_OVER`] > 0
+      ? images.find((img) => img.type === GOLFER_BOTTOM_IMAGES.positive_score.type)?.url
+      : images.find((img) => img.type === GOLFER_BOTTOM_IMAGES.negative_score.type)?.url;
+
   return response;
 };
 module.exports = {
@@ -571,4 +644,5 @@ module.exports = {
   scorecardStatic,
   getLeaderboard,
   getGolferInHoleStatistic,
+  getGolferBottom,
 };

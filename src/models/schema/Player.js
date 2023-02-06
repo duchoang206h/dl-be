@@ -50,7 +50,12 @@ class Player extends Base {
           allowNull: false,
         },
         age: Sequelize.INTEGER,
-        sex: Sequelize.BOOLEAN,
+        sex: {
+          type: Sequelize.BOOLEAN,
+          get() {
+            return this.getDataValue('sex') === true ? 'Male' : 'Female';
+          },
+        },
         code: {
           type: Sequelize.STRING,
         },
@@ -66,10 +71,10 @@ class Player extends Base {
         driverev: Sequelize.STRING,
         putting: Sequelize.STRING,
         best: Sequelize.STRING,
+        birthplace: Sequelize.STRING,
         is_show: Sequelize.BOOLEAN,
         ranking: {
           type: Sequelize.INTEGER,
-          defaultValue: 0,
         },
         status: {
           type: Sequelize.STRING,

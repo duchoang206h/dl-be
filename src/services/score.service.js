@@ -27,7 +27,7 @@ const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
 const { getScoreType, calculateScoreAverage, getRank, getDefaultScore, getTop } = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
-const { NUM_PUTT_INVALID } = require('../utils/errorMessage');
+const { NUM_PUTT_INVALID, INVALID_SCORE_INPUT } = require('../utils/errorMessage');
 
 const createScore = async (scoreBody) => {};
 const getPlayerScoresByRoundAndHole = async (scoreBody) => {
@@ -134,16 +134,35 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
     for (const score of scores) {
       if (score.num_putt <= 0 || score.num_putt > MAX_NUM_PUTT) throw new BadRequestError(NUM_PUTT_INVALID);
     }
-    const [course, round] = await Promise.all([
+    const [course, round, lastRounds] = await Promise.all([
       courseService.getCourseById(courseId),
       roundService.getRoundByNumAndCourse(roundNum, courseId),
+      Round.findAll({
+        where: {
+          course_id: courseId,
+          round_num: {
+            [Op.lt]: roundNum,
+          },
+        },
+        raw: true,
+      }),
     ]);
     const result = await Promise.all(
       scores.map(async (score) => {
         const { hole_num, num_putt, finished } = score;
-        const [hole] = await Promise.all([holeService.getHoleByNumAndGolfCourseId(hole_num, course.golf_course_id)]);
+        const [hole, preScoreCount] = await Promise.all([
+          holeService.getHoleByNumAndGolfCourseId(hole_num, course.golf_course_id),
+          Score.count({
+            where: {
+              course_id: courseId,
+              player_id: playerId,
+            },
+            raw: true,
+          }),
+        ]);
+        if (preScoreCount !== (roundNum - 1) * 18 + hole_num - 1) throw new BadRequestError(INVALID_SCORE_INPUT);
         const scoreType = getScoreType(num_putt, hole.par);
-        if (finished === undefined || finished === true) {
+        if (finished === true) {
           const [exist, created] = await Score.findOrCreate({
             where: {
               course_id: courseId,
@@ -292,7 +311,6 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
       },
     }),
   ]);
-  console.log(players);
   const [round, course] = await Promise.all([Round.findByPk(roundId, { raw: true }), courseService.getCourseById(courseId)]);
   const lastRounds = await Round.findAll({
     where: {
@@ -308,7 +326,6 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
     players.map(async (player) => {
       try {
         player = player.toJSON();
-        console.log(player);
         if (player.scores.length === 0)
           return {
             in: 0,
@@ -371,7 +388,6 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
         const today = todayScores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
         const score = totalScores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
 
-        console.log({ player_id: player.player_id, group_num: player.teetime_group_player?.TeeTimeGroup?.group_num });
         return {
           in: _in,
           total,
@@ -405,7 +421,6 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
   if (name || searchPlayers.length) {
     return players.filter((player) => searchPlayerIds.includes(player.player_id));
   }
-  console.log({ players });
   return players;
 };
 const getPlayerScoresByAllRound = async (courseId, playerId) => {
@@ -480,7 +495,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
               return {
                 scores,
                 round: round.round_num,
-                topar: scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0),
+                topar: scores.length ? scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0) : null,
               };
             })
           );
@@ -568,7 +583,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                 return {
                   scores,
                   round: round.round_num,
-                  topar: scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0),
+                  topar: scores.length ? scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0) : null,
                 };
               })
             );
@@ -612,7 +627,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
         });
         resolve(nonScoredPlayers);
       } catch (error) {
-        console.log(er);
+        console.log(error);
       }
     }),
 
@@ -630,7 +645,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
               return {
                 scores,
                 round: round.round_num,
-                topar: scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0),
+                topar: scores.length ? scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0) : null,
               };
             })
           );
@@ -780,19 +795,14 @@ const getAllPlayerScore = async (courseId, { name }) => {
       resolve(withdrawPlayers);
     }),
   ]);
-  console.log(_scoredPlayers);
-  const lastScoredPlayerPos = _scoredPlayers[_scoredPlayers.length - 1]?.pos || 0;
+  const lastScoredPlayerPos = _scoredPlayers[_scoredPlayers.length - 1]?.pos || 1;
   const lastScoredPlayerPosCount = _scoredPlayers.filter((player) => player.pos === lastScoredPlayerPos).length;
   _nonScoredPlayers = _nonScoredPlayers.map((player) => ({
     ...player,
-    pos: lastScoredPlayerPos + lastScoredPlayerPosCount + player.pos,
+    pos: lastScoredPlayerPos + lastScoredPlayerPosCount - 1 + player.pos,
   }));
-  const lastNonScoredPlayerPos = _nonScoredPlayers[_nonScoredPlayers.length - 1]?.pos || 0;
+  const lastNonScoredPlayerPos = _nonScoredPlayers[_nonScoredPlayers.length - 1]?.pos || 1;
   const lastNonScoredPlayerPosCount = _nonScoredPlayers.filter((player) => player.pos === lastNonScoredPlayerPos).length;
-  console.log({
-    lastNonScoredPlayerPosCount,
-    lastNonScoredPlayerPos,
-  });
   _outcutPlayers = _outcutPlayers.map((player) => ({
     ...player,
     pos: lastNonScoredPlayerPos + lastNonScoredPlayerPosCount - 1 + player.pos,
@@ -819,14 +829,28 @@ const getPlayerScore = async (courseId, playerId) => {
       rounds.map(async (round) => {
         const score = await Score.findAll({
           where: { player_id: player.player_id, round_id: round.round_id, course_id: courseId },
-          attributes: ['num_putt', 'score_type'],
+          attributes: ['num_putt', 'score_type', 'hole_id'],
           include: [{ model: Hole, attributes: ['hole_num'] }],
         });
-        return { scores: getDefaultScore(score), round: round.round_num };
+        return { scores: getDefaultScore(score), checkScores: score, round: round.round_num };
       })
     ),
     courseService.getCourseById(courseId),
   ]);
+  if (player.current_score) {
+    // check current score conflict with score
+    for (const s of scores) {
+      if (
+        s.checkScores.filter((sc) => {
+          sc = sc.toJSON();
+          return sc.hole_id === player.current_score?.hole_id;
+        }).length &&
+        s.round == player.current_score?.round_num
+      ) {
+        player['current_score'] = null;
+      }
+    }
+  }
   player['rounds'] = [];
 
   for (const score of scores) {
@@ -837,9 +861,7 @@ const getPlayerScore = async (courseId, playerId) => {
     });
   }
   const _today = dateWithTimezone();
-  console.log(_today);
   const lastRound = await roundService.getRoundByNumAndCourse(course.total_round, courseId);
-  console.log({ check: moment(_today, DATE_FORMAT).isBefore(moment(course.end_date)) });
   player['score'] = PAR_PER_ROUND * course.total_round - player['rounds'].reduce((pre, current) => pre + current.total, 0);
   const [thru, todayScore] = await Promise.all([
     Score.count({ where: { player_id: player.player_id } }),

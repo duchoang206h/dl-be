@@ -1,6 +1,7 @@
-const { Course, User, Player } = require('../models/schema');
+const { Course, User, Player, sequelize } = require('../models/schema');
 const { Op } = require('sequelize');
 const { uploadSingleFile } = require('./upload.service');
+const { InternalServerError } = require('../utils/ApiError');
 const createManyPlayer = async (data) => {
   await Player.bulkCreate(data);
 };
@@ -23,9 +24,38 @@ const getPlayer = async (courseId, playerId) => {
   });
 };
 const updatePlayer = async (updateBody, { playerId, courseId }) => {
-  console.log(updateBody);
-  const player = await Player.update(updateBody, { where: { player_id: playerId, course_id: courseId }, returning: true });
-  return player;
+  const t = await sequelize.transaction();
+
+  try {
+    let player = null;
+    if (updateBody.ranking) {
+      const existRank = await Player.findOne({
+        where: { course_id: courseId, ranking: updateBody.ranking },
+      });
+      if (existRank)
+        await Player.update(
+          { ranking: null },
+          { where: { course_id: courseId, player_id: existRank.player_id }, transaction: t }
+        );
+      player = await Player.update(
+        {
+          ranking: updateBody.ranking,
+        },
+        { where: { course_id: courseId, player_id: playerId } }
+      );
+    } else {
+      player = await Player.update(updateBody, {
+        where: { player_id: playerId, course_id: courseId },
+        returning: true,
+      });
+    }
+    await t.commit();
+    return player;
+  } catch (error) {
+    console.log(error);
+    await t.rollback();
+    throw new InternalServerError();
+  }
 };
 module.exports = {
   createManyPlayer,
