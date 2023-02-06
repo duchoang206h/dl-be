@@ -620,7 +620,7 @@ const getGolferBottom = async ({ code, courseId }) => {
     }
   }
   response['BOGEY'] = response['BOGEY'] + response['D.BOGEY+'];
-  response['MAIN'] = images.find((img) => img.type === GOLFER_INFO_IMAGES.main.type)?.url;
+  response['MAIN'] = images.find((img) => img.type === GOLFER_BOTTOM_IMAGES.main.type)?.url;
   response[`AVATAR`] = player.avatar_url;
   response[`IMG_COUNTRY1`] = player.flag;
   response[`G1`] = player.fullname;
