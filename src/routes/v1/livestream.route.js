@@ -9,4 +9,5 @@ router.get('/golfers', livestreamController.getGolferDetails);
 router.get('/scorecard', livestreamController.scorecardStatic);
 router.get('/leaderboard', livestreamController.getLeaderboard);
 router.get('/scorecard', livestreamController.getLeaderboard);
+router.get('/golfer-in-hole', livestreamController.getGolferInHoleStatistic);
 module.exports = router;

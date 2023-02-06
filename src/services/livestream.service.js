@@ -21,7 +21,7 @@ const { TeeTimeGroupPlayer } = require('../models/schema/TeetimeGroupPlayer');
 const { getRank, getScoreImage, getTotalOverImage, getTop } = require('../utils/score');
 const { dateWithTimezone } = require('../utils/date');
 const moment = require('moment');
-
+const { getScoreType } = require('../utils/score');
 const getPlayerScorecard = async (courseId, playerId) => {
   const [course, player] = await Promise.all([Course.findByPk(courseId), Player.findByPk(playerId)]);
   const response = {};
@@ -451,7 +451,7 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
 };
 const getGroupRanking = async ({ courseId }) => {};
 const getGolferInHoleStatistic = async ({ courseId, code }) => {
-  const [course, player, images] = await Promise.all([
+  const [course, player, images, players, rounds] = await Promise.all([
     courseService.getCourseById(courseId),
     Player.findOne({ where: { course_id: courseId, code } }),
     Image.findAll({
@@ -462,12 +462,75 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
         },
       },
     }),
+    Player.findAll({
+      where: { course_id: courseId },
+      attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+    }),
+    Round.findAll({ where: { course_id: courseId }, raw: true }),
   ]);
+  players = await Promise.all(
+    players.map(async (player) => {
+      player = player.toJSON();
+
+      const _today = dateWithTimezone();
+      const [thru, todayScore, totalScore] = await Promise.all([
+        Score.count({ where: { player_id: player.player_id } }),
+        Score.findAll({
+          where: {
+            player_id: player.player_id,
+            updatedAt: {
+              [Op.gte]: _today,
+              [Op.lt]: moment(_today).add(1, 'days').toDate(), // tomorrow
+            },
+          },
+          include: [{ model: Hole }],
+        }),
+        Score.findAll({
+          where: {
+            player_id: player.player_id,
+          },
+          include: [{ model: Hole }],
+        }),
+      ]);
+      const today = todayScore.reduce((pre, score) => {
+        score.toJSON();
+        return pre + score.num_putt - score.Hole.par;
+      }, 0);
+      const total = totalScore.reduce((pre, score) => {
+        score.toJSON();
+        return pre + score.num_putt - score.Hole.par;
+      }, 0);
+      const gross = todayScore.reduce((pre, score) => {
+        score.toJSON();
+        return pre + score.num_putt;
+      }, 0);
+      const totalGross = totalScore.reduce((pre, score) => {
+        score.toJSON();
+        return pre + score.num_putt;
+      }, 0);
+      player['thru'] = thru == HOLE_PER_COURSE ? FINISH_ALL_ROUNDS : thru;
+      player['today'] = today;
+      player['total'] = total;
+      player['gross'] = gross;
+      player['total_gross'] = totalGross;
+      return player;
+    })
+  );
+  const scores = players.map(({ total }) => total, 0);
+
+  players = players.map((player) => {
+    return {
+      ...player,
+      pos: getRank(player.total, scores),
+    };
+  });
+  players.sort((a, b) => a.pos - b.pos);
   const currentScore = await CurrentScore.findOne({
     where: { player_id: player.player_id, course_id: courseId },
     include: [{ model: Hole, as: 'hole' }],
   });
   const response = {};
+  const targetPlayer = players.find((p) => p.player_id === player.player_id);
   response['MAIN'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main.type)?.url;
   response['MAIN1'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main1.type)?.url;
   response['HOLE'] = 'Hole ' + currentScore?.hole.hole_num;
@@ -475,6 +538,30 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   response['PLAYER1'] = player.fullname;
   response['COUNTRY'] = player.country;
   response['IMG_COUNTRY'] = player.flag;
+  response['TODAY'] = targetPlayer.today;
+  response['THRU'] = targetPlayer.thru;
+  response['OVER'] = targetPlayer.total;
+  response['RANK_STT'] = targetPlayer.pos;
+  for (const r of rounds) {
+    response[`ROUND${r.round_num}`] = await Score.sum('num_putt', {
+      where: { course_id: courseId, player_id: player.player_id, round_id: r.round_id },
+    });
+  }
+  response[`GAYOVER`] = currentScore.num_putt;
+  response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore.num_putt, currentScore.hole.par));
+  if (currentScore.hole.par > currentScore.num_putt)
+    for (let i = 1; i < currentScore.num_putt; i++) {
+      response[`STROKE${i}`];
+      response[`STTSTROKE${i}`] = getScoreImage(images, getScoreType(i, currentScore.hole.par));
+    }
+  else {
+    for (let i = 1; i <= currentScore.hole.par; i++) {
+      response[`STROKE${i}`];
+    }
+  }
+  response['RESULT'] = null;
+  response['RESULT2'] = null;
+  return response;
 };
 module.exports = {
   getHoleStatistic,
