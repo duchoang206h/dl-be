@@ -9,6 +9,7 @@ const {
   FLIGHT_INFOR_IMAGES,
   GROUP_RANK_IMAGES,
   LEADERBOARD_MINI_IMAGES,
+  GOLFER_BOTTOM_IMAGES,
 } = require('../config/constant');
 const catchAsync = require('../utils/catchAsync');
 const { uploadMulter, uploadSingleFile, storeImage } = require('../services/upload.service');
@@ -29,8 +30,12 @@ const getAllImages = catchAsync(async (req, res) => {
     FLIGHT_INFOR_IMAGES: { ...FLIGHT_INFOR_IMAGES },
     GROUP_RANK_IMAGES: { ...GROUP_RANK_IMAGES },
     LEADERBOARD_MINI_IMAGES: { ...LEADERBOARD_MINI_IMAGES },
+    GOLFER_BOTTOM_IMAGES: { ...GOLFER_BOTTOM_IMAGES },
   };
-  console.log(Object.keys(subImages.SCORECARD_IMAGES));
+  Object.keys(subImages.GOLFER_BOTTOM_IMAGES).forEach((key) => {
+    const img = images.find((img) => img.type == subImages.GOLFER_BOTTOM_IMAGES[key].type);
+    subImages.GOLFER_BOTTOM_IMAGES[key].url = img ? img.url : null;
+  });
   Object.keys(subImages.SCORECARD_IMAGES).forEach((key) => {
     const img = images.find((img) => img.type == subImages.SCORECARD_IMAGES[key].type);
     subImages.SCORECARD_IMAGES[key].url = img ? img.url : null;
@@ -78,7 +83,6 @@ const getAllImages = catchAsync(async (req, res) => {
   });
 });
 const upload = catchAsync(async (req, res) => {
-  console.log(req.files);
   if (req.files.length <= 0) return res.status(httpStatus.BAD_REQUEST).send();
   const path = await uploadSingleFile(req.files[0], req.body.type);
   const images = await storeImage({ courseId: req.params.courseId, path, type: req.body.type });

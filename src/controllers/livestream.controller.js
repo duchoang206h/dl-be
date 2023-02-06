@@ -5,6 +5,12 @@ const scorecards = catchAsync(async (req, res) => {
   const courseId = req.query.courseId;
   const playerId = req.query.playerId;
 });
+const getGolferBottom = catchAsync(async (req, res) => {
+  const courseId = req.query.courseId;
+  const code = req.query.code;
+  const response = await livestreamService.getGolferBottom({ courseId, code });
+  res.status(httpStatus.OK).send(response);
+});
 const getHoleBottomStatistic = catchAsync(async (req, res) => {
   const courseId = req.query.courseId;
   const holeNum = req.query.hole;
@@ -76,4 +82,5 @@ module.exports = {
   scorecardStatic,
   getLeaderboard,
   getGolferInHoleStatistic,
+  getGolferBottom,
 };

@@ -162,7 +162,6 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
         ]);
         if (preScoreCount !== (roundNum - 1) * 18 + hole_num - 1) throw new BadRequestError(INVALID_SCORE_INPUT);
         const scoreType = getScoreType(num_putt, hole.par);
-        console.log({ finished });
         if (finished === true) {
           const [exist, created] = await Score.findOrCreate({
             where: {

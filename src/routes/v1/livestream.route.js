@@ -6,6 +6,7 @@ router.get('/holes/top', livestreamController.getHoleTopStatistic);
 router.get('/flights-info', livestreamController.getFlightImage);
 router.get('/flights', livestreamController.getFlightStatic);
 router.get('/golfers', livestreamController.getGolferDetails);
+router.get('/golfers/bottom', livestreamController.getGolferBottom);
 router.get('/scorecard', livestreamController.scorecardStatic);
 router.get('/leaderboard', livestreamController.getLeaderboard);
 router.get('/scorecard', livestreamController.getLeaderboard);
