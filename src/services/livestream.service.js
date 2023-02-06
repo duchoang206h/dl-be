@@ -451,7 +451,7 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
 };
 const getGroupRanking = async ({ courseId }) => {};
 const getGolferInHoleStatistic = async ({ courseId, code }) => {
-  const [course, player, images, players, rounds] = await Promise.all([
+  let [course, player, images, players, rounds] = await Promise.all([
     courseService.getCourseById(courseId),
     Player.findOne({ where: { course_id: courseId, code } }),
     Image.findAll({
@@ -543,19 +543,20 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   response['OVER'] = targetPlayer.total;
   response['RANK_STT'] = targetPlayer.pos;
   for (const r of rounds) {
+    console.log(r);
     response[`ROUND${r.round_num}`] = await Score.sum('num_putt', {
       where: { course_id: courseId, player_id: player.player_id, round_id: r.round_id },
     });
   }
-  response[`GAYOVER`] = currentScore.num_putt;
-  response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore.num_putt, currentScore.hole.par));
-  if (currentScore.hole.par > currentScore.num_putt)
-    for (let i = 1; i < currentScore.num_putt; i++) {
+  response[`GAYOVER`] = currentScore?.num_putt;
+  response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore?.num_putt, currentScore?.hole?.par));
+  if (currentScore?.hole?.par > currentScore?.num_putt)
+    for (let i = 1; i < currentScore?.num_putt; i++) {
       response[`STROKE${i}`];
-      response[`STTSTROKE${i}`] = getScoreImage(images, getScoreType(i, currentScore.hole.par));
+      response[`STTSTROKE${i}`] = getScoreImage(images, getScoreType(i, currentScore?.hole?.par));
     }
   else {
-    for (let i = 1; i <= currentScore.hole.par; i++) {
+    for (let i = 1; i <= currentScore?.hole?.par; i++) {
       response[`STROKE${i}`];
     }
   }
