@@ -586,7 +586,6 @@ const getGolferBottom = async ({ code, courseId }) => {
           [Op.like]: 'GOLFER_BOTTOM_IMAGES%',
         },
       },
-      raw: true,
     }),
   ]);
   console.log(images);
