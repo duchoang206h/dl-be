@@ -43,7 +43,7 @@ app.use(compression());
 // enable cors
 app.use(cors());
 app.options('*', cors());
-
+app.disable('etag');
 // jwt authentication
 app.use(passport.initialize());
 //passport.use('jwt', jwtStrategy);
