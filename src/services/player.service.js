@@ -35,7 +35,7 @@ const updatePlayer = async (updateBody, { playerId, courseId }) => {
       if (existRank)
         await Player.update(
           { ranking: null },
-          { where: { course_id: courseId, player_id: player.player_id }, transaction: t }
+          { where: { course_id: courseId, player_id: existRank.player_id }, transaction: t }
         );
       player = await Player.update(
         {
