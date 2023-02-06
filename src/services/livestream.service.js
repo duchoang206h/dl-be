@@ -583,12 +583,13 @@ const getGolferBottom = async ({ code, courseId }) => {
       where: {
         course_id: courseId,
         type: {
-          [Op.like]: 'GOLFER_BOTTOM_IMAGESs%',
+          [Op.like]: 'GOLFER_BOTTOM_IMAGES%',
         },
       },
       raw: true,
     }),
   ]);
+  console.log(images);
   const today = moment(dateWithTimezone(), DATE_FORMAT).toDate();
   const [todayScores, totalScores] = await Promise.all([
     Score.findAll({
