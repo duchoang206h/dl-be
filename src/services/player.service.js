@@ -29,10 +29,14 @@ const updatePlayer = async (updateBody, { playerId, courseId }) => {
   try {
     let player = null;
     if (updateBody.ranking) {
-      await Player.update(
-        { ranking: null },
-        { where: { course_id: courseId, ranking: updateBody.ranking }, transaction: t }
-      );
+      const existRank = await Player.findOne({
+        where: { course_id: courseId, ranking: updateBody.ranking },
+      });
+      if (existRank)
+        await Player.update(
+          { ranking: null },
+          { where: { course_id: courseId, player_id: player.player_id }, transaction: t }
+        );
       player = await Player.update(
         {
           ranking: updateBody.ranking,
@@ -48,6 +52,7 @@ const updatePlayer = async (updateBody, { playerId, courseId }) => {
     await t.commit();
     return player;
   } catch (error) {
+    console.log(error);
     await t.rollback();
     throw new InternalServerError();
   }
