@@ -27,7 +27,7 @@ const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
 const { getScoreType, calculateScoreAverage, getRank, getDefaultScore, getTop } = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
-const { NUM_PUTT_INVALID } = require('../utils/errorMessage');
+const { NUM_PUTT_INVALID, INVALID_SCORE_INPUT } = require('../utils/errorMessage');
 
 const createScore = async (scoreBody) => {};
 const getPlayerScoresByRoundAndHole = async (scoreBody) => {
@@ -141,7 +141,27 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
     const result = await Promise.all(
       scores.map(async (score) => {
         const { hole_num, num_putt, finished } = score;
-        const [hole] = await Promise.all([holeService.getHoleByNumAndGolfCourseId(hole_num, course.golf_course_id)]);
+        const [hole, preHoles] = await Promise.all([
+          holeService.getHoleByNumAndGolfCourseId(hole_num, course.golf_course_id),
+          Hole.findAll({
+            where: {
+              golf_course_id: course.golf_course_id,
+              hole_num: {
+                [Op.lt]: hole_num,
+              },
+            },
+            raw: true,
+          }),
+        ]);
+        const finishedPreviousHole = await Score.count({
+          where: {
+            course_id: courseId,
+            player_id: playerId,
+            hole_id: preHoles.map((hole) => hole.hole_id),
+          },
+        });
+        console.log({ finishedPreviousHole });
+        if (finishedPreviousHole !== hole_num - 1) throw new BadRequestError(INVALID_SCORE_INPUT);
         const scoreType = getScoreType(num_putt, hole.par);
         if (finished === undefined || finished === true) {
           const [exist, created] = await Score.findOrCreate({
