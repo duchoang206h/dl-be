@@ -134,34 +134,33 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
     for (const score of scores) {
       if (score.num_putt <= 0 || score.num_putt > MAX_NUM_PUTT) throw new BadRequestError(NUM_PUTT_INVALID);
     }
-    const [course, round] = await Promise.all([
+    const [course, round, lastRounds] = await Promise.all([
       courseService.getCourseById(courseId),
       roundService.getRoundByNumAndCourse(roundNum, courseId),
+      Round.findAll({
+        where: {
+          course_id: courseId,
+          round_num: {
+            [Op.lt]: roundNum,
+          },
+        },
+        raw: true,
+      }),
     ]);
     const result = await Promise.all(
       scores.map(async (score) => {
         const { hole_num, num_putt, finished } = score;
-        const [hole, preHoles] = await Promise.all([
+        const [hole, preScoreCount] = await Promise.all([
           holeService.getHoleByNumAndGolfCourseId(hole_num, course.golf_course_id),
-          Hole.findAll({
+          Score.count({
             where: {
-              golf_course_id: course.golf_course_id,
-              hole_num: {
-                [Op.lt]: hole_num,
-              },
+              course_id: courseId,
+              player_id: playerId,
             },
             raw: true,
           }),
         ]);
-        const finishedPreviousHole = await Score.count({
-          where: {
-            course_id: courseId,
-            player_id: playerId,
-            hole_id: preHoles.map((hole) => hole.hole_id),
-          },
-        });
-        console.log({ finishedPreviousHole });
-        if (finishedPreviousHole !== hole_num - 1) throw new BadRequestError(INVALID_SCORE_INPUT);
+        if (preScoreCount !== (roundNum - 1) * 18 + hole_num - 1) throw new BadRequestError(INVALID_SCORE_INPUT);
         const scoreType = getScoreType(num_putt, hole.par);
         if (finished === undefined || finished === true) {
           const [exist, created] = await Score.findOrCreate({
