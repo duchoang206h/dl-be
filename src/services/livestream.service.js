@@ -531,6 +531,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   });
   const response = {};
   const targetPlayer = players.find((p) => p.player_id === player.player_id);
+  console.log({});
   response['MAIN'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main.type)?.url;
   response['MAIN1'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main1.type)?.url;
   response['HOLE'] = 'Hole ' + currentScore?.hole.hole_num;
@@ -544,20 +545,25 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   response['RANK_STT'] = targetPlayer.pos;
   for (const r of rounds) {
     console.log(r);
-    response[`ROUND${r.round_num}`] = await Score.sum('num_putt', {
-      where: { course_id: courseId, player_id: player.player_id, round_id: r.round_id },
-    });
+    response[`ROUND${r.round_num}`] =
+      (await Score.sum('num_putt', {
+        where: { course_id: courseId, player_id: player.player_id, round_id: r.round_id },
+      })) || 0;
   }
   response[`GAYOVER`] = currentScore?.num_putt;
   response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore?.num_putt, currentScore?.hole?.par));
+  console.log('par', currentScore?.hole?.par);
+  console.log('num_putt', currentScore?.num_putt);
   if (currentScore?.hole?.par > currentScore?.num_putt)
     for (let i = 1; i < currentScore?.num_putt; i++) {
-      response[`STROKE${i}`];
+      console.log(i);
+      response[`STROKE${i}`] = i;
       response[`STTSTROKE${i}`] = getScoreImage(images, getScoreType(i, currentScore?.hole?.par));
     }
   else {
     for (let i = 1; i <= currentScore?.hole?.par; i++) {
-      response[`STROKE${i}`];
+      response[`STROKE${i}`] = i;
+      response[`STTSTROKE${i}`] = getScoreImage(images, getScoreType(i, currentScore?.hole?.par));
     }
   }
   response['RESULT'] = null;
