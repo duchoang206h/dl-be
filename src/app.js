@@ -2,6 +2,8 @@ const express = require('express');
 const helmet = require('helmet');
 const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 const compression = require('compression');
 const { expressjwt } = require('express-jwt');
 const cors = require('cors');
@@ -62,7 +64,20 @@ if (config.env === 'production') {
 // v1 api routes
 app.use('/static', express.static(path.join(__dirname, '../data')));
 app.use('/v1', routes);
+// livestream api docs
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Hello World',
+      version: '1.0.0',
+    },
+  },
+  apis: ['./routes/*.js'], // files containing annotations as above
+};
 
+const swaggerSpec = swaggerJsdoc(options);
+app.use('/livestream-api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
   next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
