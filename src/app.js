@@ -81,17 +81,7 @@ const options = {
 };
 
 const swaggerSpec = swaggerJsdoc(options);
-app.use(
-  '/livestream-api-docs',
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerDocument, {
-    explorer: true,
-    swaggerOptions: {
-      validatorUrl: null,
-    },
-    isExplorer: true,
-  })
-);
+app.use('/livestream-api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {}));
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
   next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
