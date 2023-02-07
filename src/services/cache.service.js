@@ -41,4 +41,5 @@ module.exports = {
   getCache,
   hasKey,
   clearCache,
+  redisConnect,
 };

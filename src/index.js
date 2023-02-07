@@ -3,8 +3,10 @@ const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
 const { seed } = require('./models/seed');
+const { redisConnect } = require('./services/cache.service');
 
 let server;
+redisConnect().then(() => console.log('connect redis'));
 db.sequelize.authenticate().then(() => {
   //seed();
   if (process.env.NODE_ENV == 'development') {

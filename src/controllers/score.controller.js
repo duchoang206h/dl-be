@@ -15,7 +15,7 @@ const getAllPlayerScoreByRound = catchAsync(async (req, res) => {
   const scores = await scoreService.getAllPlayerScoreByRoundId(round.round_id, req.params.courseId, {
     name: req.query.name,
   });
-  cacheService.setCache(req.originalUrl, scores);
+  //cacheService.setCache(req.originalUrl, scores);
 
   return res.status(httpStatus.OK).send({ result: scores });
 });
@@ -26,7 +26,7 @@ const getHoleStatisticByRoundNum = catchAsync(async (req, res) => {
     courseId: req.params.courseId,
     roundId: round.round_id,
   });
-  cacheService.setCache(req.originalUrl, scores);
+  //cacheService.setCache(req.originalUrl, scores);
 
   return res.status(httpStatus.OK).send({ result: scores });
 });
@@ -88,7 +88,7 @@ const getPlayerScoreByRoundAndHole = catchAsync(async (req, res) => {
 });
 const getAllStatistic = catchAsync(async (req, res) => {
   const { result, lastUpdatedAt } = await scoreService.getAllPlayerScore(req.params.courseId, { name: req.query.name });
-  cacheService.setCache(req.originalUrl, result);
+  //cacheService.setCache(req.originalUrl, result);
   res.status(httpStatus.OK).send({
     result,
     lastUpdatedAt,
