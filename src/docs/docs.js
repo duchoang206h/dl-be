@@ -5,8 +5,10 @@ const {
   getGolferDetails,
   getScorecard,
   getLeaderboard,
-  getGolferInHoleStatistic,
+  getFlightRank,
+  getGolferBottom,
   getGolferInHole,
+  getLeaderboardMini,
 } = require('./livestream');
 const swaggerDocument = {
   openapi: '3.0.1',
@@ -38,6 +40,9 @@ const swaggerDocument = {
     '/v1/livestream/holes/bottom': {
       get: getHoleBottom,
     },
+    '/v1/livestream/leaderboard': {
+      get: getLeaderboard,
+    },
     '/v1/livestream/holes/top': {
       get: getHoleTop,
     },
@@ -53,6 +58,15 @@ const swaggerDocument = {
     },
     '/v1/livestream/golfer-in-hole': {
       get: getGolferInHole,
+    },
+    '/v1/livestream/golfers/bottom': {
+      get: getGolferBottom,
+    },
+    /* '/v1/livestream/leaderboard': {
+      get: getLeaderboardMini,
+    }, */
+    '/v1/livestream/flights': {
+      get: getFlightRank,
     },
   },
 };

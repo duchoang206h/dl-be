@@ -7,6 +7,7 @@ const getHoleBottom = {
       schema: { type: 'number' },
       required: true,
       description: 'Id của cuộc thi golf',
+      example: 1,
     },
     {
       in: 'query',
@@ -14,6 +15,7 @@ const getHoleBottom = {
       schema: { type: 'number' },
       required: true,
       description: 'Số lỗ',
+      example: 1,
     },
     {
       in: 'query',
@@ -21,6 +23,7 @@ const getHoleBottom = {
       schema: { type: 'number' },
       required: true,
       description: 'Round hiện tại',
+      example: 1,
     },
   ],
   description: 'Get hole bottom',
@@ -43,6 +46,7 @@ const getHoleTop = {
       schema: { type: 'number' },
       required: true,
       description: 'Id của cuộc thi golf',
+      example: 1,
     },
     {
       in: 'query',
@@ -50,6 +54,7 @@ const getHoleTop = {
       schema: { type: 'string' },
       required: true,
       description: 'Số lỗ',
+      example: 1,
     },
     {
       in: 'query',
@@ -57,6 +62,7 @@ const getHoleTop = {
       schema: { type: 'number' },
       required: true,
       description: 'Round hiện tại',
+      example: 1,
     },
   ],
   description: 'Get hole top',
@@ -179,45 +185,6 @@ const getScorecard = {
     },
   },
 };
-const getLeaderboard = {
-  tags: ['Leaderboard'],
-  parameters: [
-    {
-      in: 'query',
-      name: 'courseId',
-      schema: { type: 'number' },
-      required: true,
-      description: 'Id của cuộc thi golf',
-      example: 1,
-    },
-    {
-      in: 'query',
-      name: 'round',
-      schema: { type: 'number' },
-      required: true,
-      description: 'Round hiện tại',
-      example: 1,
-    },
-    {
-      in: 'query',
-      name: 'type',
-      schema: { type: 'string' },
-      required: false,
-      description: 'mini',
-      example: 'mini',
-    },
-  ],
-  description: 'Leaderboard',
-  operationId: 'getLeaderboard',
-  responses: {
-    200: {
-      description: 'Get leaderboard successfully.',
-      content: {
-        'application/json': {},
-      },
-    },
-  },
-};
 const getGolferInHole = {
   tags: ['GolferInHole'],
   parameters: [
@@ -249,6 +216,154 @@ const getGolferInHole = {
     },
   },
 };
+const getFlightRank = {
+  tags: ['FlightRank'],
+  parameters: [
+    {
+      in: 'query',
+      name: 'courseId',
+      schema: { type: 'number' },
+      required: true,
+      description: 'Id của cuộc thi golf',
+      example: 1,
+    },
+    {
+      in: 'query',
+      name: 'round',
+      schema: { type: 'number' },
+      required: true,
+      description: 'Vòng hiện tại',
+      example: 1,
+    },
+    {
+      in: 'query',
+      name: 'flight',
+      schema: { type: 'number' },
+      required: true,
+      description: 'flight',
+      example: 1,
+    },
+  ],
+  description: 'Flight rank',
+  operationId: 'getFlightRank',
+  responses: {
+    200: {
+      description: 'Get flight rank successfully.',
+      content: {
+        'application/json': {},
+      },
+    },
+  },
+};
+const getLeaderboardMini = {
+  tags: ['LeaderboardMini'],
+  parameters: [
+    {
+      in: 'query',
+      name: 'courseId',
+      schema: { type: 'number' },
+      required: true,
+      description: 'Id của cuộc thi golf',
+      example: 1,
+    },
+    {
+      in: 'query',
+      name: 'round',
+      schema: { type: 'number' },
+      required: true,
+      description: 'Round hiện tại',
+      example: 1,
+    },
+    {
+      in: 'query',
+      name: 'type',
+      schema: { type: 'string' },
+      required: true,
+      description: 'mini',
+      example: 'mini',
+    },
+  ],
+  description: 'Leaderboard min',
+  operationId: 'getLeaderboardMini',
+  responses: {
+    200: {
+      description: 'Get leaderboardMini successfully.',
+      content: {
+        'application/json': {},
+      },
+    },
+  },
+};
+const getLeaderboard = {
+  tags: ['Leaderboard'],
+  parameters: [
+    {
+      in: 'query',
+      name: 'courseId',
+      schema: { type: 'number' },
+      required: true,
+      description: 'Id của cuộc thi golf',
+      example: 1,
+    },
+    {
+      in: 'query',
+      name: 'round',
+      schema: { type: 'number' },
+      required: true,
+      description: 'Round hiện tại',
+      example: 1,
+    },
+    {
+      in: 'query',
+      name: 'type',
+      schema: { type: 'string' },
+      required: false,
+      description: 'type=mini for leaderboard mini',
+      example: 'mini',
+    },
+  ],
+  description: 'Leaderboard',
+  operationId: 'getLeaderboard',
+  responses: {
+    200: {
+      description: 'Get leaderboard successfully.',
+      content: {
+        'application/json': {},
+      },
+    },
+  },
+};
+const getGolferBottom = {
+  tags: ['GolferBottom'],
+  parameters: [
+    {
+      in: 'query',
+      name: 'courseId',
+      schema: { type: 'number' },
+      required: true,
+      description: 'Id của cuộc thi golf',
+      example: 1,
+    },
+    {
+      in: 'query',
+      name: 'code',
+      schema: { type: 'number' },
+      required: true,
+      description: 'Mã vhandicap của golfer',
+      example: 1,
+    },
+  ],
+  description: 'Golfer bottom',
+  operationId: 'getGolferBottom',
+  responses: {
+    200: {
+      description: 'Get golfer bottom successfully.',
+      content: {
+        'application/json': {},
+      },
+    },
+  },
+};
 module.exports = {
   getFlightInfo,
   getGolferDetails,
@@ -257,4 +372,7 @@ module.exports = {
   getHoleTop,
   getLeaderboard,
   getScorecard,
+  getFlightRank,
+  getLeaderboardMini,
+  getGolferBottom,
 };
