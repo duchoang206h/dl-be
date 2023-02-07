@@ -69,5 +69,19 @@ const swaggerDocument = {
       get: getFlightRank,
     },
   },
+  servers: [
+   /*  {
+      url: 'https://',
+      description: 'PROD Env',
+    }, */
+    {
+      url: 'http://http://42.96.41.96/:3000',
+      description: 'DEV Env',
+    },
+    {
+      url: 'http://localhost:3000/',
+      description: 'LCL Env',
+    },
+  ],
 };
 module.exports = { swaggerDocument };
