@@ -102,7 +102,7 @@ const getGolferDetails = async ({ courseId, code }) => {
   const response = {};
   const [course, player, images] = await Promise.all([
     Course.findByPk(courseId),
-    Player.findOne({ where: { code } }),
+    Player.findOne({ where: { code, course_id: courseId } }),
     Image.findAll({
       where: {
         course_id: courseId,
