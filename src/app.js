@@ -45,7 +45,7 @@ app.use(compression());
 // enable cors
 app.use(cors());
 app.options('*', cors());
-app.disable('etag');
+//app.disable('etag');
 // jwt authentication
 app.use(passport.initialize());
 //passport.use('jwt', jwtStrategy);
@@ -85,6 +85,8 @@ app.use(
     swaggerOptions: {
       validatorUrl: null,
     },
+    isExplorer: true,
+    
   })
 );
 // send back a 404 error for any unknown api request

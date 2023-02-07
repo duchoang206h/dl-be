@@ -75,7 +75,7 @@ const swaggerDocument = {
       description: 'PROD Env',
     }, */
     {
-      url: 'http://http://42.96.41.96/:3000',
+      url: 'http://42.96.41.96/:3000',
       description: 'DEV Env',
     },
     {
@@ -83,6 +83,5 @@ const swaggerDocument = {
       description: 'LCL Env',
     },
   ],
-  explorer: true,
 };
 module.exports = { swaggerDocument };
