@@ -16,6 +16,7 @@ const {
   HOLE_TOP_IMAGES,
   DATE_FORMAT,
   GOLFER_BOTTOM_IMAGES,
+  PLAYER_STATUS,
 } = require('../config/constant');
 const { Player, Course, Score, Round, Hole, sequelize, TeeTimeGroup, Image, CurrentScore } = require('../models/schema');
 const { TeeTime } = require('../models/schema/Teetime');
@@ -112,7 +113,7 @@ const getGolferDetails = async ({ courseId, code }) => {
     }),
   ]);
   response['MAIN'] = images.find((img) => img.type === GOLFER_INFO_IMAGES.main.type)?.url;
-  response[`AVATAR`] = player.avatar;
+  response[`AVATAR`] = player.avatar_url;
   response[`G1`] = player.fullname;
   response[`BIRTH`] = player.birth;
   response[`HEIGHT`] = player.height;
@@ -122,7 +123,7 @@ const getGolferDetails = async ({ courseId, code }) => {
   response[`PUTTING`] = player.putting;
   response[`BEST`] = player.best;
   response[`BIRTHPLACE`] = player.birthplace;
-  response[`AGE`] = player.birthplace;
+  response[`AGE`] = player.age;
   return response;
 };
 const getFlightStatic = async ({ courseId, flight, roundNum }) => {
@@ -338,15 +339,15 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
     players.map(async (player) => {
       player = player.toJSON();
 
-      const _today = dateWithTimezone();
+      const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), 'DD-MM-YYYY').format('DD-MM-YYYY');
       const [thru, todayScore, totalScore] = await Promise.all([
         Score.count({ where: { player_id: player.player_id, round_id: round.round_id } }),
         Score.findAll({
           where: {
             player_id: player.player_id,
             updatedAt: {
-              [Op.gte]: _today,
-              [Op.lt]: moment(_today).add(1, 'days').toDate(), // tomorrow
+              [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
+              [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
             },
           },
           include: [{ model: Hole }],
@@ -378,20 +379,58 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
       player['today'] = today;
       player['total'] = total;
       player['gross'] = gross;
+      player['scores'] = totalScore;
       player['total_gross'] = totalGross;
       return player;
     })
   );
-  const scores = players.map(({ total }) => total, 0);
-
-  players = players.map((player) => {
+  let normalPlayers = players.filter((player) => player.status === PLAYER_STATUS.NORMAL);
+  let outCutPlayers = players.filter(
+    (player) => player.status !== PLAYER_STATUS.NORMAL && player.status !== PLAYER_STATUS.WITHDRAW
+  );
+  let withdrawPlayers = players.filter((player) => player.status === PLAYER_STATUS.WITHDRAW);
+  let scoredPlayers = normalPlayers.filter((player) => player.scores.length);
+  let nonScoredPlayers = normalPlayers.filter((player) => player.scores.length === 0);
+  const scores = scoredPlayers.map(({ total }) => total);
+  scoredPlayers = scoredPlayers.map((player) => {
     return {
       ...player,
       pos: getRank(player.total, scores),
     };
   });
-  players.sort((a, b) => a.pos - b.pos);
+  const nonScores = nonScoredPlayers.map(({ total }) => total);
+  nonScoredPlayers = nonScoredPlayers.map((player) => {
+    return {
+      ...player,
+      pos: getRank(player.total, nonScores),
+    };
+  });
+  scoredPlayers.sort((a, b) => a.pos - b.pos);
+  const lastScoredPlayerPos = scoredPlayers[scoredPlayers.length - 1]?.pos || 1;
+  const lastScoredPlayerPosCount = scoredPlayers.filter((player) => player.pos === lastScoredPlayerPos).length;
+  nonScoredPlayers = nonScoredPlayers.map((player) => ({
+    ...player,
+    pos: lastScoredPlayerPos + lastScoredPlayerPosCount - 1 + player.pos,
+  }));
+  const lastNonScoredPlayerPos = nonScoredPlayers[nonScoredPlayers.length - 1]?.pos || 1;
+  const lastNonScoredPlayerPosCount = nonScoredPlayers.filter((player) => player.pos === lastNonScoredPlayerPos).length;
+  const outCutScores = outCutPlayers.map(({ total }) => total);
+  outCutPlayers = outCutPlayers.map((player) => {
+    return {
+      ...player,
+      pos: getRank(player.total, outCutScores),
+    };
+  });
+  outCutPlayers = outCutPlayers.map((player) => ({
+    ...player,
+    pos: lastNonScoredPlayerPos + lastNonScoredPlayerPosCount - 1 + player.pos,
+  }));
+  outCutPlayers.sort((a, b) => a.pos - b.pos);
+  withdrawPlayers = withdrawPlayers.map((p) => ({ ...p, pos: 'WD' }));
+  players = [...scoredPlayers, ...nonScoredPlayers, ...outCutPlayers, ...withdrawPlayers];
+
   let response = {};
+
   response['MAIN'] = images.find(
     (img) => img.type == (type === 'mini' ? LEADERBOARD_MINI_IMAGES.main.type : LEADERBOARD_IMAGES.main.type)
   )?.url;
