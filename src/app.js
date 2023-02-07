@@ -19,7 +19,7 @@ const { ApiError } = require('./utils/ApiError');
 const { jwt } = require('./config/config');
 const path = require('path');
 const { cacheMiddleware } = require('./middlewares/cache');
-
+const { swaggerDocument } = require('./docs/docs');
 const app = express();
 
 if (config.env !== 'test') {
@@ -69,7 +69,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Hello World',
+      title: 'Livestream',
       version: '1.0.0',
     },
   },
@@ -77,7 +77,7 @@ const options = {
 };
 
 const swaggerSpec = swaggerJsdoc(options);
-app.use('/livestream-api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/livestream-api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
   next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
