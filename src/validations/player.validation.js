@@ -21,6 +21,7 @@ const updatePlayer = {
     putting: Joi.string(),
     best: Joi.string(),
     ranking: Joi.number(),
+    vga: Joi.string(),
   }),
 };
 module.exports = {

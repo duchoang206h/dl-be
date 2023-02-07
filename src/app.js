@@ -12,7 +12,7 @@ const httpStatus = require('http-status');
 const config = require('./config/config');
 const morgan = require('./config/morgan');
 //const { jwtStrategy } = require('./config/passport');
-const { authLimiter } = require('./middlewares/rateLimiter');
+const { rateLimiter } = require('./middlewares/rateLimiter');
 const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const { ApiError } = require('./utils/ApiError');
@@ -53,11 +53,9 @@ app.options('*', cors());
 // jwt authentication
 app.use(passport.initialize());
 //passport.use('jwt', jwtStrategy);
-app.use(cacheMiddleware);
+//app.use(cacheMiddleware);
 // limit repeated failed requests to auth endpoints
-if (config.env === 'production') {
-  app.use('/v1/auth', authLimiter);
-}
+app.use(rateLimiter);
 /* app.use(
   expressjwt({
     algorithms: ['HS256'],

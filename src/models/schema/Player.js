@@ -64,6 +64,9 @@ class Player extends Base {
         code: {
           type: Sequelize.STRING,
         },
+        vga: {
+          type: Sequelize.STRING,
+        },
         club: Sequelize.STRING,
         group: Sequelize.STRING,
         avatar: Sequelize.STRING,

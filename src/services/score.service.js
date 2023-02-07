@@ -305,7 +305,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
             },
           },
           {
-            code: name,
+            vga: name,
           },
         ],
       },
@@ -342,6 +342,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
             age: player.age,
             sex: player.sex,
             code: player.code,
+            vga: player.vga,
             club: player.club,
             group: player.group,
             avatar: player.avatar,
@@ -403,6 +404,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
           age: player.age,
           sex: player.sex,
           code: player.code,
+          vga: player.vga,
           club: player.club,
           group: player.group,
           avatar: player.avatar,
@@ -463,7 +465,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                 },
               },
               {
-                code: name,
+                vga: name,
               },
             ],
           },

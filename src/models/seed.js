@@ -127,7 +127,7 @@ const exportPlayerXlsx = async (totalPlayer) => {
       country: COUNTRY[Math.floor(Math.random() * (COUNTRY.length - 1 + 1))].code,
       age: faker.datatype.number({ max: 30, min: 20 }),
       sex: faker.datatype.number({ max: 1, min: 0 }),
-      code: Date.now().toString() + Math.floor(Math.random() * (10000 - 1 + 1)),
+      code: null, //Date.now().toString() + Math.floor(Math.random() * (10000 - 1 + 1)),
       club: null,
       group: null,
       avatar: null,
@@ -142,8 +142,25 @@ const exportPlayerXlsx = async (totalPlayer) => {
       is_show: null,
       birthplace: null,
       level: [PLAYER_LEVEL.AMATEUR, PLAYER_LEVEL.PROFESSIONAL][faker.datatype.number({ max: 1, min: 0 })],
+      vga: null,
     };
   });
   writeToXlsx(players, __dirname + '/player.xlsx');
 };
-module.exports = { seed, exportPlayerXlsx, exportTeetimeXlsx };
+const exportPlayerByCourseId = async (courseId) => {
+  let players = await Player.findAll({
+    where: { course_id: courseId },
+    raw: true,
+    attributes: {
+      exclude: ['createdAt', 'updatedAt'],
+    },
+  });
+  players = players.map((player) => {
+    return {
+      ...player,
+      'name-golfer': player.fullName,
+    };
+  });
+  writeToXlsx(players, __dirname + `/player_course.xlsx`);
+};
+module.exports = { seed, exportPlayerXlsx, exportTeetimeXlsx, exportPlayerByCourseId };

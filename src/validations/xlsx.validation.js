@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const playerSchema = Joi.object({
   'name-golfer': Joi.string().required(),
-  code: Joi.required(),
+  code: Joi.any(),
   avatar: Joi.any(),
   group: Joi.string(),
   flightname: Joi.any(),
@@ -31,6 +31,7 @@ const playerSchema = Joi.object({
   best: Joi.any(),
   birthplace: Joi.any(),
   level: Joi.any(),
+  vga: Joi.any(),
 });
 const teetimeSchema = Joi.object({
   'name-golfer': Joi.string().required(),

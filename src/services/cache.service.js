@@ -6,21 +6,20 @@ const { createClient } = require('redis');
 // Create a Redis instance.
 // By default, it will connect to localhost:6379.
 // We are going to cover how to specify connection options soon.
-console.log(`redis://@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`);
-const client = createClient({
+/* const client = createClient({
   url: `redis://@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
   database: 0,
-});
-const redisConnect = async () => {
+}); */
+/* const redisConnect = async () => {
   await client
     .connect()
     .then(() => console.log('connect to redis'))
     .catch((error) => console.log(error));
-};
+}; */
 const setCache = async (key, data, ttl = 10 * 60) => {
   try {
     logger.info(`cache-set-key': ${key}`);
-    await client.set(key, JSON.stringify(data), { EX: ttl });
+    cache.set(key, data, ttl);
   } catch (error) {
     console.log(error);
   }
@@ -28,8 +27,7 @@ const setCache = async (key, data, ttl = 10 * 60) => {
 const getCache = async (key) => {
   try {
     logger.info(`cache-get-key': ${key}`);
-    const result = await client.get(key);
-    return JSON.parse(result);
+    return cache.get(key);
   } catch (error) {
     console.log(error);
     return null;
@@ -37,13 +35,13 @@ const getCache = async (key) => {
 };
 const hasKey = async (key) => {
   try {
-    return await client.exists(key);
+    return cache.has(key);
   } catch (error) {
     console.log(error);
   }
 };
 const clearCache = async () => {
-  await client.flushAll();
+  await cache.flushAll();
   logger.info('clear cache');
 };
 /* client.on('set', function (key, _) {
@@ -72,5 +70,4 @@ module.exports = {
   getCache,
   hasKey,
   clearCache,
-  redisConnect,
 };

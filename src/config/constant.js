@@ -156,12 +156,12 @@ const LEADERBOARD_MINI_IMAGES = {
   },
   bogey_mini_color: {
     name: 'Màu Bogey Mini',
-    type: 'LEADERBOARD_IMAGES.bogey_mini_color',
+    type: 'LEADERBOARD_MINI_IMAGES.bogey_mini_color',
     url: null,
   },
   double_bogey_mini_color: {
     name: 'Màu Double Bogey + Mini',
-    type: 'LEADERBOARD_IMAGES.double_bogey_mini_color',
+    type: 'LEADERBOARD_MINI_IMAGES.double_bogey_mini_color',
     url: null,
   },
   eagle_mini_color: {
@@ -179,11 +179,6 @@ const PLAYER_STATUS = {
 };
 const MAX_NUM_PUTT = 50;
 const SCORECARD_IMAGES = {
-  logo: {
-    name: 'Logo giải đấu',
-    type: 'SCORECARD_IMAGES.logo',
-    url: null,
-  },
   main: {
     name: 'Ảnh main',
     type: 'SCORECARD_IMAGES.main',
@@ -209,11 +204,6 @@ const GOLFER_BOTTOM_IMAGES = {
   main: {
     name: 'Ảnh main',
     type: 'GOLFER_BOTTOM_IMAGES.main',
-    url: null,
-  },
-  logo: {
-    name: 'logo',
-    type: 'GOLFER_BOTTOM_IMAGES.logo',
     url: null,
   },
   negative_score: {
@@ -244,21 +234,12 @@ const GOLFER_INFO_IMAGES = {
     type: 'GOLFER_INFO_IMAGES.main',
     url: null,
   },
-  logo: {
-    name: 'Logo giải đấu',
-    type: 'GOLFER_INFO_IMAGES.logo',
-    url: null,
-  },
 };
 const FLIGHT_INFOR_IMAGES = {
   main: {
     name: 'Ảnh main',
     type: 'FLIGHT_INFOR_IMAGES.logo',
     url: null,
-  },
-  logo: {
-    name: 'Logo giải đấu',
-    type: 'FLIGHT_INFOR_IMAGES.logo',
   },
 };
 const GROUP_RANK_IMAGES = {
