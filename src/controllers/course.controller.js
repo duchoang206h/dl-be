@@ -5,6 +5,7 @@ const moment = require('moment');
 const { User } = require('../models/schema');
 const { uploadSingleFile } = require('../services/upload.service');
 const { DATE_FORMAT } = require('../config/constant');
+const { cacheService } = require('../services');
 const createCourse = catchAsync(async (req, res) => {
   const course = await courseService.createCourse(req.body);
   if (course) res.status(httpStatus.CREATED).json({ result: course });
@@ -33,6 +34,7 @@ const getAllCourse = catchAsync(async (req, res) => {
       start_date: moment(course.start_date, 'YYYY-MM-DD').format(DATE_FORMAT),
     };
   });
+  cacheService.setCache(req.originalUrl, course);
   if (course) res.status(httpStatus.OK).json({ result: course });
   else res.status(httpStatus.NOT_FOUND).json({ result: [] });
 });

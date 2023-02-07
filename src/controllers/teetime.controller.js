@@ -51,7 +51,7 @@ const importTeetime = catchAsync(async (req, res) => {
 });
 const getTeetime = catchAsync(async (req, res) => {
   const teetimes = await teetimeService.getTeetimeByCourseAndRound(req.params.courseId, req.params.roundNum);
-  //cacheService.setCache(req.originalUrl, teetimes);
+  cacheService.setCache(req.originalUrl, teetimes);
 
   return res.status(httpStatus.OK).send({ result: teetimes });
 });
