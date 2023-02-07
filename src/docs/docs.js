@@ -70,7 +70,7 @@ const swaggerDocument = {
     },
   },
   servers: [
-   /*  {
+    /*  {
       url: 'https://',
       description: 'PROD Env',
     }, */
@@ -83,5 +83,6 @@ const swaggerDocument = {
       description: 'LCL Env',
     },
   ],
+  explorer: true,
 };
 module.exports = { swaggerDocument };
