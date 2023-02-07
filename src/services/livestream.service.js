@@ -310,10 +310,9 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
   });
   /// iamge TOTALOVER
   response['STT_TOTALOVER'] = getTotalOverImage(images, totalOver);
-  if (player.scores.length > 8) {
-    response['OUT'] = player.scores.slice(0, 9).reduce((pre, cur) => pre + cur.num_putt, 0);
-    if (player.scores.length == 18) response['IN'] = player.scores.slice(9).reduce((pre, cur) => cur.num_putt, 0);
-  }
+  response['OUT'] = player.scores.slice(0, 9).reduce((pre, cur) => pre + cur.num_putt, 0);
+  response['IN'] = player.scores.slice(9).reduce((pre, cur) => pre + cur.num_putt, 0);
+
   //const [todayScore, totalScore]
   return response;
 };
