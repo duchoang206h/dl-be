@@ -30,6 +30,7 @@ const playerSchema = Joi.object({
   putting: Joi.any(),
   best: Joi.any(),
   birthplace: Joi.any(),
+  level: Joi.any(),
 });
 const teetimeSchema = Joi.object({
   'name-golfer': Joi.string().required(),

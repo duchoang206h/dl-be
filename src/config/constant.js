@@ -729,6 +729,10 @@ const COUNTRY = [
   { name: 'Zambia', code: 'ZM' },
   { name: 'Zimbabwe', code: 'ZW' },
 ];
+const PLAYER_LEVEL = {
+  AMATEUR: 'Amateur',
+  PROFESSIONAL: 'Professional',
+};
 module.exports = {
   COURSE_TYPE,
   SCORE_TYPE,
@@ -752,4 +756,5 @@ module.exports = {
   LEADERBOARD_MINI_IMAGES,
   GOLFER_BOTTOM_IMAGES,
   COUNTRY,
+  PLAYER_LEVEL,
 };

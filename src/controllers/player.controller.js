@@ -4,7 +4,8 @@ const { getDataFromXlsx } = require('../services/xlsxService');
 const { playerSchema } = require('../validations/xlsx.validation');
 const { playerService } = require('../services');
 const { BadRequestError } = require('../utils/ApiError');
-const { INVALID_GOLFER_CODE } = require('../utils/errorMessage');
+const { INVALID_GOLFER_CODE, INVALID_GOLFER_LEVEL } = require('../utils/errorMessage');
+const { PLAYER_LEVEL } = require('../config/constant');
 const importPlayers = catchAsync(async (req, res) => {
   const [data, error] = await getDataFromXlsx(req.files[0].buffer, playerSchema);
   if (error) throw error;
@@ -27,10 +28,13 @@ const importPlayers = catchAsync(async (req, res) => {
     putting: player['putting'],
     best: player['best'],
     is_show: player['is_show'],
+    level: player['level'],
     course_id: req.params.courseId,
   }));
   const duplicatesCode = {};
   players.forEach((player) => {
+    if (player.level !== PLAYER_LEVEL.AMATEUR && player.level !== PLAYER_LEVEL.PROFESSIONAL)
+      throw new BadRequestError(INVALID_GOLFER_LEVEL);
     if (duplicatesCode.hasOwnProperty(player.code)) throw new BadRequestError(INVALID_GOLFER_CODE);
     else duplicatesCode[player.code] = true;
   });

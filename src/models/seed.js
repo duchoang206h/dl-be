@@ -1,4 +1,4 @@
-const { COUNTRY } = require('../config/constant');
+const { COUNTRY, PLAYER_LEVEL } = require('../config/constant');
 const { writeToXlsx } = require('../services/xlsxService');
 const { hashPassword } = require('../utils/hash');
 const { getScoreType } = require('../utils/score');
@@ -140,6 +140,8 @@ const exportPlayerXlsx = async (totalPlayer) => {
       putting: null,
       best: null,
       is_show: null,
+      birthplace: null,
+      level: [PLAYER_LEVEL.AMATEUR, PLAYER_LEVEL.PROFESSIONAL][faker.datatype.number({ max: 1, min: 0 })],
     };
   });
   writeToXlsx(players, __dirname + '/player.xlsx');

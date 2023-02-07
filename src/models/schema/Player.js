@@ -1,4 +1,4 @@
-const { PLAYER_STATUS } = require('../../config/constant');
+const { PLAYER_STATUS, PLAYER_LEVEL } = require('../../config/constant');
 const { getFlag } = require('../../utils/country');
 const { Base } = require('./Base');
 const Sequelize = require('sequelize');
@@ -44,6 +44,11 @@ class Player extends Base {
         fullname: {
           type: Sequelize.STRING,
           allowNull: false,
+          get() {
+            return this.getDataValue('level') === PLAYER_LEVEL.PROFESSIONAL
+              ? this.getDataValue('fullname')
+              : this.getDataValue('fullname') + ' (Am)';
+          },
         },
         country: {
           type: Sequelize.STRING,
@@ -73,6 +78,7 @@ class Player extends Base {
         best: Sequelize.STRING,
         birthplace: Sequelize.STRING,
         is_show: Sequelize.BOOLEAN,
+        level: Sequelize.STRING,
         ranking: {
           type: Sequelize.INTEGER,
         },
