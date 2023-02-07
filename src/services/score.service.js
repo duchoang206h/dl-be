@@ -479,7 +479,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
   let withdrawPlayers = players.filter((player) => player.status === PLAYER_STATUS.WITHDRAW);
   let scoredPlayers = normalPlayers.filter((player) => player.scores.length);
   let nonScoredPlayers = normalPlayers.filter((player) => player.scores.length === 0);
-  const _today = dateWithTimezone();
+  const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), 'DD-MM-YYYY').format('DD-MM-YYYY');
   let [_scoredPlayers, _nonScoredPlayers, _outcutPlayers, _withdrawPlayers] = await Promise.all([
     new Promise(async (resolve, reject) => {
       scoredPlayers = await Promise.all(
@@ -518,8 +518,8 @@ const getAllPlayerScore = async (courseId, { name }) => {
               where: {
                 player_id: player.player_id,
                 updatedAt: {
-                  [Op.gte]: _today,
-                  [Op.lt]: moment(_today).add(1, 'days').toDate(), // tomorrow
+                  [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
+                  [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
                 },
               },
               include: [{ model: Hole }],

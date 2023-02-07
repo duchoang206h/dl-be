@@ -588,16 +588,18 @@ const getGolferBottom = async ({ code, courseId }) => {
       },
     }),
   ]);
-  console.log(images);
-  const today = moment(dateWithTimezone(), DATE_FORMAT).toDate();
+  const today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');
+  console.log({ today });
+  console.log(moment(today, 'DD-MM-YYYY').toDate());
+  console.log(moment(today, 'DD-MM-YYYY').add(1, 'days').toDate());
   const [todayScores, totalScores] = await Promise.all([
     Score.findAll({
       where: {
         course_id: courseId,
         player_id: player.player_id,
         updatedAt: {
-          [Op.gte]: today,
-          [Op.lt]: moment(today).add(1, 'days'),
+          [Op.gte]: moment(today, 'DD-MM-YYYY').toDate(),
+          [Op.lt]: moment(today, 'DD-MM-YYYY').add(1, 'days').toDate(),
         },
       },
       attributes: ['score_type', [sequelize.fn('count', sequelize.col('score_type')), 'total']],
@@ -612,6 +614,7 @@ const getGolferBottom = async ({ code, courseId }) => {
       include: [{ model: Hole }],
     }),
   ]);
+  console.log(todayScores);
   Object.values(SCORE_TYPE).forEach((type) => (response[type.toUpperCase()] = 0));
   for (const score of todayScores) {
     if (Object.values(SCORE_TYPE).includes(score.score_type)) {
@@ -625,7 +628,6 @@ const getGolferBottom = async ({ code, courseId }) => {
   response[`G1`] = player.fullname;
 
   delete response['D.BOGEY+'];
-  console.log(images);
   response[`TOTAL_OVER`] = totalScores.reduce((pre, cur) => pre + cur.Hole.par - cur.num_putt, 0);
   response[`STT_TOTALOVER`] =
     response[`TOTAL_OVER`] == 0
