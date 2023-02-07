@@ -1,9 +1,20 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { livestreamService } = require('../services');
+const { Player } = require('../models/schema');
 const scorecards = catchAsync(async (req, res) => {
   const courseId = req.query.courseId;
   const playerId = req.query.playerId;
+});
+const getAllGolfer = catchAsync(async (req, res) => {
+  const courseId = req.query.courseId;
+  const players = await Player.findAll({
+    where: { course_id: courseId },
+    attributes: { exclude: ['createdAt', 'updatedAt'] },
+  });
+  return res.status(httpStatus.OK).send({
+    golfers: players,
+  });
 });
 const getGolferBottom = catchAsync(async (req, res) => {
   const courseId = req.query.courseId;
@@ -83,4 +94,5 @@ module.exports = {
   getLeaderboard,
   getGolferInHoleStatistic,
   getGolferBottom,
+  getAllGolfer,
 };

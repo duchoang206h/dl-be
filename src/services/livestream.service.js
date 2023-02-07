@@ -102,7 +102,7 @@ const getGolferDetails = async ({ courseId, code }) => {
   const response = {};
   const [course, player, images] = await Promise.all([
     Course.findByPk(courseId),
-    Player.findOne({ where: { code, course_id: courseId } }),
+    Player.findOne({ where: { player_id: code, course_id: courseId } }),
     Image.findAll({
       where: {
         course_id: courseId,
@@ -280,7 +280,7 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
     }),
   ]);
   const player = await Player.findOne({
-    where: { code, course_id: courseId },
+    where: { player_id: code, course_id: courseId },
     include: [{ model: Score, as: 'scores', where: { round_id: round.round_id }, include: [{ model: Hole }] }],
   });
   const allScores = await Score.findAll({
@@ -495,7 +495,7 @@ const getGroupRanking = async ({ courseId }) => {};
 const getGolferInHoleStatistic = async ({ courseId, code }) => {
   let [course, player, images, players, rounds] = await Promise.all([
     courseService.getCourseById(courseId),
-    Player.findOne({ where: { course_id: courseId, code } }),
+    Player.findOne({ where: { course_id: courseId, player_id: code } }),
     Image.findAll({
       where: {
         course_id: courseId,
@@ -616,7 +616,7 @@ const getGolferBottom = async ({ code, courseId }) => {
   const response = {};
   const [course, player, images] = await Promise.all([
     Course.findByPk(courseId),
-    Player.findOne({ where: { code, course_id: courseId } }),
+    Player.findOne({ where: { player_id: code, course_id: courseId } }),
     Image.findAll({
       where: {
         course_id: courseId,
