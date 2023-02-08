@@ -48,3 +48,16 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Dependencies
+node_modules
+
+# yarn error logs
+yarn-error.log
+
+# Environment varibales
+.env*
+!.env*.example
+config/config.json
+# Code coverage
+coverage
+data
