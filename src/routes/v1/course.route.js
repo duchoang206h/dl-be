@@ -90,6 +90,8 @@ router.post('/:courseId/images/upload', auth, checkAminPermission, upload.any(),
 
 //player
 router.get('/players/status', (_, res) => res.status(httpStatus.OK).send({ result: PLAYER_STATUS }));
+router.get('/:courseId/players-export', playerController.exportPlayer);
+
 router.post('/:courseId/players/:playerId/avatar', auth, checkAminPermission, upload.any(), playerController.uploadAvatar);
 
 router.put(
@@ -115,6 +117,7 @@ router.get('/seed/teetime', async (req, res) => {
 router.get('/:courseId/players/export', async (req, res) => {
   const courseId = req.params.courseId;
   await exportPlayerByCourseId(courseId);
+  fs.unlinkSync(path.resolve(__dirname, '..', '..', 'models/player_course.xlsx'));
   res.download(path.resolve(__dirname, '..', '..', 'models/player_course.xlsx'), 'player_course.xlsx');
 });
 module.exports = router;

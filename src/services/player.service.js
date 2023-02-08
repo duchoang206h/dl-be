@@ -2,6 +2,8 @@ const { Course, User, Player, sequelize } = require('../models/schema');
 const { Op } = require('sequelize');
 const { uploadSingleFile } = require('./upload.service');
 const { InternalServerError } = require('../utils/ApiError');
+const path = require('path');
+const { writeToXlsx } = require('./xlsxService');
 const createManyPlayer = async (data) => {
   await Player.bulkCreate(data);
 };
@@ -57,10 +59,16 @@ const updatePlayer = async (updateBody, { playerId, courseId }) => {
     throw new InternalServerError();
   }
 };
+const exportPlayerByCourseId = async (courseId) => {
+  let players = await Player.findAll({ where: { course_id: courseId }, attributes: ['fullname', 'vga'], raw: true });
+  players = players.map((p, i) => ({ Stt: i + 1, 'name-golfer': p.fullname, vga: p.vga }));
+  writeToXlsx(players, path.resolve(__dirname, '..', '..', '/data/', 'course_player.xlsx'));
+};
 module.exports = {
   createManyPlayer,
   getAllPlayer,
   getPlayer,
   updatePlayer,
   uploadAvatar,
+  exportPlayerByCourseId,
 };
