@@ -160,7 +160,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
             include: [{ model: Hole }],
           }),
         ]);
-       /*  if (preScoreCount.filter((s) => s?.Hole?.hole_num < hole_num).length !== (roundNum - 1) * 18 + hole_num - 1)
+        /*  if (preScoreCount.filter((s) => s?.Hole?.hole_num < hole_num).length !== (roundNum - 1) * 18 + hole_num - 1)
           throw new BadRequestError(INVALID_SCORE_INPUT); */
         const scoreType = getScoreType(num_putt, hole.par);
         if (finished === true) {
@@ -813,6 +813,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
     pos: lastNonScoredPlayerPos + lastNonScoredPlayerPosCount - 1 + player.pos,
   }));
   let result = [..._scoredPlayers, ..._nonScoredPlayers, ..._outcutPlayers, ..._withdrawPlayers];
+  result.sort((a, b) => a.pos - b.pos);
   const searchPlayerIds = searchPlayers.map((player) => player.player_id);
   if (name || searchPlayers.length) {
     result = result.filter((player) => searchPlayerIds.includes(player.player_id));
