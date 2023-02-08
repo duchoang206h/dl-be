@@ -35,6 +35,10 @@ const getScoreType = (score, par) => {
 };
 const calculateScoreAverage = (holePar, statisticObject, totalPlayer) => {
   let sumScore = 0;
+  let sumPutt = 0;
+  for (const [key, value] of Object.entries(statisticObject)) {
+    sumPutt += value;
+  }
   for (const [key, value] of Object.entries(statisticObject)) {
     switch (key) {
       case SCORE_TYPE.PAR:
@@ -58,7 +62,7 @@ const calculateScoreAverage = (holePar, statisticObject, totalPlayer) => {
         break;
     }
   }
-  return +(sumScore / totalPlayer).toFixed(2);
+  return +(sumScore / sumPutt).toFixed(2);
 };
 const getScoreImage = (images, scoreType) => {
   let imageUrl = null;
