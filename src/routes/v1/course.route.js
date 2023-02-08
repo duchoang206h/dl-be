@@ -16,10 +16,20 @@ const { upload } = require('../../middlewares/upload');
 const path = require('path');
 const httpStatus = require('http-status');
 const { COURSE_TYPE, PLAYER_STATUS } = require('../../config/constant');
+const { exportPlayerXlsx, exportTeetimeXlsx, exportPlayerByCourseId } = require('../../models/seed');
 const router = express.Router();
 router.post('/', auth, isSuperAdmin, validate(courseValidation.createCourse), courseController.createCourse);
+router.post(
+  '/:courseId/upload',
+  auth,
+  checkAminPermission,
+  upload.any(),
+  validate(courseValidation.uploadPhoto),
+  courseController.uploadPhoto
+);
 router.post('/:courseId/users', auth, isSuperAdmin, userController.createUser);
 router.get('/:courseId', courseController.getCourseById);
+router.put('/:courseId', auth, checkAminPermission, courseController.updateCourse);
 router.post('/:courseId/players/import', auth, checkAminPermission, upload.any(), playerController.importPlayers);
 router.post(
   '/:courseId/rounds/:roundNum/teetime/import',
@@ -48,8 +58,8 @@ router.put(
   validate(holeValidation.updateHole),
   holeController.updateHole
 );
-router.get('/:courseId/holes', holeController.getHolesByCourseId);
-router.get('/:courseId/holes/:holeNum', holeController.getHolesByCourseIdAndHoleNum);
+router.get('/:courseId/holes', holeController.getHolesByGolfCourse);
+router.get('/:courseId/holes/:holeNum', holeController.getHolesByGolfCourseAndHoleNum);
 
 //score
 router.get('/:courseId/scores/players/:playerId/rounds/:roundNum', scoreController.getPlayerScoreByRound);
@@ -75,10 +85,12 @@ router.get('/:courseId/statistic/players/:playerId', scoreController.getAllStati
 router.get('/:courseId/teetimes/rounds/:roundNum', teetimeController.getTeetime);
 
 // upload
-router.get('/images/types', uploadController.getAllImages);
+router.get('/:courseId/images/types', uploadController.getAllImages);
 router.post('/:courseId/images/upload', auth, checkAminPermission, upload.any(), uploadController.upload);
 
 //player
+router.get('/players/status', (_, res) => res.status(httpStatus.OK).send({ result: PLAYER_STATUS }));
+router.post('/:courseId/players/:playerId/avatar', auth, checkAminPermission, upload.any(), playerController.uploadAvatar);
 
 router.put(
   '/:courseId/players/:playerId',
@@ -90,7 +102,19 @@ router.put(
 router.get('/:courseId/players/status/all', (_, res) => res.status(httpStatus.OK).send({ result: PLAYER_STATUS }));
 
 // seed
-router.get('/:courseId/seed', (req, res) => {
-  res.download(path.resolve(__dirname, '..', '..', 'models/teetime_round_1.xlsx'), 'teetime_round_1.xlsx');
+router.get('/seed/player', async (req, res) => {
+  const total = req.query.total;
+  await exportPlayerXlsx(Number(total));
+  res.download(path.resolve(__dirname, '..', '..', 'models/player.xlsx'), 'player.xlsx');
+});
+router.get('/seed/teetime', async (req, res) => {
+  const courseId = req.query.courseId;
+  await exportTeetimeXlsx(Number(courseId));
+  res.download(path.resolve(__dirname, '..', '..', 'models/teetime.xlsx'), 'teetime.xlsx');
+});
+router.get('/:courseId/players/export', async (req, res) => {
+  const courseId = req.params.courseId;
+  await exportPlayerByCourseId(courseId);
+  res.download(path.resolve(__dirname, '..', '..', 'models/player_course.xlsx'), 'player_course.xlsx');
 });
 module.exports = router;

@@ -3,6 +3,7 @@ const _ = require('lodash');
 const { ApiError, BadRequestError, InternalServerError } = require('../utils/ApiError');
 const logger = require('../config/logger');
 const { PLAYER_NOT_FOUND } = require('../utils/errorMessage');
+const { PLAYER_STATUS } = require('../config/constant');
 const createManyTeetime = async (teetimes, { courseId, roundNum }) => {
   const t = await sequelize.transaction();
   try {
@@ -12,7 +13,7 @@ const createManyTeetime = async (teetimes, { courseId, roundNum }) => {
     for (const teetime of teetimes) {
       const existGroupIndex = groups.findIndex((group) => group.group_num == teetime.group);
       const player = await Player.findOne({
-        where: { fullname: teetime['name-golfer'] },
+        where: { fullname: teetime['name-golfer'], course_id: courseId },
         raw: true,
         attributes: ['player_id'],
       });
@@ -92,7 +93,14 @@ const getTeetimeByCourseAndRound = async (courseId, roundNum) => {
             model: TeeTimeGroupPlayer,
             as: 'group_players',
             attributes: { exclude: ['createdAt', 'updatedAt', 'course_id', 'round_id'] },
-            include: [{ model: Player, as: 'players', attributes: { exclude: ['createdAt', 'updatedAt'] } }],
+            include: [
+              {
+                model: Player,
+                as: 'players',
+                attributes: { exclude: ['createdAt', 'updatedAt'] },
+                where: { status: PLAYER_STATUS.NORMAL },
+              },
+            ],
           },
         ],
       },

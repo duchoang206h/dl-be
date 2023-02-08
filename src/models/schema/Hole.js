@@ -11,9 +11,19 @@ class Hole extends Base {
   static associate(models) {
     // define association here
     Hole.hasMany(models.Score, { as: 'scores', foreignKey: 'hole_id', sourceKey: 'hole_id' });
-    Hole.belongsTo(models.Course, {
+    /* Hole.belongsTo(models.Course, {
       foreignKey: 'course_id',
       targetKey: 'course_id',
+    }); */
+    Hole.belongsTo(models.GolfCourse, {
+      foreignKey: 'golf_course_id',
+      targetKey: 'golf_course_id',
+      as: 'golf_course',
+    });
+    Hole.hasMany(models.CurrentScore, {
+      foreignKey: 'hole_id',
+      sourceKey: 'hole_id',
+      as: 'current_scores',
     });
   }
 
@@ -25,7 +35,7 @@ class Hole extends Base {
           autoIncrement: true,
           primaryKey: true,
         },
-        course_id: Sequelize.INTEGER,
+        golf_course_id: Sequelize.INTEGER,
         hole_num: {
           type: Sequelize.INTEGER,
           allowNull: false,
@@ -42,6 +52,13 @@ class Hole extends Base {
           type: Sequelize.VIRTUAL,
           get() {
             return yardToMeter(this.yards);
+          },
+        },
+        main_photo: Sequelize.STRING,
+        main_photo_url: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return process.env.APP_URL + '/static/images/' + this.main_photo;
           },
         },
       },

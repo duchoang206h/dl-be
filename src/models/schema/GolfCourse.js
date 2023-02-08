@@ -9,6 +9,8 @@ class GolfCourse extends Base {
    */
   static associate(models) {
     // define association here
+    GolfCourse.hasMany(models.Course, { foreignKey: 'golf_course_id', as: 'courses', sourceKey: 'golf_course_id' });
+    GolfCourse.hasMany(models.Hole, { foreignKey: 'golf_course_id', as: 'holes', sourceKey: 'golf_course_id' });
   }
   static init(sequelize) {
     return super.init(
@@ -20,6 +22,9 @@ class GolfCourse extends Base {
         },
         name: Sequelize.STRING,
         address: Sequelize.STRING,
+        total_hole: Sequelize.INTEGER,
+        total_par: Sequelize.INTEGER,
+        slope: Sequelize.INTEGER,
       },
       {
         sequelize,

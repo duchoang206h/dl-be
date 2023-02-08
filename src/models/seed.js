@@ -1,7 +1,8 @@
+const { COUNTRY, PLAYER_LEVEL } = require('../config/constant');
 const { writeToXlsx } = require('../services/xlsxService');
 const { hashPassword } = require('../utils/hash');
 const { getScoreType } = require('../utils/score');
-const { Player, Hole, Score, Round, User } = require('./schema');
+const { Player, Hole, Score, Round, User, GolfCourse } = require('./schema');
 const { faker } = require('@faker-js/faker');
 const putts = [3, 4, 5];
 const randomPutt = () => {
@@ -53,11 +54,18 @@ const generateTeetime = () => {
 const seed = async () => {
   try {
     console.log('---------------start');
-   /*  await User.create({
+    /* await User.create({
       username: 'duchoang206h',
       password: hashPassword('123456'),
       is_super: true,
       role: 'admin',
+    });
+    await GolfCourse.create({
+      name: 'San golf 1',
+      address: 'Da Nang',
+      total_hole: 18,
+      total_par: 72,
+      slope: 120,
     }); */
     let arr = new Array(40).fill(null);
     const players = await Promise.all(
@@ -72,7 +80,7 @@ const seed = async () => {
         )
       )
     );
-    const holes = await Hole.findAll({ where: { course_id: 1 }, raw: true });
+    const holes = await Hole.findAll({ where: { golf_course_id: 1 }, raw: true });
     const rounds = await Round.findAll({ where: { course_id: 1 }, raw: true });
     const promises = [];
     for (const p of players) {
@@ -93,22 +101,66 @@ const seed = async () => {
       }
     }
     await Promise.all(promises);
-    console.log('---------------end');
   } catch (error) {
     console.log(error);
   }
 };
-const exportXlsx = async () => {
+const exportTeetimeXlsx = async (courseId) => {
   const teetime = generateTeetime();
-  const players = await Player.findAll({ where: { course_id: 1 }, attributes: ['fullname'], raw: true });
+  const players = await Player.findAll({ where: { course_id: courseId }, attributes: ['fullname'], raw: true });
   const teetimes = players.map(({ fullname }) => {
     return {
       'name-golfer': fullname,
-      group: teetime.group(),
+      flight: teetime.group(),
       tee: 1,
       time: teetime.time(),
     };
   });
-  writeToXlsx(teetimes, __dirname + '/teetime_round_1.xlsx');
+  writeToXlsx(teetimes, __dirname + '/teetime.xlsx');
 };
-module.exports = { seed, exportXlsx };
+const exportPlayerXlsx = async (totalPlayer) => {
+  let players = new Array(totalPlayer).fill(null);
+
+  players = players.map(() => {
+    return {
+      'name-golfer': faker.name.fullName(),
+      country: COUNTRY[Math.floor(Math.random() * (COUNTRY.length - 1 + 1))].code,
+      age: faker.datatype.number({ max: 30, min: 20 }),
+      sex: faker.datatype.number({ max: 1, min: 0 }),
+      code: null, //Date.now().toString() + Math.floor(Math.random() * (10000 - 1 + 1)),
+      club: null,
+      group: null,
+      avatar: null,
+      status_day: null,
+      note: null,
+      birth: null,
+      height: null,
+      weight: null,
+      driverev: null,
+      putting: null,
+      best: null,
+      is_show: null,
+      birthplace: null,
+      level: [PLAYER_LEVEL.AMATEUR, PLAYER_LEVEL.PROFESSIONAL][faker.datatype.number({ max: 1, min: 0 })],
+      vga: null,
+    };
+  });
+  writeToXlsx(players, __dirname + '/player.xlsx');
+};
+const exportPlayerByCourseId = async (courseId) => {
+  let players = await Player.findAll({
+    where: { course_id: courseId },
+    raw: true,
+    attributes: {
+      exclude: ['createdAt', 'updatedAt'],
+    },
+  });
+  players = players.map((player) => {
+    return {
+      ...player,
+      'name-golfer': player.fullName,
+    };
+  });
+  writeToXlsx(players, __dirname + `/player_course.xlsx`);
+};
+module.exports = { seed, exportPlayerXlsx, exportTeetimeXlsx, exportPlayerByCourseId };

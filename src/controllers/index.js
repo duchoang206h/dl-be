@@ -6,3 +6,5 @@ module.exports.scoreController = require('./score.controller');
 module.exports.playerController = require('./player.controller');
 module.exports.teetimeController = require('./teetime.controller');
 module.exports.uploadController = require('./upload.controller');
+module.exports.golfCourseController = require('./golf_course.controller');
+module.exports.livestreamController = require('./livestream.controller');

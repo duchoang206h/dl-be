@@ -35,6 +35,10 @@ const getScoreType = (score, par) => {
 };
 const calculateScoreAverage = (holePar, statisticObject, totalPlayer) => {
   let sumScore = 0;
+  let sumPutt = 0;
+  for (const [key, value] of Object.entries(statisticObject)) {
+    sumPutt += value;
+  }
   for (const [key, value] of Object.entries(statisticObject)) {
     switch (key) {
       case SCORE_TYPE.PAR:
@@ -58,7 +62,82 @@ const calculateScoreAverage = (holePar, statisticObject, totalPlayer) => {
         break;
     }
   }
-  return +(sumScore / totalPlayer).toFixed(2);
+  return sumPutt == 0 ? 0 : +(sumScore / sumPutt).toFixed(2);
+};
+const getScoreImage = (images, scoreType) => {
+  let imageUrl = null;
+  console.log({ scoreType });
+  switch (scoreType) {
+    case SCORE_TYPE.EAGLE: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('eagle_color')) return true;
+        return false;
+      });
+      imageUrl = image?.url;
+      break;
+    }
+    case SCORE_TYPE.BIRDIE: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('birdie_color')) return true;
+        return false;
+      });
+      imageUrl = image?.url;
+      break;
+    }
+    case SCORE_TYPE.BIRDIE: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('birdie_color')) return true;
+        return false;
+      });
+      imageUrl = image?.url;
+      break;
+    }
+    case SCORE_TYPE.PAR: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('par_color')) return true;
+        return false;
+      });
+      imageUrl = image?.url;
+      break;
+    }
+    case SCORE_TYPE.BOGEY: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('bogey_color')) return true;
+        return false;
+      });
+      imageUrl = image?.url;
+      break;
+    }
+    case SCORE_TYPE.D_BOGEY: {
+      const image = images.find((img) => {
+        let type = img.type;
+        if (type.includes('double_bogey_color')) return true;
+        return false;
+      });
+      imageUrl = image?.url;
+      break;
+    }
+  }
+  return imageUrl;
+};
+const getTotalOverImage = (images, totalOver) => {
+  let imageUrl = null;
+  if (totalOver == 0) {
+    const image = images.find((img) => img.type.includes('equal_score'));
+    imageUrl = image?.url;
+  } else if (totalOver > 0) {
+    const image = images.find((img) => img.type.includes('positive_score'));
+    imageUrl = image?.url;
+  } else {
+    const image = images.find((img) => img.type.includes('negative_score'));
+    imageUrl = image?.url;
+  }
+  return imageUrl;
 };
 const getRank = (total, scores) => {
   scores.sort((a, b) => a - b);
@@ -76,12 +155,50 @@ const getRank = (total, scores) => {
   }
   return ranks[total];
 };
+//1 1
+//2 2
+//2 3
+//2/4
+//2 4
+//5
+// ranks  { 1: 1, 2: 2, 3: 2 }
+// [2,2,1]
+const getTop = (pos, ranking, ranks) => {
+  if (ranks.length === 3) {
+    if (ranking) return ranking;
+    if (!ranking) {
+      const index = ranks.findIndex((r) => r == pos);
+      if (index < 0) return pos;
+      return ranks.length + 1;
+    }
+  }
+  return pos;
+};
 const previousRankCount = (i, duplicates, scoresShort) => {
   let sum = 0;
   for (let j = 0; j < i; j++) {
     sum += duplicates[scoresShort[j]];
   }
   return sum + 1;
+};
+/// [1,2,3,4] 6
+const getDefaultScore = (scores) => {
+  let cloneScores = [...scores];
+  cloneScores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
+  const scoreReach = cloneScores.length;
+  if (scoreReach < 18) {
+    for (let i = cloneScores.length + 1; i <= 18; i++) {
+      cloneScores.push({
+        Hole: {
+          hole_num: i,
+        },
+        num_putt: 0,
+        score_type: null,
+      });
+    }
+    return cloneScores;
+  }
+  return cloneScores;
 };
 //[1, 2, 3, 6, 3, 4, 3, 2];
 // [1,2,2,3,3,3,4,6]
@@ -95,4 +212,8 @@ module.exports = {
   getScoreType,
   calculateScoreAverage,
   getRank,
+  getDefaultScore,
+  getScoreImage,
+  getTotalOverImage,
+  getTop,
 };

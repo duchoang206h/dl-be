@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { getDataFromXlsx } = require('../services/xlsxService');
 const { playerSchema } = require('../validations/xlsx.validation');
-const { playerService, roundService, scoreService } = require('../services');
+const { playerService, roundService, scoreService, cacheService } = require('../services');
 const getPlayerScoreByAllRound = catchAsync(async (req, res) => {
   const scores = await scoreService.getPlayerScoresByAllRound(req.params.courseId, req.params.playerId);
   res.status(httpStatus.OK).send({
@@ -15,6 +15,7 @@ const getAllPlayerScoreByRound = catchAsync(async (req, res) => {
   const scores = await scoreService.getAllPlayerScoreByRoundId(round.round_id, req.params.courseId, {
     name: req.query.name,
   });
+  cacheService.setCache(req.originalUrl, scores);
   return res.status(httpStatus.OK).send({ result: scores });
 });
 const getHoleStatisticByRoundNum = catchAsync(async (req, res) => {
@@ -24,6 +25,8 @@ const getHoleStatisticByRoundNum = catchAsync(async (req, res) => {
     courseId: req.params.courseId,
     roundId: round.round_id,
   });
+  cacheService.setCache(req.originalUrl, scores);
+
   return res.status(httpStatus.OK).send({ result: scores });
 });
 const getPlayerScoresByAllRound = catchAsync(async (req, res) => {
@@ -83,13 +86,16 @@ const getPlayerScoreByRoundAndHole = catchAsync(async (req, res) => {
   });
 });
 const getAllStatistic = catchAsync(async (req, res) => {
-  const score = await scoreService.getAllPlayerScore(req.params.courseId);
+  const { result, lastUpdatedAt } = await scoreService.getAllPlayerScore(req.params.courseId, { name: req.query.name });
+  cacheService.setCache(req.originalUrl, { result, lastUpdatedAt });
   res.status(httpStatus.OK).send({
-    result: score,
+    result,
+    lastUpdatedAt,
   });
 });
 const getAllStatisticByPlayerId = catchAsync(async (req, res) => {
   const score = await scoreService.getPlayerScore(req.params.courseId, req.params.playerId);
+  cacheService.setCache(req.originalUrl, score);
   res.status(httpStatus.OK).send({
     result: score,
   });

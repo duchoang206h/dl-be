@@ -12,9 +12,8 @@ class Course extends Base {
     Course.hasMany(models.Score, { as: 'scores', foreignKey: 'course_id', sourceKey: 'course_id' });
     Course.hasMany(models.Round, { as: 'rounds', foreignKey: 'course_id', sourceKey: 'course_id' });
     Course.hasMany(models.Player, { as: 'players', foreignKey: 'course_id', sourceKey: 'course_id' });
-
-    Course.hasMany(models.Hole, { as: 'holes', foreignKey: 'course_id', sourceKey: 'course_id' });
     Course.hasMany(models.Score, { as: 'images', foreignKey: 'course_id', sourceKey: 'course_id' });
+    Course.belongsTo(models.GolfCourse, { as: 'golf_course', foreignKey: 'golf_course_id', targetKey: 'golf_course_id' });
   }
   static init(sequelize) {
     return super.init(
@@ -24,6 +23,7 @@ class Course extends Base {
           autoIncrement: true,
           primaryKey: true,
         },
+        golf_course_id: Sequelize.INTEGER,
         name: Sequelize.STRING,
         type: Sequelize.STRING,
         total_prize: Sequelize.FLOAT,
@@ -32,16 +32,24 @@ class Course extends Base {
           type: Sequelize.INTEGER,
           allowNull: false,
         },
-        total_hole: {
-          type: Sequelize.INTEGER,
-          allowNull: false,
-        },
         event_date: Sequelize.STRING,
         start_date: Sequelize.DATEONLY,
         end_date: Sequelize.DATEONLY,
         logo: Sequelize.STRING,
+        logo_url: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return process.env.APP_URL + '/static/images/' + this.logo;
+          },
+        },
         address: Sequelize.STRING,
-        banner: Sequelize.STRING,
+        main_photo: Sequelize.STRING,
+        main_photo_url: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return process.env.APP_URL + '/static/images/' + this.main_photo;
+          },
+        },
         color: Sequelize.STRING,
       },
       {

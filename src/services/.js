@@ -19,7 +19,7 @@ const createScore = async (scoreBody) => {};
 const getPlayerScoresByRoundAndHole = async (scoreBody) => {
   const { course_id, roundNum, holeNum, player_id } = scoreBody;
   const [hole, round] = await Promise.all([
-    holeService.getHoleByNumAndCourse(holeNum, course_id),
+    holeService.getHoleByNumAndGolfCourseId(holeNum, course_id),
     roundService.getRoundByNumAndCourse(roundNum, course_id),
   ]);
   return Score.findOne({
@@ -39,7 +39,7 @@ const createManyScore = async (scoreBodyArr, { courseId, playerId, roundNum }) =
       scoreBodyArr.map(async (scoreBody) => {
         const { hole_num, num_putt } = scoreBody;
         const [hole, round] = await Promise.all([
-          holeService.getHoleByNumAndCourse(hole_num, courseId),
+          holeService.getHoleByNumAndGolfCourseId(hole_num, courseId),
           roundService.getRoundByNumAndCourse(roundNum, courseId),
         ]);
         const scoreType = getScoreType(num_putt, hole.par);
@@ -70,7 +70,7 @@ const createManyScore = async (scoreBodyArr, { courseId, playerId, roundNum }) =
 const updateScore = async (scoreBody) => {
   const { course_id, round_num, hole_num, player_id, num_putt } = scoreBody;
   const [hole, round] = await Promise.all([
-    holeService.getHoleByNumAndCourse(hole_num, course_id),
+    holeService.getHoleByNumAndGolfCourseId(hole_num, course_id),
     roundService.getRoundByNumAndCourse(round_num, course_id),
   ]);
   const scoreType = getScoreType(num_putt, hole.par);
@@ -89,7 +89,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
       scores.map(async (score) => {
         const { hole_num, num_putt } = score;
         const [hole, round] = await Promise.all([
-          holeService.getHoleByNumAndCourse(hole_num, courseId),
+          holeService.getHoleByNumAndGolfCourseId(hole_num, courseId),
           roundService.getRoundByNumAndCourse(roundNum, courseId),
         ]);
         const scoreType = getScoreType(num_putt, hole.par);

@@ -8,3 +8,6 @@ module.exports.courseService = require('./course.service');
 module.exports.roundService = require('./round.service');
 module.exports.scoreService = require('./score.service');
 module.exports.teetimeService = require('./teetime.service');
+module.exports.golfCourseService = require('./golf_course.service');
+module.exports.livestreamService = require('./livestream.service');
+module.exports.cacheService = require('./cache.service');

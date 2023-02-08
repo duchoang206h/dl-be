@@ -1,4 +1,4 @@
-const { PLAYER_STATUS } = require('../../config/constant');
+const { PLAYER_STATUS, PLAYER_LEVEL } = require('../../config/constant');
 const { getFlag } = require('../../utils/country');
 const { Base } = require('./Base');
 const Sequelize = require('sequelize');
@@ -21,6 +21,11 @@ class Player extends Base {
       targetKey: 'player_id',
       as: 'teetime_group_player',
     });
+    Player.hasOne(models.CurrentScore, {
+      foreignKey: 'player_id',
+      sourceKey: 'player_id',
+      as: 'current_score',
+    });
     /* Player.belongsToMany(models.TeeTimeGroup, {
       through: { model: models.TeeTimeGroupPlayer },
       foreignKey: 'player_id',
@@ -39,14 +44,29 @@ class Player extends Base {
         fullname: {
           type: Sequelize.STRING,
           allowNull: false,
+          get() {
+            return this.getDataValue('level') === PLAYER_LEVEL.PROFESSIONAL
+              ? this.getDataValue('fullname')
+              : this.getDataValue('fullname') + ' (Am)';
+          },
         },
         country: {
           type: Sequelize.STRING,
           allowNull: false,
         },
         age: Sequelize.INTEGER,
-        sex: Sequelize.BOOLEAN,
-        code: Sequelize.STRING,
+        sex: {
+          type: Sequelize.BOOLEAN,
+          get() {
+            return this.getDataValue('sex') === true ? 'Male' : 'Female';
+          },
+        },
+        code: {
+          type: Sequelize.STRING,
+        },
+        vga: {
+          type: Sequelize.STRING,
+        },
         club: Sequelize.STRING,
         group: Sequelize.STRING,
         avatar: Sequelize.STRING,
@@ -59,7 +79,12 @@ class Player extends Base {
         driverev: Sequelize.STRING,
         putting: Sequelize.STRING,
         best: Sequelize.STRING,
+        birthplace: Sequelize.STRING,
         is_show: Sequelize.BOOLEAN,
+        level: Sequelize.STRING,
+        ranking: {
+          type: Sequelize.INTEGER,
+        },
         status: {
           type: Sequelize.STRING,
           defaultValue: PLAYER_STATUS.NORMAL,
@@ -70,6 +95,12 @@ class Player extends Base {
             return this.country ? getFlag(this.country) : null;
           },
         },
+        avatar_url: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return process.env.APP_URL + '/static/images/' + this.avatar;
+          },
+        },
       },
       {
         sequelize,
@@ -77,6 +108,7 @@ class Player extends Base {
         freezeTableName: true,
         tableName: 'players',
         timestamps: true,
+        indexes: [{ fields: ['course_id', 'code'] }, { fields: ['course_id', 'fullname'] }],
       }
     );
   }
