@@ -62,7 +62,7 @@ const calculateScoreAverage = (holePar, statisticObject, totalPlayer) => {
         break;
     }
   }
-  return +(sumScore / sumPutt).toFixed(2);
+  return sumPutt == 0 ? 0 : +(sumScore / sumPutt).toFixed(2);
 };
 const getScoreImage = (images, scoreType) => {
   let imageUrl = null;
