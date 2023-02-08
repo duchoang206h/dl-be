@@ -152,15 +152,16 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
         const { hole_num, num_putt, finished } = score;
         const [hole, preScoreCount] = await Promise.all([
           holeService.getHoleByNumAndGolfCourseId(hole_num, course.golf_course_id),
-          Score.count({
+          Score.findAll({
             where: {
               course_id: courseId,
               player_id: playerId,
             },
-            raw: true,
+            include: [{ model: Hole }],
           }),
         ]);
-        if (preScoreCount !== (roundNum - 1) * 18 + hole_num - 1) throw new BadRequestError(INVALID_SCORE_INPUT);
+        if (preScoreCount.filter((s) => s?.Hole?.hole_num < hole_num).length !== (roundNum - 1) * 18 + hole_num - 1)
+          throw new BadRequestError(INVALID_SCORE_INPUT);
         const scoreType = getScoreType(num_putt, hole.par);
         if (finished === true) {
           const [exist, created] = await Score.findOrCreate({
