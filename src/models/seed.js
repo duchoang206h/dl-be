@@ -4,6 +4,7 @@ const { hashPassword } = require('../utils/hash');
 const { getScoreType } = require('../utils/score');
 const { Player, Hole, Score, Round, User, GolfCourse } = require('./schema');
 const { faker } = require('@faker-js/faker');
+const path = require('path');
 const putts = [3, 4, 5];
 const randomPutt = () => {
   const index = Math.floor(Math.random() * 3);
@@ -155,12 +156,13 @@ const exportPlayerByCourseId = async (courseId) => {
       exclude: ['createdAt', 'updatedAt'],
     },
   });
-  players = players.map((player) => {
+  players = players.map((player, i) => {
     return {
-      ...player,
+      stt: i + 1,
       'name-golfer': player.fullName,
+      vga: player.vga,
     };
   });
-  writeToXlsx(players, __dirname + `/player_course.xlsx`);
+  writeToXlsx(players, path.resolve(__dirname));
 };
 module.exports = { seed, exportPlayerXlsx, exportTeetimeXlsx, exportPlayerByCourseId };

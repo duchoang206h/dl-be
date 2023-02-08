@@ -10,6 +10,8 @@ const { PLAYER_LEVEL } = require('../config/constant');
 const { genVGA } = require('../utils/country');
 const { Player } = require('../models/schema');
 const { Op } = require('sequelize');
+const { exportPlayerByCourseId } = require('../services/player.service');
+const path = require('path');
 const importPlayers = catchAsync(async (req, res) => {
   const [data, error] = await getDataFromXlsx(req.files[0].buffer, playerSchema);
   if (error) throw error;
@@ -82,4 +84,9 @@ const updatePlayer = catchAsync(async (req, res) => {
   });
   return res.status(httpStatus.OK).json({ result: player });
 });
-module.exports = { importPlayers, getAllPlayer, getPlayer, updatePlayer, uploadAvatar };
+const exportPlayer = catchAsync(async (req, res) => {
+  console.log(req.params.courseId);
+  await exportPlayerByCourseId(req.params.courseId);
+  res.download(path.resolve(__dirname, '..', '..', 'data/course_player.xlsx'), 'course_player.xlsx');
+});
+module.exports = { importPlayers, getAllPlayer, getPlayer, updatePlayer, uploadAvatar, exportPlayer };
