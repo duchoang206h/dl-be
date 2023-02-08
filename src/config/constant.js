@@ -220,11 +220,21 @@ const HOLE_TOP_IMAGES = {
     type: 'HOLE_TOP_IMAGES.main',
     url: null,
   },
+  main1: {
+    name: 'Ảnh main 1',
+    type: 'HOLE_TOP_IMAGES.main1',
+    url: null,
+  },
 };
 const HOLE_BOTTOM_IMAGES = {
   main: {
     name: 'Ảnh main',
     type: 'HOLE_BOTTOM_IMAGES.main',
+    url: null,
+  },
+  main1: {
+    name: 'Ảnh main 1',
+    type: 'HOLE_BOTTOM_IMAGES.main1',
     url: null,
   },
 };

@@ -34,9 +34,18 @@ const getPlayerScorecard = async (courseId, playerId) => {
 const getHoleStatistic = async ({ courseId, roundNum, holeNum, type }) => {
   const response = {};
   const course = await Course.findByPk(courseId);
-  const [round, hole] = await Promise.all([
+  const [round, hole, images] = await Promise.all([
     Round.findOne({ where: { course_id: courseId, round_num: roundNum } }),
     Hole.findOne({ where: { golf_course_id: course.golf_course_id, hole_num: holeNum } }),
+    Image.findAll({
+      where: {
+        course_id: courseId,
+        type: {
+          [Op.like]: type === 'top' ? `HOLE_TOP_IMAGES%` : `HOLE_BOTTOM_IMAGES%`,
+        },
+      },
+    }),
+    HOLE_TOP_IMAGES,
   ]);
   const scores = await Score.findAll({
     where: { hole_id: hole.hole_id, course_id: courseId, round_id: round.round_id },
@@ -55,9 +64,15 @@ const getHoleStatistic = async ({ courseId, roundNum, holeNum, type }) => {
   response['PAR_HOLE'] = hole.par;
   response['YARDS'] = hole.yards;
 
+  response['MAIN'] =
+    type == 'top'
+      ? images.find((img) => img.type === HOLE_TOP_IMAGES.main.type)?.url
+      : images.find((img) => img.type === HOLE_BOTTOM_IMAGES.main.type)?.url;
+  response['MAIN1'] =
+    type == 'top'
+      ? images.find((img) => img.type === HOLE_TOP_IMAGES.main1.type)?.url
+      : images.find((img) => img.type === HOLE_BOTTOM_IMAGES.main.type)?.url;
   if (type == 'top') return response;
-  response['MAIN'] = hole.main_photo_url;
-  response['MAIN1'] = hole.main_photo_url;
   response['PAR'] = statistic[SCORE_TYPE.PAR];
   response['BIRDIE'] = statistic[SCORE_TYPE.BIRDIE];
   response['EAGLE'] = statistic[SCORE_TYPE.EAGLE];
