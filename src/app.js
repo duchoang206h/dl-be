@@ -55,7 +55,7 @@ app.use(passport.initialize());
 //passport.use('jwt', jwtStrategy);
 //app.use(cacheMiddleware);
 // limit repeated failed requests to auth endpoints
-app.use(rateLimiter);
+//app.use(rateLimiter);
 /* app.use(
   expressjwt({
     algorithms: ['HS256'],

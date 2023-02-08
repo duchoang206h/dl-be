@@ -293,23 +293,25 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
         { model: TeeTimeGroupPlayer, as: 'teetime_group_player', include: [{ model: TeeTimeGroup }] },
       ],
     }),
-    Player.findAll({
-      where: {
-        course_id: courseId,
+    name
+      ? Player.findAll({
+          where: {
+            course_id: courseId,
 
-        status: PLAYER_STATUS.NORMAL,
-        [Op.or]: [
-          {
-            fullname: {
-              [Op.like]: `%${name}%`,
-            },
+            status: PLAYER_STATUS.NORMAL,
+            [Op.or]: [
+              {
+                fullname: {
+                  [Op.like]: `%${name}%`,
+                },
+              },
+              {
+                vga: name,
+              },
+            ],
           },
-          {
-            vga: name,
-          },
-        ],
-      },
-    }),
+        })
+      : [],
   ]);
   const [round, course] = await Promise.all([Round.findByPk(roundId, { raw: true }), courseService.getCourseById(courseId)]);
   const lastRounds = await Round.findAll({
@@ -342,7 +344,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
             age: player.age,
             sex: player.sex,
             code: player.code,
-            vga: player.vga,
+            vga: player?.vga,
             club: player.club,
             group: player.group,
             avatar: player.avatar,
