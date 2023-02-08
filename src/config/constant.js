@@ -43,112 +43,54 @@ const LEADERBOARD_IMAGES = {
     name: 'Ảnh theo điểm số bằng',
     type: 'LEADERBOARD_IMAGES.equal_score',
   },
-  negative_score_mini: {
-    name: 'Ảnh theo điểm số âm',
-    type: 'LEADERBOARD_IMAGES.negative_score_mini',
-  },
-  positive_score_mini: {
-    name: 'Ảnh theo điểm số dương',
-    type: 'LEADERBOARD_IMAGES.positive_score_mini',
-  },
-  equal_score_mini: {
-    name: 'Ảnh theo điểm số bằng',
-    type: 'LEADERBOARD_IMAGES.equal_score_mini',
-  },
   birdie_color: {
     name: 'Màu Birdie',
     type: 'LEADERBOARD_IMAGES.birdie_color',
+    url: null,
   },
   bogey_color: {
     name: 'Màu Bogey',
     type: 'LEADERBOARD_IMAGES.bogey_color',
+    url: null,
   },
   double_bogey_color: {
     name: 'Màu Double Bogey +',
     type: 'LEADERBOARD_IMAGES.double_bogey_color',
+    url: null,
   },
   eagle_color: {
     name: 'Màu Eagle',
     type: 'LEADERBOARD_IMAGES.eagle_color',
-  },
-  birdie_mini_color: {
-    name: 'Màu Birdie Mini',
-    type: 'LEADERBOARD_IMAGES.birdie_mini_color',
-  },
-  bogey_mini_color: {
-    name: 'Màu Bogey Mini',
-    type: 'LEADERBOARD_IMAGES.bogey_mini_color',
-  },
-  double_bogey_mini_color: {
-    name: 'Màu Double Bogey + Mini',
-    type: 'LEADERBOARD_IMAGES.double_bogey_mini_color',
-  },
-  eagle_mini_color: {
-    name: 'Màu Eagle Mini',
-    type: 'LEADERBOARD_IMAGES.eagle_mini_color',
+    url: null,
   },
 };
 const LEADERBOARD_MINI_IMAGES = {
   main: {
-    name: 'ẢNH BXH',
+    name: 'ẢNH BXH MINI ',
     type: 'LEADERBOARD_MINI_IMAGES.main',
     url: null,
   },
   main1: {
-    name: 'ẢNH BXH 1',
+    name: 'ẢNH BXH MINI 1',
     type: 'LEADERBOARD_MINI_IMAGES.main1',
     url: null,
   },
-  negative_score: {
-    name: 'Ảnh theo điểm số âm',
-    type: 'LEADERBOARD_MINI_IMAGES.negative_score',
-    url: null,
-  },
-  positive_score: {
-    name: 'Ảnh theo điểm số dương',
-    type: 'LEADERBOARD_MINI_IMAGES.positive_score',
-    url: null,
-  },
-  equal_score: {
-    name: 'Ảnh theo điểm số bằng',
-    type: 'LEADERBOARD_MINI_IMAGES.equal_score',
-    url: null,
-  },
   negative_score_mini: {
-    name: 'Ảnh theo điểm số âm min',
+    name: 'Ảnh theo điểm số âm mini',
     type: 'LEADERBOARD_MINI_IMAGES.negative_score_mini',
     url: null,
   },
   positive_score_mini: {
-    name: 'Ảnh theo điểm số dương min',
+    name: 'Ảnh theo điểm số dương mini',
     type: 'LEADERBOARD_MINI_IMAGES.positive_score_mini',
     url: null,
   },
   equal_score_mini: {
-    name: 'Ảnh theo điểm số bằng min',
+    name: 'Ảnh theo điểm số bằng mini',
     type: 'LEADERBOARD_MINI_IMAGES.equal_score_mini',
     url: null,
   },
-  birdie_color: {
-    name: 'Màu Birdie',
-    type: 'LEADERBOARD_IMAGES.birdie_color',
-    url: null,
-  },
-  bogey_color: {
-    name: 'Màu Bogey',
-    type: 'LEADERBOARD_MINI_IMAGES.bogey_color',
-    url: null,
-  },
-  double_bogey_color: {
-    name: 'Màu Double Bogey +',
-    type: 'LEADERBOARD_MINI_IMAGES.double_bogey_color',
-    url: null,
-  },
-  eagle_color: {
-    name: 'Màu Eagle',
-    type: 'LEADERBOARD_MINI_IMAGES.eagle_color',
-    url: null,
-  },
+
   birdie_mini_color: {
     name: 'Màu Birdie Mini',
     type: 'LEADERBOARD_MINI_IMAGES.birdie_mini_color',

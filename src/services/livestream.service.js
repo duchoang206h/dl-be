@@ -454,40 +454,27 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
   )?.url;
   const negative_score_image = images.find((image) => {
     image.toJSON();
-    return (
-      image.type == (type === 'mini' ? LEADERBOARD_MINI_IMAGES.negative_score.type : LEADERBOARD_IMAGES.negative_score.type)
-    );
+    return image.type == LEADERBOARD_IMAGES.negative_score.type;
   })?.url;
   const equal_score_image = images.find((image) => {
     image.toJSON();
-    return image.type == (type === 'mini' ? LEADERBOARD_MINI_IMAGES.eagle_color.type : LEADERBOARD_IMAGES.eagle_color.type);
+    return image.type == LEADERBOARD_IMAGES.eagle_color.type;
   })?.url;
   const positive_score_image = images.find((image) => {
     image.toJSON();
-    return (
-      image.type == (type === 'mini' ? LEADERBOARD_MINI_IMAGES.positive_score.type : LEADERBOARD_IMAGES.positive_score.type)
-    );
+    return image.type == LEADERBOARD_IMAGES.positive_score.type;
   })?.url;
   const negative_score_image_mini = images.find((image) => {
     image.toJSON();
-    return (
-      image.type ==
-      (type === 'mini' ? LEADERBOARD_MINI_IMAGES.negative_score_mini.type : LEADERBOARD_IMAGES.negative_score_mini.type)
-    );
+    return image.type == LEADERBOARD_MINI_IMAGES.negative_score_mini.type;
   })?.url;
   const equal_score_image_mini = images.find((image) => {
     image.toJSON();
-    return (
-      image.type ==
-      (type === 'mini' ? LEADERBOARD_MINI_IMAGES.equal_score_mini.type : LEADERBOARD_IMAGES.equal_score_mini.type)
-    );
+    return image.type == LEADERBOARD_MINI_IMAGES.equal_score_mini.type;
   })?.url;
   const positive_score_image_mini = images.find((image) => {
     image.toJSON();
-    return (
-      image.type ==
-      (type === 'mini' ? LEADERBOARD_MINI_IMAGES.positive_score_mini.type : LEADERBOARD_IMAGES.positive_score_mini.type)
-    );
+    return image.type == LEADERBOARD_MINI_IMAGES.positive_score_mini.type;
   })?.url;
   players.forEach((player, index) => {
     response[`G${index + 1}`] = player.fullname;
@@ -499,10 +486,17 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
     response[`RANK${index + 1}`] = player.pos;
     response[`GROSS${index + 1}`] = player.gross;
     response[`TOTAL_GROSS${index + 1}`] = player.total_gross;
-    response[`IMG_OVER${index + 1}`] =
-      player.today == 0 ? equal_score_image : player.today > 0 ? positive_score_image : negative_score_image;
-    response[`IMG_OVER_MINI${index + 1}`] =
-      player.today == 0 ? equal_score_image_mini : player.today > 0 ? positive_score_image_mini : negative_score_image_mini;
+    if (type === 'mini')
+      response[`IMG_OVER_MINI${index + 1}`] =
+        player.today == 0
+          ? equal_score_image_mini
+          : player.today > 0
+          ? positive_score_image_mini
+          : negative_score_image_mini;
+    else {
+      response[`IMG_OVER${index + 1}`] =
+        player.today == 0 ? equal_score_image : player.today > 0 ? positive_score_image : negative_score_image;
+    }
   });
   return response;
 };
