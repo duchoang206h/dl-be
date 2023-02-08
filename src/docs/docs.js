@@ -37,35 +37,35 @@ const swaggerDocument = {
   ],
   paths: {
     /** Aws */
-    '/v1/livestream/holes/bottom': {
+    '/v1/livestream/holes/bottom.json': {
       get: getHoleBottom,
     },
-    '/v1/livestream/leaderboard': {
+    '/v1/livestream/leaderboard.json': {
       get: getLeaderboard,
     },
-    '/v1/livestream/holes/top': {
+    '/v1/livestream/holes/top.json': {
       get: getHoleTop,
     },
 
-    '/v1/livestream/flights-info': {
+    '/v1/livestream/flights-info.json': {
       get: getFlightInfo,
     },
-    '/v1/livestream/golfers': {
+    '/v1/livestream/golfers.json': {
       get: getGolferDetails,
     },
-    '/v1/livestream/scorecard': {
+    '/v1/livestream/scorecard.json': {
       get: getScorecard,
     },
-    '/v1/livestream/golfer-in-hole': {
+    '/v1/livestream/golfer-in-hole.json': {
       get: getGolferInHole,
     },
-    '/v1/livestream/golfers/bottom': {
+    '/v1/livestream/golfers/bottom.json': {
       get: getGolferBottom,
     },
     /* '/v1/livestream/leaderboard': {
       get: getLeaderboardMini,
     }, */
-    '/v1/livestream/flights': {
+    '/v1/livestream/flights.json': {
       get: getFlightRank,
     },
   },
