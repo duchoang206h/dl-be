@@ -1,11 +1,11 @@
 const AWS = require('aws-sdk');
 const multer = require('multer');
-const { default: axios } = require('axios');
+//const { default: axios } = require('axios');
 const fs = require('fs');
 const { Image } = require('../models/schema');
 const path = require('path');
 const { COUNTRY } = require('../config/constant');
-const delay = require('delay');
+//const delay = require('delay');
 const s3 = new AWS.S3();
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -31,7 +31,7 @@ const storeImage = async ({ courseId, path, type }) => {
   }
   return await Image.create({ course_id: courseId, path, type });
 };
-const downloadCountryImages = async () => {
+/* const downloadCountryImages = async () => {
   try {
     for (const country of COUNTRY) {
       await delay(100);
@@ -47,7 +47,7 @@ const downloadCountryImages = async () => {
     console.log(error);
   }
 };
-downloadCountryImages();
+downloadCountryImages(); */
 module.exports = {
   uploadSingleFile,
   uploadMulter,
