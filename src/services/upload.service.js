@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 const { Image } = require('../models/schema');
 const { COUNTRY } = require('../config/constant');
+//const delay = require('delay');
 const s3 = new AWS.S3();
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -33,6 +34,7 @@ const storeImage = async ({ courseId, path, type }) => {
 /* const downloadCountryImages = async () => {
   try {
     for (const country of COUNTRY) {
+      await delay(100);
       const result = await axios.get(`https://countryflagsapi.com/png/${country.code.toLowerCase()}`, {
         responseType: 'stream',
       });
