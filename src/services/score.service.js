@@ -817,8 +817,9 @@ const getAllPlayerScore = async (courseId, { name }) => {
     ...player,
     pos: lastNonScoredPlayerPos + lastNonScoredPlayerPosCount - 1 + player.pos,
   }));
-  let result = [..._scoredPlayers, ..._nonScoredPlayers, ..._outcutPlayers, ..._withdrawPlayers];
+  let result = [..._scoredPlayers, ..._nonScoredPlayers, ..._outcutPlayers];
   result.sort((a, b) => a.pos - b.pos);
+  result = [...result, ..._withdrawPlayers];
   const searchPlayerIds = searchPlayers.map((player) => player.player_id);
   if (name || searchPlayers.length) {
     result = result.filter((player) => searchPlayerIds.includes(player.player_id));
