@@ -396,8 +396,8 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
           in: _in,
           total,
           out,
-          today: today == 0 ? EVENT_ZERO : today,
-          score: score == 0 ? EVENT_ZERO : score,
+          today,
+          score,
           scores: player.scores,
           group_num: player.teetime_group_player?.TeeTimeGroup?.group_num,
           flag: player.flag,
@@ -422,6 +422,11 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
     return { ...player, pos: getRank(player.score, scores) };
   });
   players.sort((a, b) => a.pos - b.pos);
+  players = players.map((p) => ({
+    ...p,
+    score: p.score == 0 ? EVENT_ZERO : p.score,
+    today: p.today == 0 ? EVENT_ZERO : p.today,
+  }));
   const searchPlayerIds = searchPlayers.map((player) => player.player_id);
   if (name || searchPlayers.length) {
     return players.filter((player) => searchPlayerIds.includes(player.player_id));
