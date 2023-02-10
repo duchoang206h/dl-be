@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const { courseService, playerService, roundService } = require('.');
+const { isValid, alpha2ToAlpha3, alpha3ToAlpha2 } = require('i18n-iso-countries')
 const {
   SCORE_TYPE,
   HOLE_PER_COURSE,
@@ -586,10 +587,10 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   console.log({});
   response['MAIN'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main.type)?.url;
   response['MAIN1'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main1.type)?.url;
-  response['HOLE'] = 'Hole ' + currentScore?.hole.hole_num;
+  response['HOLE'] = currentScore?.hole.hole_num;
   response['YARD'] = currentScore?.hole.yards;
   response['PLAYER1'] = player.fullname;
-  response['COUNTRY'] = player.country;
+  response['COUNTRY'] = player.country.length === 2 && isValid(player.country)? alpha2ToAlpha3(player.country): player.country;
   response['IMG_COUNTRY'] = player.flag;
   response['TODAY'] = targetPlayer.today;
   response['THRU'] = targetPlayer.thru;
