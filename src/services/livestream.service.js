@@ -61,7 +61,7 @@ const getHoleStatistic = async ({ courseId, roundNum, holeNum, type }) => {
       statistic[score.score_type] = score.total;
     }
   }
-  response['HOLE'] = 'Hole ' + hole.hole_num;
+  response['HOLE'] =  hole.hole_num;
   response['PAR_HOLE'] = hole.par;
   response['YARDS'] = hole.yards;
 
