@@ -417,9 +417,9 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
       }
     })
   );
-  const scores = players.map(({ total }) => total);
+  const scores = players.map(({ score }) => score);
   players = players.map((player) => {
-    return { ...player, pos: getRank(player.total, scores) };
+    return { ...player, pos: getRank(player.score, scores) };
   });
   players.sort((a, b) => a.pos - b.pos);
   const searchPlayerIds = searchPlayers.map((player) => player.player_id);
