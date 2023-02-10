@@ -488,6 +488,7 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
     response[`RANK${index + 1}`] = player.pos;
     response[`GROSS${index + 1}`] = player.gross;
     response[`TOTAL_GROSS${index + 1}`] = player.total_gross;
+    response[`NATION${index+1}`] = player.country === 2 && isValid(player.country)? alpha2ToAlpha3(player.country): player.country
     if (type === 'mini')
       response[`IMG_OVER_MINI${index + 1}`] =
         player.total == 0
