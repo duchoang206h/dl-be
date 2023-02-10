@@ -360,10 +360,11 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
         Score.findAll({
           where: {
             player_id: player.player_id,
-            updatedAt: {
+            round_id: round.round_id,
+           /*  updatedAt: {
               [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
               [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
-            },
+            }, */
           },
           include: [{ model: Hole }],
         }),
@@ -458,7 +459,7 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
   })?.url;
   const equal_score_image = images.find((image) => {
     image.toJSON();
-    return image.type == LEADERBOARD_IMAGES.eagle_color.type;
+    return image.type == LEADERBOARD_IMAGES.equal_score.type;
   })?.url;
   const positive_score_image = images.find((image) => {
     image.toJSON();
@@ -488,14 +489,14 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
     response[`TOTAL_GROSS${index + 1}`] = player.total_gross;
     if (type === 'mini')
       response[`IMG_OVER_MINI${index + 1}`] =
-        player.today == 0
+        player.total == 0
           ? equal_score_image_mini
           : player.today > 0
           ? positive_score_image_mini
           : negative_score_image_mini;
     else {
       response[`IMG_OVER${index + 1}`] =
-        player.today == 0 ? equal_score_image : player.today > 0 ? positive_score_image : negative_score_image;
+        player.total == 0 ? equal_score_image : player.today > 0 ? positive_score_image : negative_score_image;
     }
   });
   return response;
