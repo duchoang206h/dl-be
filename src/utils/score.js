@@ -208,6 +208,16 @@ const getDefaultScore = (scores) => {
 //3->4 4 4 4
 // 4-> 8
 // 6->9
+const getScoreTitle = (score, par) => {
+  let title = ''
+  const distance = score - par;
+  if(distance <=-2) title = 'FOR EAGLE';
+  else if(distance === -1) title = 'FOR BIRDIE'
+  else if(distance === 0 ) title = 'FOR PAR'
+  else if(distance === 1 ) title = 'FOR BOGEY'
+  else if(distance >=2 ) title = 'FOR DOUBLE BOGEY+'
+  return title
+}
 module.exports = {
   getScoreType,
   calculateScoreAverage,
@@ -216,4 +226,5 @@ module.exports = {
   getScoreImage,
   getTotalOverImage,
   getTop,
+  getScoreTitle,
 };
