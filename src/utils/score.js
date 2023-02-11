@@ -66,7 +66,6 @@ const calculateScoreAverage = (holePar, statisticObject, totalPlayer) => {
 };
 const getScoreImage = (images, scoreType) => {
   let imageUrl = null;
-  console.log({ scoreType });
   switch (scoreType) {
     case SCORE_TYPE.EAGLE: {
       const image = images.find((img) => {
@@ -101,6 +100,7 @@ const getScoreImage = (images, scoreType) => {
         if (type.includes('par_color')) return true;
         return false;
       });
+      console.log(image);
       imageUrl = image?.url;
       break;
     }
@@ -123,6 +123,7 @@ const getScoreImage = (images, scoreType) => {
       break;
     }
   }
+  console.log(imageUrl);
   return imageUrl;
 };
 const getTotalOverImage = (images, totalOver) => {

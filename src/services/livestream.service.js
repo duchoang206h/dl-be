@@ -526,15 +526,17 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
     players.map(async (player) => {
       player = player.toJSON();
 
-      const _today = dateWithTimezone();
+      const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');;
+      console.log({ _today});
       const [thru, todayScore, totalScore] = await Promise.all([
-        Score.count({ where: { player_id: player.player_id } }),
+        Score.count({ where: { player_id: player.player_id, course_id: courseId } }),
         Score.findAll({
           where: {
             player_id: player.player_id,
+            course_id: courseId,
             updatedAt: {
-              [Op.gte]: _today,
-              [Op.lt]: moment(_today).add(1, 'days').toDate(), // tomorrow
+              [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
+              [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
             },
           },
           include: [{ model: Hole }],
@@ -542,6 +544,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
         Score.findAll({
           where: {
             player_id: player.player_id,
+            course_id: courseId,
           },
           include: [{ model: Hole }],
         }),
