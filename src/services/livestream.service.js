@@ -605,6 +605,8 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
       })) || 0;
   }
   response[`GAYOVER`] = currentScore?.num_putt;
+  response[`HOLE`] = currentScore?.hole?.hole_num;
+  response[`PAR`] = currentScore?.hole?.par;
   response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore?.num_putt, currentScore?.hole?.par));
   console.log('par', currentScore?.hole?.par);
   console.log('num_putt', currentScore?.num_putt);
