@@ -515,6 +515,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
           [Op.like]: 'GOLFER_IN_HOLE_IMAGES%',
         },
       },
+      raw: true
     }),
     Player.findAll({
       where: { course_id: courseId },
