@@ -488,6 +488,7 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
     response[`RANK${index + 1}`] = player.pos;
     response[`GROSS${index + 1}`] = player.gross;
     response[`TOTAL_GROSS${index + 1}`] = player.total_gross;
+    response[`NATION${index+1}`] = player.country.length === 2 && isValid(player.country)? alpha2ToAlpha3(player.country): player.country
     if (type === 'mini')
       response[`IMG_OVER_MINI${index + 1}`] =
         player.total == 0
@@ -604,6 +605,8 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
       })) || 0;
   }
   response[`GAYOVER`] = currentScore?.num_putt;
+  response[`HOLE`] = currentScore?.hole?.hole_num;
+  response[`PAR`] = currentScore?.hole?.par;
   response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore?.num_putt, currentScore?.hole?.par));
   console.log('par', currentScore?.hole?.par);
   console.log('num_putt', currentScore?.num_putt);
