@@ -30,7 +30,7 @@ class Image extends Base {
           type: Sequelize.STRING,
         },
         url: {
-          type: Sequelize.STRING,
+          type: Sequelize.VIRTUAL,
           get() {
             return process.env.APP_URL + '/static/images/' + this.path;
           },

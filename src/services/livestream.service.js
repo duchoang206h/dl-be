@@ -515,7 +515,6 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
           [Op.like]: 'GOLFER_IN_HOLE_IMAGES%',
         },
       },
-      raw: true
     }),
     Player.findAll({
       where: { course_id: courseId },
@@ -608,7 +607,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   response[`GAYOVER`] = currentScore?.num_putt;
   response[`HOLE`] = currentScore?.hole?.hole_num;
   response[`PAR`] = currentScore?.hole?.par;
-  response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore?.num_putt, currentScore?.hole?.par));
+  response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore?.num_putt, currentScore?.hole?.par)) || null;
   response[`TITLEGAYOVER`] = getScoreTitle(currentScore?.num_putt, currentScore?.hole?.par)
     for (let i = 1; i <= currentScore?.hole?.par; i++) {
       response[`STROKE${i}`] = i;
