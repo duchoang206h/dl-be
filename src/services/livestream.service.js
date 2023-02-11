@@ -22,7 +22,7 @@ const {
 const { Player, Course, Score, Round, Hole, sequelize, TeeTimeGroup, Image, CurrentScore } = require('../models/schema');
 const { TeeTime } = require('../models/schema/Teetime');
 const { TeeTimeGroupPlayer } = require('../models/schema/TeetimeGroupPlayer');
-const { getRank, getScoreImage, getTotalOverImage, getTop } = require('../utils/score');
+const { getRank, getScoreImage, getTotalOverImage, getTop, getScoreTitle } = require('../utils/score');
 const { dateWithTimezone } = require('../utils/date');
 const moment = require('moment');
 const { getScoreType } = require('../utils/score');
@@ -562,7 +562,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
         score.toJSON();
         return pre + score.num_putt;
       }, 0);
-      player['thru'] = thru == HOLE_PER_COURSE ? FINISH_ALL_ROUNDS : thru;
+      player['thru'] = thru
       player['today'] = today;
       player['total'] = total;
       player['gross'] = gross;
@@ -594,7 +594,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   response['COUNTRY'] = player.country.length === 2 && isValid(player.country)? alpha2ToAlpha3(player.country): player.country;
   response['IMG_COUNTRY'] = player.flag;
   response['TODAY'] = targetPlayer.today;
-  response['THRU'] = targetPlayer.thru;
+  response['THRU'] = targetPlayer.thru % HOLE_PER_COURSE == 0 ? FINISH_ALL_ROUNDS : targetPlayer.thru % HOLE_PER_COURSE;
   response['OVER'] = targetPlayer.total;
   response['RANK_STT'] = targetPlayer.pos;
   for (const r of rounds) {
@@ -608,20 +608,10 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   response[`HOLE`] = currentScore?.hole?.hole_num;
   response[`PAR`] = currentScore?.hole?.par;
   response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore?.num_putt, currentScore?.hole?.par));
-  console.log('par', currentScore?.hole?.par);
-  console.log('num_putt', currentScore?.num_putt);
-  if (currentScore?.hole?.par > currentScore?.num_putt)
-    for (let i = 1; i < currentScore?.num_putt; i++) {
-      console.log(i);
-      response[`STROKE${i}`] = i;
-      response[`STTSTROKE${i}`] = getScoreImage(images, getScoreType(i, currentScore?.hole?.par));
-    }
-  else {
+  response[`TITLEGAYOVER`] = getScoreTitle(currentScore?.num_putt, currentScore?.hole?.par)
     for (let i = 1; i <= currentScore?.hole?.par; i++) {
       response[`STROKE${i}`] = i;
-      response[`STTSTROKE${i}`] = getScoreImage(images, getScoreType(i, currentScore?.hole?.par));
     }
-  }
   response['RESULT'] = null;
   response['RESULT2'] = null;
   return response;
