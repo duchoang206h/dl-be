@@ -155,7 +155,7 @@ const getFlightStatic = async ({ courseId, flight, roundNum }) => {
       include: [{ model: Score, as: 'scores' }],
     }),
   ]);
-  const _today = dateWithTimezone();
+  const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');
   players = await Promise.all(
     players.map(async (player) => {
       player = player.toJSON();
@@ -194,8 +194,8 @@ const getFlightStatic = async ({ courseId, flight, roundNum }) => {
           where: {
             player_id: player.player_id,
             updatedAt: {
-              [Op.gte]: _today,
-              [Op.lt]: moment(_today).add(1, 'days').toDate(), // tomorrow
+              [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
+              [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
             },
           },
           include: [{ model: Hole }],
