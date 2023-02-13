@@ -20,7 +20,7 @@ const updatePlayer = {
     driverev: Joi.string(),
     putting: Joi.string(),
     best: Joi.string(),
-    ranking: Joi.number(),
+    ranking: Joi.any(),
     vga: Joi.string(),
   }),
 };
