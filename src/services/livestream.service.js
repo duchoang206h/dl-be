@@ -109,7 +109,7 @@ const getFlightImage = async ({ courseId, roundNum, flight }) => {
   response['TEE_TIME'] = group.teetime.time;
   group.group_players.forEach((player, index) => {
     response[`G${index + 1}`] = player.players.fullname;
-    response[`AVATAR${index + 1}`] = player.players.avatar;
+    response[`AVATAR${index + 1}`] = player.players.avatar_url;
     response[`IMG_COUNTRY${index + 1}`] = player.players.flag;
   });
   return response;
@@ -273,7 +273,7 @@ const getFlightStatic = async ({ courseId, flight, roundNum }) => {
   response['TEE_TIME'] = group.teetime.time;
   players.forEach((player, index) => {
     response[`G${index + 1}`] = player.fullname;
-    response[`AVATAR${index + 1}`] = player.avatar;
+    response[`AVATAR${index + 1}`] = player.avatar_url;
     response[`IMG_COUNTRY${index + 1}`] = player.flag;
     response[`OVER${index + 1}`] = player.today;
     response[`RANK_STT${index + 1}`] = player.pos;
