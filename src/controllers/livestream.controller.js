@@ -47,7 +47,7 @@ const getFlightImage = catchAsync(async (req, res) => {
   const courseId = req.query.courseId;
   const flight = req.query.flight;
   const roundNum = req.query.round;
-  const response = await livestreamService.getFlightImage({ courseId, flight, roundNum });
+  const response = await livestreamService.getFlightStatic({ courseId, flight, roundNum });
   res.status(httpStatus.OK).send(response);
 });
 const getGolferDetails = catchAsync(async (req, res) => {
