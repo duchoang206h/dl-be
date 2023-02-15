@@ -16,10 +16,12 @@ class MatchPlayScore extends Base {
     return super.init(
       {
         matchplay_group_id: Sequelize.INTEGER,
+        player_id: Sequelize.INTEGER,
         course_id: Sequelize.INTEGER,
         num_putt: Sequelize.INTEGER,
         hole_num: Sequelize.INTEGER,
         round_num: Sequelize.INTEGER,
+        match_num: Sequelize.INTEGER,
       },
       {
         sequelize,

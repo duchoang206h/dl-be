@@ -25,11 +25,14 @@ class MatchPlayGroup extends Base {
   static init(sequelize) {
     return super.init(
       {
-        matchplay_team_id: {
+        matchplay_group_id: {
           type: Sequelize.INTEGER,
           autoIncrement: true,
           primaryKey: true,
         },
+        matchplay_team_id: Sequelize.INTEGER,
+        match_num: Sequelize.INTEGER,
+        round_num: Sequelize.INTEGER,
         course_id: Sequelize.INTEGER,
         type: Sequelize.STRING,
         total_player: Sequelize.INTEGER,

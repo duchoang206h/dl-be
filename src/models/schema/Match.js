@@ -1,9 +1,7 @@
-const { PLAYER_STATUS, PLAYER_LEVEL } = require('../../config/constant');
-const { getFlag } = require('../../utils/country');
 const { Base } = require('./Base');
 const Sequelize = require('sequelize');
 
-class MatchPlayVersus extends Base {
+class Match extends Base {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
@@ -15,33 +13,25 @@ class MatchPlayVersus extends Base {
   static init(sequelize) {
     return super.init(
       {
-        matchplay_versus_id: {
+        match_id: {
           type: Sequelize.INTEGER,
           autoIncrement: true,
           primaryKey: true,
         },
+        match_num: Sequelize.INTEGER,
         course_id: Sequelize.INTEGER,
         round_num: Sequelize.INTEGER,
-        match_num: Sequelize.INTEGER,
-        type: Sequelize.STRING,
-        from: Sequelize.INTEGER,
-        to: Sequelize.INTEGER,
-        finish: {
-          type: Sequelize.BOOLEAN,
-          defaultValue: false,
-        },
-        winner: Sequelize.STRING,
       },
       {
         sequelize,
-        modelName: 'MatchPlayVersus',
+        modelName: 'Match',
         freezeTableName: true,
-        tableName: 'matchplayversuses',
+        tableName: 'matchs',
         timestamps: true,
       }
     );
   }
 }
 module.exports = {
-  MatchPlayVersus,
+  Match,
 };

@@ -2,8 +2,9 @@ const COURSE_TYPE = {
   STOKE_PLAY: 'Stroke play',
   MATCH_PLAY: 'Match play',
   FOURSOME: 'Foursome',
-  FOUR_BALL: 'Four ball',
+  FOUR_BALL: 'Four-ball',
   STABLEFORD: 'Stableford',
+  SINGLE_MATCH: 'Single match',
 };
 const SCORE_TYPE = {
   PAR: 'PAR',

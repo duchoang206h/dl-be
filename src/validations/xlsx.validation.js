@@ -44,8 +44,15 @@ const holeSchema = Joi.object({
   par: Joi.number().required(),
   yards: Joi.number().required(),
 });
+const groupSchema = Joi.object({
+  team: Joi.string().required(),
+  type: Joi.string().required(),
+  match: Joi.number().required(),
+  'name-golfer': Joi.string().required(),
+});
 module.exports = {
   playerSchema,
   teetimeSchema,
   holeSchema,
+  groupSchema,
 };

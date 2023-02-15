@@ -15,6 +15,12 @@ const { Token } = require('./Token');
 const { Image } = require('./Image');
 const { TeeTimeGroupPlayer } = require('./TeetimeGroupPlayer');
 const { CurrentScore } = require('./CurrentScore');
+const { Match } = require('./Match');
+const { MatchPlayGroup } = require('./MatchPlayGroup');
+const { MatchPlayGroupPlayer } = require('./MatchPlayGroupPlayer');
+const { MatchPlayTeam } = require('./MatchPlayTeam');
+const { MatchPlayVersus } = require('./MatchPlayVersus');
+const { MatchPlayScore } = require('./MatchPlayerScore');
 const db = {};
 const models = {
   Image,
@@ -31,6 +37,12 @@ const models = {
   User,
   Token,
   CurrentScore,
+  Match,
+  MatchPlayGroup,
+  MatchPlayGroupPlayer,
+  MatchPlayScore,
+  MatchPlayTeam,
+  MatchPlayVersus,
 };
 const sequelize = new Sequelize(process.env.DB_URL, { dialect: 'mysql', logging: false });
 Object.keys(models).forEach((x) => {
