@@ -480,6 +480,9 @@ const getAllPlayerScore = async (courseId, { name }) => {
               {
                 vga: name,
               },
+              {
+                vga: name.includes('-') ? name.replace('-', '_') : name,
+              },
             ],
           },
           attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
