@@ -3,7 +3,7 @@ const { getFlag } = require('../../utils/country');
 const { Base } = require('./Base');
 const Sequelize = require('sequelize');
 
-class MatchPlayGroupPlayer extends Base {
+class MatchPlayClub extends Base {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
@@ -11,38 +11,39 @@ class MatchPlayGroupPlayer extends Base {
    */
   static associate(models) {
     // define association here
-    MatchPlayGroupPlayer.belongsTo(models.MatchPlayGroup, {
-      as: 'group',
-      foreignKey: 'matchplay_group_id',
-      targetKey: 'matchplay_group_id',
+    MatchPlayClub.belongsTo(models.Course, {
+      as: 'course',
+      foreignKey: 'course_id',
+      targetKey: 'course_id',
     });
-    MatchPlayGroupPlayer.hasMany(models.Player, {
-      as: 'players',
-      foreignKey: 'player_id',
-      sourceKey: 'player_id',
+    MatchPlayClub.hasMany(models.MatchPlayTeam, {
+      as: 'teams',
+      foreignKey: 'matchplay_club_id',
+      sourceKey: 'matchplay_club_id',
     });
   }
   static init(sequelize) {
     return super.init(
       {
-        id: {
+        matchplay_club_id: {
           type: Sequelize.INTEGER,
           autoIncrement: true,
           primaryKey: true,
         },
-        matchplay_group_id: Sequelize.INTEGER,
-        player_id: Sequelize.INTEGER,
+        course_id: Sequelize.INTEGER,
+        name: Sequelize.STRING,
+        total_player: Sequelize.INTEGER,
       },
       {
         sequelize,
-        modelName: 'MatchPlayGroupPlayer',
+        modelName: 'MatchPlayClub',
         freezeTableName: true,
-        tableName: 'matchplaygroupplayers',
+        tableName: 'matchplayclubs',
         timestamps: true,
       }
     );
   }
 }
 module.exports = {
-  MatchPlayGroupPlayer,
+  MatchPlayClub,
 };

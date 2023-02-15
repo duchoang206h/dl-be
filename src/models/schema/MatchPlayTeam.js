@@ -11,15 +11,15 @@ class MatchPlayTeam extends Base {
    */
   static associate(models) {
     // define association here
-    MatchPlayTeam.belongsTo(models.Course, {
-      as: 'course',
-      foreignKey: 'course_id',
-      targetKey: 'course_id',
+    MatchPlayTeam.belongsTo(models.MatchPlayClub, {
+      as: 'club',
+      foreignKey: 'matchplay_club_id',
+      targetKey: 'matchplay_club_id',
     });
-    MatchPlayTeam.hasMany(models.MatchPlayTeam, {
-      as: 'groups',
+    MatchPlayTeam.hasMany(models.MatchPlayTeamPlayer, {
       foreignKey: 'matchplay_team_id',
       sourceKey: 'matchplay_team_id',
+      as: 'team_players',
     });
   }
   static init(sequelize) {
@@ -30,8 +30,11 @@ class MatchPlayTeam extends Base {
           autoIncrement: true,
           primaryKey: true,
         },
+        matchplay_club_id: Sequelize.INTEGER,
+        match_num: Sequelize.INTEGER,
+        round_num: Sequelize.INTEGER,
         course_id: Sequelize.INTEGER,
-        name: Sequelize.STRING,
+        type: Sequelize.STRING,
         total_player: Sequelize.INTEGER,
       },
       {

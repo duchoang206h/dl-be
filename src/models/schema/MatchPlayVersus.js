@@ -24,13 +24,14 @@ class MatchPlayVersus extends Base {
         round_num: Sequelize.INTEGER,
         match_num: Sequelize.INTEGER,
         type: Sequelize.STRING,
-        from: Sequelize.INTEGER,
-        to: Sequelize.INTEGER,
+        host: Sequelize.INTEGER,
+        guest: Sequelize.INTEGER,
         finish: {
           type: Sequelize.BOOLEAN,
           defaultValue: false,
         },
         winner: Sequelize.STRING,
+        result: Sequelize.STRING,
       },
       {
         sequelize,

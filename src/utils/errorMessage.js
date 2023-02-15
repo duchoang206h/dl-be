@@ -14,6 +14,7 @@ const INVALID_GOLFER_LEVEL = `Level must be Amateur or Professional`;
 const INVALID_GOLFER_NAME = `Golfer name field must be unique`;
 const INVALID_SCORE_INPUT = `Previous hole score must be completed, then create a new one`;
 const INVALID_COUNTRY_CODE = `Invalid country code`;
+const COURSE_TYPE_NOT_FOUND = `Course type not found`;
 module.exports = {
   TOKEN_EXPIRED,
   TOKEN_INVALID,
@@ -31,4 +32,5 @@ module.exports = {
   INVALID_SCORE_INPUT,
   INVALID_GOLFER_LEVEL,
   INVALID_COUNTRY_CODE,
+  COURSE_TYPE_NOT_FOUND,
 };

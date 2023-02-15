@@ -16,9 +16,9 @@ const { Image } = require('./Image');
 const { TeeTimeGroupPlayer } = require('./TeetimeGroupPlayer');
 const { CurrentScore } = require('./CurrentScore');
 const { Match } = require('./Match');
-const { MatchPlayGroup } = require('./MatchPlayGroup');
-const { MatchPlayGroupPlayer } = require('./MatchPlayGroupPlayer');
 const { MatchPlayTeam } = require('./MatchPlayTeam');
+const { MatchPlayTeamPlayer } = require('./MatchPlayTeamPlayer');
+const { MatchPlayClub } = require('./MatchPlayClub');
 const { MatchPlayVersus } = require('./MatchPlayVersus');
 const { MatchPlayScore } = require('./MatchPlayerScore');
 const db = {};
@@ -38,10 +38,10 @@ const models = {
   Token,
   CurrentScore,
   Match,
-  MatchPlayGroup,
-  MatchPlayGroupPlayer,
-  MatchPlayScore,
   MatchPlayTeam,
+  MatchPlayTeamPlayer,
+  MatchPlayScore,
+  MatchPlayClub,
   MatchPlayVersus,
 };
 const sequelize = new Sequelize(process.env.DB_URL, { dialect: 'mysql', logging: false });

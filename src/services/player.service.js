@@ -60,8 +60,8 @@ const updatePlayer = async (updateBody, { playerId, courseId }) => {
   }
 };
 const exportPlayerByCourseId = async (courseId) => {
-  let players = await Player.findAll({ where: { course_id: courseId }, attributes: ['fullname', 'vga'], raw: true });
-  players = players.map((p, i) => ({ stt: i + 1, 'name-golfer': p.fullname, vga: p.vga }));
+  let players = await Player.findAll({ where: { course_id: courseId }, attributes: ['fullname', 'vga', 'club'], raw: true });
+  players = players.map((p, i) => ({ stt: i + 1, 'name-golfer': p.fullname, vga: p.vga, club: p.club }));
   writeToXlsx(players, path.resolve(__dirname, '..', '..', 'data', 'course_player.xlsx'));
 };
 module.exports = {

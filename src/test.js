@@ -1,50 +1,149 @@
-const NodeCache = require('node-cache');
-const cache = new NodeCache({ stdTTL: 100, checkperiod: 120, useClones: false, maxKeys: 100 });
-const { createClient } = require('redis');
-const client = createClient({
-  url: `redis://@42.96.43.9:6379`,
-  database: 0,
-});
-const redisConnect = async () => {
-  await client
-    .connect()
-    .then(() => console.log('connect to redis'))
-    .catch((error) => console.log(error));
-};
-const setCache = async (key, data, ttl = 10 * 60) => {
-  try {
-    await client.set(key, JSON.stringify(data), { EX: ttl });
-  } catch (error) {
-    console.log(error);
+function main() {
+  const teetimes = [
+    {
+      club: 'Miền Nam',
+      'name-golfer': 'Deanna Sawayn',
+      type: 'Foursome',
+      match_num: 1,
+      tee: 1,
+      time: '07:00',
+    },
+    {
+      club: 'Miền Nam',
+      'name-golfer': 'Bessie Veum',
+      type: 'Foursome',
+      match_num: 1,
+      tee: 1,
+      time: '07:00',
+    },
+    {
+      club: 'Miền Nam',
+      'name-golfer': 'Jim Heaney',
+      type: 'Foursome',
+      match_num: 2,
+      tee: 1,
+      time: '07:10',
+    },
+    {
+      club: 'Miền Nam',
+      'name-golfer': 'Vicky Hills',
+      type: 'Foursome',
+      match_num: 2,
+      tee: 1,
+      time: '07:10',
+    },
+    {
+      club: 'Miền Nam',
+      'name-golfer': 'Lorene Wunsch II',
+      type: 'Foursome',
+      match_num: 3,
+      tee: 1,
+      time: '07:20',
+    },
+    {
+      club: 'Miền Nam',
+      'name-golfer': 'Clayton Mante',
+      type: 'Foursome',
+      match_num: 3,
+      tee: 1,
+      time: '07:20',
+    },
+    {
+      club: 'Miền Nam',
+      'name-golfer': 'Lorene Rogahn',
+      type: 'Foursome',
+      match_num: 4,
+      tee: 1,
+      time: '07:30',
+    },
+    {
+      club: 'Miền Nam',
+      'name-golfer': 'Joyce Kuhn',
+      type: 'Foursome',
+      match_num: 4,
+      tee: 1,
+      time: '07:30',
+    },
+    {
+      club: 'Miền Bắc',
+      'name-golfer': 'Winston Christiansen',
+      type: 'Foursome',
+      match_num: 1,
+      tee: 1,
+      time: '07:00',
+    },
+    {
+      club: 'Miền Bắc',
+      'name-golfer': 'Jamie Corwin',
+      type: 'Foursome',
+      match_num: 1,
+      tee: 1,
+      time: '07:00',
+    },
+    {
+      club: 'Miền Bắc',
+      'name-golfer': 'Hector Greenholt',
+      type: 'Foursome',
+      match_num: 2,
+      tee: 1,
+      time: '07:10',
+    },
+    {
+      club: 'Miền Bắc',
+      'name-golfer': 'Jan Bode',
+      type: 'Foursome',
+      match_num: 2,
+      tee: 1,
+      time: '07:10',
+    },
+    {
+      club: 'Miền Bắc',
+      'name-golfer': 'Scott Hane',
+      type: 'Foursome',
+      match_num: 3,
+      tee: 1,
+      time: '07:20',
+    },
+    {
+      club: 'Miền Bắc',
+      'name-golfer': 'Guy Heaney',
+      type: 'Foursome',
+      match_num: 3,
+      tee: 1,
+      time: '07:20',
+    },
+    {
+      club: 'Miền Bắc',
+      'name-golfer': 'Muriel Windler',
+      type: 'Foursome',
+      match_num: 4,
+      tee: 1,
+      time: '07:30',
+    },
+    {
+      club: 'Miền Bắc',
+      'name-golfer': 'Ralph Bergnaum',
+      type: 'Foursome',
+      match_num: 4,
+      tee: 1,
+      time: '07:30',
+    },
+  ];
+  const teamVersus = [];
+  const matches = [1, 2, 3, 4];
+  for (let i = 0; i < matches.length; i++) {
+    let teams = [];
+    for (let j = 0; j < teetimes.length; j++) {
+      if (teetimes[j]['match_num'] === matches[i]) teams.push(teetimes[j]);
+    }
+    let hostTeam = teams.shift();
+
+    const guestTeam = teams.filter((t) => t.club !== hostTeam.club);
+    hostTeam = [hostTeam, teams.find((t) => t.club === hostTeam.club)];
+    console.log({ hostTeam });
+    console.log({ guestTeam });
+    teamVersus.push([hostTeam, guestTeam]);
   }
-};
-const getCache = async (key) => {
-  try {
-    const data = await client.get(key);
-    return JSON.parse(data);
-  } catch (error) {
-    return null;
-  }
-};
-const hasKey = async (key) => {
-  try {
-    return await client.exists(key);
-  } catch (error) {
-    return false;
-    console.log(error);
-  }
-};
-const clearCache = async () => {
-  await client.flushAll();
-  logger.info('clear cache');
-};
-async function main() {
-  try {
-    await redisConnect();
-    await setCache('test', JSON.stringify({ aa: 'aa' }));
-    console.log(await getCache('test'));
-  } catch (error) {
-    console.log(error);
-  }
+  console.log(teamVersus);
 }
-main();
+console.log(main());
