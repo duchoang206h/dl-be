@@ -605,7 +605,6 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   const targetPlayer = players.find((p) => p.player_id === player.player_id);
   response['MAIN'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main.type)?.url;
   response['MAIN1'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main1.type)?.url;
-  response['HOLE'] = currentScore?.hole.hole_num;
   response['YARD'] = currentScore?.hole.yards;
   response['PLAYER1'] = player.fullname;
 
@@ -624,7 +623,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   }
   response[`GAYOVER`] = currentScore?.num_putt;
   response[`HOLE`] = currentScore?.hole?.hole_num;
-  response[`PAR`] = currentScore?.hole?.par;
+  response[`PAR_HOLE`] = currentScore?.hole?.par;
   response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore?.num_putt, currentScore?.hole?.par)) || null;
   response[`TITLEGAYOVER`] = getScoreTitle(currentScore?.num_putt, currentScore?.hole?.par);
   for (let i = 1; i <= currentScore?.hole?.par; i++) {
