@@ -1,6 +1,6 @@
 const { Op } = require('sequelize');
 const { courseService, playerService, roundService } = require('.');
-const { isValid, alpha2ToAlpha3, alpha3ToAlpha2 } = require('i18n-iso-countries')
+const { isValid, alpha2ToAlpha3, alpha3ToAlpha2 } = require('i18n-iso-countries');
 const {
   SCORE_TYPE,
   HOLE_PER_COURSE,
@@ -61,7 +61,7 @@ const getHoleStatistic = async ({ courseId, roundNum, holeNum, type }) => {
       statistic[score.score_type] = score.total;
     }
   }
-  response['HOLE'] =  hole.hole_num;
+  response['HOLE'] = hole.hole_num;
   response['PAR_HOLE'] = hole.par;
   response['YARDS'] = hole.yards;
 
@@ -248,11 +248,6 @@ const getFlightStatic = async ({ courseId, flight, roundNum }) => {
       where: { group_num: flight, course_id: courseId, round_id: round.round_id },
       include: [
         {
-          model: TeeTimeGroupPlayer,
-          as: 'group_players',
-          include: [{ model: Player, as: 'players', include: [{ model: Score, as: 'scores' }] }],
-        },
-        {
           model: TeeTime,
           as: 'teetime',
         },
@@ -267,10 +262,18 @@ const getFlightStatic = async ({ courseId, flight, roundNum }) => {
       },
     }),
   ]);
+  const groupPlayers = await TeeTimeGroupPlayer.findAll({
+    where: { teetime_group_id: group.teetime_group_id },
+    include: [{ model: Player, as: 'players' }],
+    raw: true,
+  });
   response['MAIN'] = images.find((img) => img.type == GROUP_RANK_IMAGES.main.type)?.url;
   response['MAIN1'] = images.find((img) => img.type == GROUP_RANK_IMAGES.main1.type)?.url;
-  response['GROUP'] = 'GROUP ' + group.group_num;
+  response['GROUP'] = group.group_num;
   response['TEE_TIME'] = group.teetime.time;
+
+  const flightPlayerIds = groupPlayers.map((p) => p['players.player_id']);
+  players = players.filter((p) => flightPlayerIds.includes(p.player_id));
   players.forEach((player, index) => {
     response[`G${index + 1}`] = player.fullname;
     response[`AVATAR${index + 1}`] = player.avatar_url;
@@ -307,7 +310,8 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
   let response = {};
   response['MAIN'] = images.find((img) => img.type == SCORECARD_IMAGES.main.type)?.url;
   response[`G1`] = player.fullname;
-
+  response[`IMG_COUNTRY1`] = player.flag;
+  response[`NATION1`] = player.country.length == 2 ? alpha2ToAlpha3(player.country) : player.country;
   player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
 
   //TOTALOVER
@@ -325,6 +329,7 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
     response[`G1SCORE${index + 1}`] = score.num_putt;
     response[`G1IMG${index + 1}`] = getScoreImage(images, score.score_type);
   });
+
   /// iamge TOTALOVER
   response['STT_TOTALOVER'] = getTotalOverImage(images, totalOver);
   response['OUT'] = player.scores.slice(0, 9).reduce((pre, cur) => pre + cur.num_putt, 0);
@@ -362,7 +367,7 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
           where: {
             player_id: player.player_id,
             round_id: round.round_id,
-           /*  updatedAt: {
+            /*  updatedAt: {
               [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
               [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
             }, */
@@ -488,7 +493,8 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
     response[`RANK${index + 1}`] = player.pos;
     response[`GROSS${index + 1}`] = player.gross;
     response[`TOTAL_GROSS${index + 1}`] = player.total_gross;
-    response[`NATION${index+1}`] = player.country.length === 2 && isValid(player.country)? alpha2ToAlpha3(player.country): player.country
+    response[`NATION${index + 1}`] =
+      player.country.length === 2 && isValid(player.country) ? alpha2ToAlpha3(player.country) : player.country;
     if (type === 'mini')
       response[`IMG_OVER_MINI${index + 1}`] =
         player.total == 0
@@ -526,8 +532,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
     players.map(async (player) => {
       player = player.toJSON();
 
-      const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');;
-      console.log({ _today});
+      const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');
       const [thru, todayScore, totalScore] = await Promise.all([
         Score.count({ where: { player_id: player.player_id, course_id: courseId } }),
         Score.findAll({
@@ -565,11 +570,21 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
         score.toJSON();
         return pre + score.num_putt;
       }, 0);
-      player['thru'] = thru
+      player['thru'] = thru;
       player['today'] = today;
       player['total'] = total;
       player['gross'] = gross;
       player['total_gross'] = totalGross;
+      player['statistic'] = {};
+      Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
+      for (const score of todayScore) {
+        if (Object.values(SCORE_TYPE).includes(score.score_type)) {
+          player['statistic'][score.score_type.toUpperCase()] = score.total;
+        }
+      }
+      player['statistic']['BOGEY'] = player['statistic']['BOGEY'] + player['statistic']['D.BOGEY+'];
+      delete player['statistic']['D.BOGEY+'];
+
       return player;
     })
   );
@@ -586,22 +601,22 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
     where: { player_id: player.player_id, course_id: courseId },
     include: [{ model: Hole, as: 'hole' }],
   });
-  const response = {};
+  let response = {};
   const targetPlayer = players.find((p) => p.player_id === player.player_id);
-  console.log({});
   response['MAIN'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main.type)?.url;
   response['MAIN1'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main1.type)?.url;
   response['HOLE'] = currentScore?.hole.hole_num;
   response['YARD'] = currentScore?.hole.yards;
   response['PLAYER1'] = player.fullname;
-  response['COUNTRY'] = player.country.length === 2 && isValid(player.country)? alpha2ToAlpha3(player.country): player.country;
+
+  response['COUNTRY'] =
+    player.country.length === 2 && isValid(player.country) ? alpha2ToAlpha3(player.country) : player.country;
   response['IMG_COUNTRY'] = player.flag;
   response['TODAY'] = targetPlayer.today;
   response['THRU'] = targetPlayer.thru % HOLE_PER_COURSE == 0 ? FINISH_ALL_ROUNDS : targetPlayer.thru % HOLE_PER_COURSE;
   response['OVER'] = targetPlayer.total;
   response['RANK_STT'] = targetPlayer.pos;
   for (const r of rounds) {
-    console.log(r);
     response[`ROUND${r.round_num}`] =
       (await Score.sum('num_putt', {
         where: { course_id: courseId, player_id: player.player_id, round_id: r.round_id },
@@ -611,12 +626,13 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
   response[`HOLE`] = currentScore?.hole?.hole_num;
   response[`PAR`] = currentScore?.hole?.par;
   response[`STTGAYOVER`] = getScoreImage(images, getScoreType(currentScore?.num_putt, currentScore?.hole?.par)) || null;
-  response[`TITLEGAYOVER`] = getScoreTitle(currentScore?.num_putt, currentScore?.hole?.par)
-    for (let i = 1; i <= currentScore?.hole?.par; i++) {
-      response[`STROKE${i}`] = i;
-    }
+  response[`TITLEGAYOVER`] = getScoreTitle(currentScore?.num_putt, currentScore?.hole?.par);
+  for (let i = 1; i <= currentScore?.hole?.par; i++) {
+    response[`STROKE${i}`] = i;
+  }
   response['RESULT'] = null;
   response['RESULT2'] = null;
+  response = { ...response, ...targetPlayer['statistic'] };
   return response;
 };
 const getGolferBottom = async ({ code, courseId }) => {
@@ -634,9 +650,6 @@ const getGolferBottom = async ({ code, courseId }) => {
     }),
   ]);
   const today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');
-  console.log({ today });
-  console.log(moment(today, 'DD-MM-YYYY').toDate());
-  console.log(moment(today, 'DD-MM-YYYY').add(1, 'days').toDate());
   const [todayScores, totalScores] = await Promise.all([
     Score.findAll({
       where: {
@@ -659,7 +672,6 @@ const getGolferBottom = async ({ code, courseId }) => {
       include: [{ model: Hole }],
     }),
   ]);
-  console.log(todayScores);
   Object.values(SCORE_TYPE).forEach((type) => (response[type.toUpperCase()] = 0));
   for (const score of todayScores) {
     if (Object.values(SCORE_TYPE).includes(score.score_type)) {
