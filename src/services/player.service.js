@@ -1,11 +1,29 @@
-const { Course, User, Player, sequelize } = require('../models/schema');
+const { Course, User, Player, sequelize, MatchPlayClub } = require('../models/schema');
 const { Op } = require('sequelize');
+const _ = require('lodash');
 const { uploadSingleFile } = require('./upload.service');
 const { InternalServerError } = require('../utils/ApiError');
 const path = require('path');
 const { writeToXlsx } = require('./xlsxService');
+const { courseService } = require('.');
+const { COURSE_TYPE } = require('../config/constant');
 const createManyPlayer = async (data) => {
-  await Player.bulkCreate(data);
+  const t = await sequelize.transaction();
+  try {
+    const course = await courseService.getCourseById(data[0]?.course_id);
+    let clubs;
+    if (course.type === COURSE_TYPE.MATCH_PLAY) {
+      clubs = _.map(_.uniqBy(data, 'club'), 'club');
+      clubs = clubs.map((c, i) => ({ course_id: data[0]?.course_id, name: c, type: i == 0 ? 'host' : 'guest' }));
+      await MatchPlayClub.bulkCreate(clubs, { transaction: t });
+    }
+    await Player.bulkCreate(data, { transaction: t });
+    await t.commit();
+    return true;
+  } catch (error) {
+    await t.rollback();
+    throw new InternalServerError();
+  }
 };
 const uploadAvatar = async (file, { courseId, playerId }) => {
   const path = await uploadSingleFile(file);

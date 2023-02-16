@@ -33,6 +33,10 @@ class MatchPlayClub extends Base {
         course_id: Sequelize.INTEGER,
         name: Sequelize.STRING,
         total_player: Sequelize.INTEGER,
+        type: {
+          type: Sequelize.STRING,
+          defaultValue: 'host',
+        },
       },
       {
         sequelize,

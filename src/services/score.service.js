@@ -27,6 +27,7 @@ const {
   MatchPlayTeam,
   MatchPlayTeamPlayer,
   MatchPlayVersus,
+  GolfCourse,
 } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
@@ -1048,6 +1049,7 @@ const getPlayerScore = async (courseId, playerId) => {
 };
 const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
   const where = {};
+  const response = {};
   if (roundNum) where['round_num'] = roundNum;
   const course = await Course.findOne({
     where: { course_id: courseId },
@@ -1055,14 +1057,24 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
       {
         model: MatchPlayVersus,
         as: 'versus',
-      },
-      {
-        model: MatchPlayClub,
-        as: 'clubs',
         include: [
           {
             model: MatchPlayTeam,
-            as: 'teams',
+            as: 'host_team',
+            where,
+            include: [
+              {
+                model: MatchPlayTeamPlayer,
+                as: 'team_players',
+                include: [
+                  { model: Player, as: 'players', include: [{ model: Score, as: 'scores', include: [{ model: Hole }] }] },
+                ],
+              },
+            ],
+          },
+          {
+            model: MatchPlayTeam,
+            as: 'guest_team',
             where,
             include: [
               {
@@ -1074,10 +1086,45 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
           },
         ],
       },
+      {
+        model: MatchPlayClub,
+        as: 'clubs',
+      },
+      {
+        model: GolfCourse,
+        as: 'golf_course',
+        include: [{ model: Hole, as: 'holes', attributes: ['meters', 'par', 'yards', 'hole_num'] }],
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+      },
+    ],
+    order: [
+      [{ model: GolfCourse, as: 'golf_course' }, { model: Hole, as: 'holes' }, 'hole_num', 'ASC'],
+      [{ model: MatchPlayVersus, as: 'versus' }, 'match_num', 'ASC'],
     ],
   });
+  const matches = course?.versus.map((v) => {
+    return {
+      match: v?.match_num,
+      type: v?.type,
+      host: v?.host_team?.team_players?.map((p) => p.players),
+      guest: v?.guest_team?.team_players?.map((p) => p.players),
+      score: 2,
+      leave_hole: [17, 18],
+      start_hole: 1,
+    };
+  });
+  response['matches'] = matches;
+  response['golf_course'] = course.golf_course;
+  response['host'] = {
+    name: 'Miền Bắc',
+    score: 10,
+  };
+  response['guest'] = {
+    name: 'Miền Name',
+    score: 10,
+  };
   return {
-    result: course,
+    result: response,
   };
 };
 

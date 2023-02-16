@@ -86,12 +86,11 @@ const createManyTeetime = async (teetimes, { courseId, roundNum, courseType }) =
         for (let j = 0; j < teetimes.length; j++) {
           if (teetimes[j]['match_num'] === matches[i]) teams.push(teetimes[j]);
         }
-        let hostTeam = teams.shift();
+        let hostTeam = teams.find((t) => clubs.find((c) => c.type === 'host')?.matchplay_club_id === t?.matchplay_club_id);
         const guestTeam = teams.filter((t) => t.club !== hostTeam.club);
         hostTeam = [hostTeam, teams.find((t) => t.club === hostTeam.club)];
         teamVersus.push([hostTeam, guestTeam]);
       }
-      console.log({ teamVersus });
       await Promise.all(
         teamVersus.map(async (teams) => {
           console.log({ teams });
