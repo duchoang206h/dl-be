@@ -15,6 +15,7 @@ const path = require('path');
 const importPlayers = catchAsync(async (req, res) => {
   const [data, error] = await getDataFromXlsx(req.files[0].buffer, playerSchema);
   if (error) throw error;
+  let notVgaPlayerCount = 1;
   const players = data.map((player) => ({
     fullname: player['name-golfer'],
     country: player['country'],
@@ -52,12 +53,20 @@ const importPlayers = catchAsync(async (req, res) => {
       const countryCode3Alpha = players[i].country.length === 2 ? alpha2ToAlpha3(players[i].country) : players[i].country;
       let count = await Player.count({
         where: {
-          vga: {
-            [Op.like]: `${countryCode3Alpha}%${suffix}`,
-          },
+          [Op.or]: [
+            {
+              vga: {
+                [Op.like]: `%P`,
+              },
+              vga: {
+                [Op.like]: `%A`,
+              },
+            },
+          ],
         },
       });
-      players[i].vga = await genVGA(players[i].country, suffix, count + 1);
+      players[i].vga = await genVGA(players[i].country, suffix, count + notVgaPlayerCount);
+      notVgaPlayerCount++;
     }
   }
   await playerService.createManyPlayer(players);
