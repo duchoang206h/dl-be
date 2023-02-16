@@ -21,6 +21,16 @@ class MatchPlayTeam extends Base {
       sourceKey: 'matchplay_team_id',
       as: 'team_players',
     });
+    MatchPlayTeam.belongsTo(models.MatchPlayVersus, {
+      as: 'host',
+      foreignKey: 'matchplay_team_id',
+      targetKey: 'host',
+    });
+    MatchPlayTeam.belongsTo(models.MatchPlayVersus, {
+      as: 'guest',
+      foreignKey: 'matchplay_team_id',
+      targetKey: 'guest',
+    });
   }
   static init(sequelize) {
     return super.init(

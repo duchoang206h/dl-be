@@ -22,6 +22,11 @@ const {
   TeeTimeGroup,
   Sequelize,
   CurrentScore,
+  Course,
+  MatchPlayClub,
+  MatchPlayTeam,
+  MatchPlayTeamPlayer,
+  MatchPlayVersus,
 } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
@@ -149,7 +154,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
     ]);
     const result = await Promise.all(
       scores.map(async (score) => {
-        const { hole_num, num_putt, finished } = score;
+        const { hole_num, num_putt, finished, match_num = null } = score;
         const [hole, preScoreCount] = await Promise.all([
           holeService.getHoleByNumAndGolfCourseId(hole_num, course.golf_course_id),
           Score.findAll({
@@ -179,6 +184,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
             defaults: {
               num_putt,
               score_type: scoreType,
+              match_num,
             },
             transaction: t,
           });
@@ -204,6 +210,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                 round_num: roundNum,
                 num_putt,
                 score_type: scoreType,
+                match_num,
               },
               { where: { player_id: playerId, course_id: courseId } }
             );
@@ -215,6 +222,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
               score_type: scoreType,
               player_id: playerId,
               course_id: courseId,
+              match_num,
             });
           }
         }
@@ -1038,6 +1046,41 @@ const getPlayerScore = async (courseId, playerId) => {
   player['today'] = today == 0 ? EVENT_ZERO : today;
   return player;
 };
+const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
+  const where = {};
+  if (roundNum) where['round_num'] = roundNum;
+  const course = await Course.findOne({
+    where: { course_id: courseId },
+    include: [
+      {
+        model: MatchPlayVersus,
+        as: 'versus',
+      },
+      {
+        model: MatchPlayClub,
+        as: 'clubs',
+        include: [
+          {
+            model: MatchPlayTeam,
+            as: 'teams',
+            where,
+            include: [
+              {
+                model: MatchPlayTeamPlayer,
+                as: 'team_players',
+                include: [{ model: Player, as: 'players', include: [{ model: Score, as: 'scores' }] }],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+  return {
+    result: course,
+  };
+};
+
 module.exports = {
   getScoresByPlayerAndRound,
   getHoleStatisticByRound,
@@ -1050,4 +1093,5 @@ module.exports = {
   getAllPlayerScore,
   getPlayerScore,
   updateManyScore,
+  getLeaderboardMatchPlay,
 };

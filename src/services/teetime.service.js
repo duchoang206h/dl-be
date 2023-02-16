@@ -10,6 +10,7 @@ const {
   MatchPlayTeam,
   MatchPlayClub,
   MatchPlayVersus,
+  MatchPlayTeamPlayer,
 } = require('../models/schema');
 const _ = require('lodash');
 const { ApiError, BadRequestError, InternalServerError } = require('../utils/ApiError');
@@ -75,11 +76,11 @@ const createManyTeetime = async (teetimes, { courseId, roundNum, courseType }) =
       const matches = _.map(_.uniqBy(teetimes, 'match_num'), 'match_num');
       let clubs = _.map(_.uniqBy(teetimes, 'club'), 'club');
       clubs = await Promise.all(
-        clubs.map((c) => MatchPlayClub.findOne({ where: { course_id: courseId, name: c.name }, raw: true }))
+        clubs.map((c) => MatchPlayClub.findOne({ where: { course_id: courseId, name: c }, raw: true }))
       );
       const clubNameToId = {};
       clubs.forEach((c) => (clubNameToId[c.name] = c.matchplay_club_id));
-      teetimes = teetimes.map((t) => ({ ...t, mathplay_club_id: clubNameToId[t.club] }));
+      teetimes = teetimes.map((t) => ({ ...t, matchplay_club_id: clubNameToId[t.club] }));
       for (let i = 0; i < matches.length; i++) {
         let teams = [];
         for (let j = 0; j < teetimes.length; j++) {
@@ -90,40 +91,45 @@ const createManyTeetime = async (teetimes, { courseId, roundNum, courseType }) =
         hostTeam = [hostTeam, teams.find((t) => t.club === hostTeam.club)];
         teamVersus.push([hostTeam, guestTeam]);
       }
+      console.log({ teamVersus });
       await Promise.all(
         teamVersus.map(async (teams) => {
-          const players = await Player.findAll({
-            where: {
-              course_id: courseId,
-              fullname: {
-                [Op.in]: teams.map((t) => t['name-golfer']),
-              },
-            },
-            raw: true,
-          });
+          console.log({ teams });
+
           const createdTeams = await Promise.all(
             teams.map(async (team) => {
+              // await MatchPlayTeamPlayer.bulkCreate();
+              const players = await Player.findAll({
+                where: {
+                  course_id: courseId,
+                  fullname: {
+                    [Op.in]: team.map((t) => t['name-golfer']),
+                  },
+                },
+                raw: true,
+              });
               return MatchPlayTeam.create(
                 {
-                  matchplay_club_id: team.matchplay_club_id,
-                  match_num: team.match_num,
+                  matchplay_club_id: team[0]?.matchplay_club_id,
+                  match_num: team[0]?.match_num,
                   round_num: roundNum,
                   course_id: courseId,
-                  type: team.type,
+                  type: team[0]?.type,
                   team_players: players.map((p) => ({ player_id: p.player_id })),
                 },
 
-                { returning: true, transaction: t, include: [{ model: Player, as: 'team_players' }] }
+                { transaction: t, include: [{ model: MatchPlayTeamPlayer, as: 'team_players' }], raw: true }
               );
             })
           );
+          console.log({ createdTeams });
           await MatchPlayVersus.create({
             course_id: courseId,
             round_num: roundNum,
-            match_num: teams[0]?.match_num,
-            type: teams[0]?.type,
-            host: createdTeams[0]['matchplay_team_id'],
-            host: createdTeams[1]['matchplay_team_id'],
+            match_num: teams[0][0]?.match_num,
+            type: teams[0][0]?.type,
+            host: createdTeams[0].dataValues['matchplay_team_id'],
+            guest: createdTeams[1].dataValues['matchplay_team_id'],
           });
         })
       );

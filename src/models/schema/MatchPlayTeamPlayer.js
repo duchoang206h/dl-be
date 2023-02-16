@@ -16,7 +16,7 @@ class MatchPlayTeamPlayer extends Base {
       foreignKey: 'matchplay_team_id',
       targetKey: 'matchplay_team_id',
     });
-    MatchPlayTeamPlayer.hasMany(models.Player, {
+    MatchPlayTeamPlayer.hasOne(models.Player, {
       as: 'players',
       foreignKey: 'player_id',
       sourceKey: 'player_id',

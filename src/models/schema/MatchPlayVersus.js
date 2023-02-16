@@ -11,6 +11,21 @@ class MatchPlayVersus extends Base {
    */
   static associate(models) {
     // define association here
+    MatchPlayVersus.belongsTo(models.Course, {
+      as: 'course',
+      foreignKey: 'course_id',
+      targetKey: 'course_id',
+    });
+    MatchPlayVersus.hasOne(models.MatchPlayTeam, {
+      as: 'host_team',
+      foreignKey: 'matchplay_team_id',
+      sourceKey: 'host',
+    });
+    MatchPlayVersus.hasOne(models.MatchPlayTeam, {
+      as: 'guest_team',
+      foreignKey: 'matchplay_team_id',
+      sourceKey: 'guest',
+    });
   }
   static init(sequelize) {
     return super.init(

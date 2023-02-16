@@ -14,6 +14,8 @@ class Course extends Base {
     Course.hasMany(models.Player, { as: 'players', foreignKey: 'course_id', sourceKey: 'course_id' });
     Course.hasMany(models.Score, { as: 'images', foreignKey: 'course_id', sourceKey: 'course_id' });
     Course.belongsTo(models.GolfCourse, { as: 'golf_course', foreignKey: 'golf_course_id', targetKey: 'golf_course_id' });
+    Course.hasMany(models.MatchPlayClub, { as: 'clubs', foreignKey: 'course_id', sourceKey: 'course_id' });
+    Course.hasMany(models.MatchPlayVersus, { as: 'versus', foreignKey: 'course_id', sourceKey: 'course_id' });
   }
   static init(sequelize) {
     return super.init(
