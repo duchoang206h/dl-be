@@ -58,6 +58,8 @@ const importPlayers = catchAsync(async (req, res) => {
               vga: {
                 [Op.like]: `%P`,
               },
+            },
+            {
               vga: {
                 [Op.like]: `%A`,
               },
