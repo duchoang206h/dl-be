@@ -5,7 +5,7 @@ const { playerSchema } = require('../validations/xlsx.validation');
 const { playerService } = require('../services');
 const { BadRequestError } = require('../utils/ApiError');
 const { INVALID_GOLFER_CODE, INVALID_GOLFER_LEVEL, INVALID_COUNTRY_CODE } = require('../utils/errorMessage');
-const { isValid } = require('i18n-iso-countries');
+const { isValid, alpha2ToAlpha3 } = require('i18n-iso-countries');
 const { PLAYER_LEVEL } = require('../config/constant');
 const { genVGA } = require('../utils/country');
 const { Player } = require('../models/schema');
@@ -49,10 +49,11 @@ const importPlayers = catchAsync(async (req, res) => {
       throw new BadRequestError(INVALID_GOLFER_LEVEL);
     if (!players[i].vga) {
       const suffix = players[i].level === PLAYER_LEVEL.AMATEUR ? 'A' : 'P';
+      const countryCode3Alpha = players[i].country.length === 2 ? alpha2ToAlpha3(players[i].country) : players[i].country;
       let count = await Player.count({
         where: {
           vga: {
-            [Op.like]: `${players[i].country}%${suffix}`,
+            [Op.like]: `${countryCode3Alpha}%${suffix}`,
           },
         },
       });
