@@ -1099,7 +1099,20 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
               {
                 model: MatchPlayTeamPlayer,
                 as: 'team_players',
-                include: [{ model: Player, as: 'players', include: [{ model: Score, as: 'scores' }] }],
+                include: [
+                  {
+                    model: Player,
+                    as: 'players',
+                    include: [
+                      {
+                        model: Score,
+                        as: 'scores',
+                        include: [{ model: Hole, attributes: ['hole_num'] }],
+                        attributes: ['num_putt', 'score_type'],
+                      },
+                    ],
+                  },
+                ],
               },
             ],
           },
@@ -1140,7 +1153,10 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
       ],
     ],
   });
-
+  /* console.log(
+    getMatchPlayScore(course?.versus[0]?.host_team?.team_players?.map((p) => p.players)),
+    getMatchPlayScore(course?.versus[0]?.host_team?.team_players?.map((p) => p.players))
+  ); */
   const matches = course?.versus.map((v) => {
     return {
       match: v?.match_num,
