@@ -1,4 +1,4 @@
-const { SCORE_TYPE } = require('../config/constant');
+const { SCORE_TYPE, COURSE_TYPE } = require('../config/constant');
 
 const getScoreType = (score, par) => {
   let scoreType;
@@ -210,15 +210,39 @@ const getDefaultScore = (scores) => {
 // 4-> 8
 // 6->9
 const getScoreTitle = (score, par) => {
-  let title = ''
+  let title = '';
   const distance = score - par;
-  if(distance <=-2) title = 'FOR EAGLE';
-  else if(distance === -1) title = 'FOR BIRDIE'
-  else if(distance === 0 ) title = 'FOR PAR'
-  else if(distance === 1 ) title = 'FOR BOGEY'
-  else if(distance >=2 ) title = 'FOR DOUBLE BOGEY+'
-  return title
-}
+  if (distance <= -2) title = 'FOR EAGLE';
+  else if (distance === -1) title = 'FOR BIRDIE';
+  else if (distance === 0) title = 'FOR PAR';
+  else if (distance === 1) title = 'FOR BOGEY';
+  else if (distance >= 2) title = 'FOR DOUBLE BOGEY+';
+  return title;
+};
+const getMatchPlayScore = (hostPlayers, guestPlayers, type, startHole = 1) => {
+  const host = [];
+  const guest = [];
+  let score = 0;
+  if (type === COURSE_TYPE.FOUR_BALL) {
+    for (let i = 0; i < hostPlayers[0].scores.length; i++) {
+      const betterScoreHost =
+        hostPlayers[0].scores[i]?.num_putt < hostPlayers[1].scores[i]?.num_putt
+          ? hostPlayers[0].scores[i]?.num_putt
+          : hostPlayers[1].scores[i]?.num_putt;
+      const betterScoreGuest =
+        guestPlayers[0].scores[i]?.num_putt < guestPlayers[1].scores[i]?.num_putt
+          ? guestPlayers[0].scores[i]?.num_putt
+          : guestPlayers[1].scores[i]?.num_putt;
+      host.push(betterScoreHost);
+      guest.push(betterScoreGuest);
+    }
+    for (let i = 0; i < hostPlayers[0].scores.length; i++) {
+      if (host[i] < guest[i]) score += 1;
+      if (host[i] > guest[i]) score -= 1;
+    }
+  }
+  return score;
+};
 module.exports = {
   getScoreType,
   calculateScoreAverage,
@@ -228,4 +252,5 @@ module.exports = {
   getTotalOverImage,
   getTop,
   getScoreTitle,
+  getMatchPlayScore,
 };

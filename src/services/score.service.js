@@ -31,7 +31,14 @@ const {
 } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
-const { getScoreType, calculateScoreAverage, getRank, getDefaultScore, getTop } = require('../utils/score');
+const {
+  getScoreType,
+  calculateScoreAverage,
+  getRank,
+  getDefaultScore,
+  getTop,
+  getMatchPlayScore,
+} = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
 const { NUM_PUTT_INVALID, INVALID_SCORE_INPUT } = require('../utils/errorMessage');
 
@@ -189,6 +196,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
             },
             transaction: t,
           });
+          console.log(created);
           if (exist)
             await Score.update(
               { num_putt, score_type: scoreType },
@@ -1067,7 +1075,18 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
                 model: MatchPlayTeamPlayer,
                 as: 'team_players',
                 include: [
-                  { model: Player, as: 'players', include: [{ model: Score, as: 'scores', include: [{ model: Hole }] }] },
+                  {
+                    model: Player,
+                    as: 'players',
+                    include: [
+                      {
+                        model: Score,
+                        as: 'scores',
+                        include: [{ model: Hole, attributes: ['hole_num'] }],
+                        attributes: ['num_putt', 'score_type'],
+                      },
+                    ],
+                  },
                 ],
               },
             ],
@@ -1100,8 +1119,28 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
     order: [
       [{ model: GolfCourse, as: 'golf_course' }, { model: Hole, as: 'holes' }, 'hole_num', 'ASC'],
       [{ model: MatchPlayVersus, as: 'versus' }, 'match_num', 'ASC'],
+      [
+        { model: MatchPlayVersus, as: 'versus' },
+        {
+          model: MatchPlayTeam,
+          as: 'host_team',
+        },
+        {
+          model: MatchPlayTeamPlayer,
+          as: 'team_players',
+        },
+        {
+          model: Player,
+          as: 'players',
+        },
+        { model: Score, as: 'scores' },
+        { model: Hole },
+        'hole_num',
+        'ASC',
+      ],
     ],
   });
+
   const matches = course?.versus.map((v) => {
     return {
       match: v?.match_num,
