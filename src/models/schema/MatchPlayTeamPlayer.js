@@ -31,7 +31,13 @@ class MatchPlayTeamPlayer extends Base {
           primaryKey: true,
         },
         matchplay_team_id: Sequelize.INTEGER,
-        player_id: Sequelize.INTEGER,
+        player_id: {
+          type: Sequelize.INTEGER,
+          references: {
+            key: 'player_id',
+            model: 'players',
+          },
+        },
       },
       {
         sequelize,
