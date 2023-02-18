@@ -300,31 +300,37 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
   ]);
   const player = await Player.findOne({
     where: { player_id: code, course_id: courseId },
-    include: [{ model: Score, as: 'scores', where: { round_id: round.round_id }, include: [{ model: Hole }] }],
+    //include: [{ model: Score, as: 'scores', where: { round_id: round.round_id }, include: [{ model: Hole }] }],
   });
-  const allScores = await Score.findAll({
-    where: { player_id: player.player_id, course_id: courseId },
-    include: [{ model: Hole }],
-  });
+  const [todayScores, allScores] = await Promise.all([
+    Score.findAll({
+      where: { player_id: player?.player_id, course_id: courseId, round_id: round.round_id },
+      include: [{ model: Hole }],
+    }),
+    Score.findAll({
+      where: { player_id: player?.player_id, course_id: courseId },
+      include: [{ model: Hole }],
+    }),
+  ]);
 
   let response = {};
   response['MAIN'] = images.find((img) => img.type == SCORECARD_IMAGES.main.type)?.url;
   response[`G1`] = player.fullname;
   response[`IMG_COUNTRY1`] = player.flag;
   response[`NATION1`] = player.country.length == 2 ? alpha2ToAlpha3(player.country) : player.country;
-  player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
+  todayScores.sort((a, b) => a.Hole?.hole_num - b.Hole?.hole_num);
 
   //TOTALOVER
-  const totalOver = player.scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
+  const totalOver = todayScores.reduce((pre, cur) => pre + cur.num_putt - cur?.Hole?.par, 0);
   response['TOTALOVER'] = totalOver;
   //TOTALOVERALL
-  const totalOverAll = allScores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
+  const totalOverAll = allScores.reduce((pre, cur) => pre + cur.num_putt - cur?.Hole?.par, 0);
   response['TOTALOVERALL'] = totalOverAll;
   // TOTALGROSS
   const totalGross = allScores.reduce((pre, cur) => pre + cur.num_putt, 0);
   response['TOTALGROSS'] = totalGross;
 
-  player.scores.forEach((score, index) => {
+  todayScores.forEach((score, index) => {
     score = score.toJSON();
     response[`G1SCORE${index + 1}`] = score.num_putt;
     response[`G1IMG${index + 1}`] = getScoreImage(images, score.score_type);
@@ -332,8 +338,8 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
 
   /// iamge TOTALOVER
   response['STT_TOTALOVER'] = getTotalOverImage(images, totalOver);
-  response['OUT'] = player.scores.slice(0, 9).reduce((pre, cur) => pre + cur.num_putt, 0);
-  response['IN'] = player.scores.slice(9).reduce((pre, cur) => pre + cur.num_putt, 0);
+  response['OUT'] = todayScores.slice(0, 9).reduce((pre, cur) => pre + cur.num_putt, 0);
+  response['IN'] = todayScores.slice(9).reduce((pre, cur) => pre + cur.num_putt, 0);
 
   //const [todayScore, totalScore]
   return response;
