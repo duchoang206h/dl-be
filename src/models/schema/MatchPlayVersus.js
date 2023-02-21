@@ -54,6 +54,7 @@ class MatchPlayVersus extends Base {
         freezeTableName: true,
         tableName: 'matchplayversuses',
         timestamps: true,
+        indexes: [{ fields: ['round_num'] }],
       }
     );
   }

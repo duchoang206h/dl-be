@@ -223,7 +223,7 @@ const getMatchPlayScore = (hostPlayers, guestPlayers, type, startHole = 1) => {
   const host = [];
   const guest = [];
   let score = 0;
-  console.log('scores', hostPlayers[0].scores.length);
+  console.log('scores', hostPlayers[0]);
   if (type === COURSE_TYPE.FOUR_BALL) {
     for (let i = 0; i < hostPlayers[0].scores.length; i++) {
       const betterScoreHost =

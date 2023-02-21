@@ -1058,66 +1058,9 @@ const getPlayerScore = async (courseId, playerId) => {
 const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
   const where = {};
   const response = {};
-  if (roundNum) where['round_num'] = roundNum;
   const course = await Course.findOne({
     where: { course_id: courseId },
     include: [
-      {
-        model: MatchPlayVersus,
-        as: 'versus',
-        include: [
-          {
-            model: MatchPlayTeam,
-            as: 'host_team',
-            where,
-            include: [
-              {
-                model: MatchPlayTeamPlayer,
-                as: 'team_players',
-                include: [
-                  {
-                    model: Player,
-                    as: 'players',
-                    include: [
-                      {
-                        model: Score,
-                        as: 'scores',
-                        include: [{ model: Hole, attributes: ['hole_num'] }],
-                        attributes: ['num_putt', 'score_type'],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            model: MatchPlayTeam,
-            as: 'guest_team',
-            where,
-            include: [
-              {
-                model: MatchPlayTeamPlayer,
-                as: 'team_players',
-                include: [
-                  {
-                    model: Player,
-                    as: 'players',
-                    include: [
-                      {
-                        model: Score,
-                        as: 'scores',
-                        include: [{ model: Hole, attributes: ['hole_num'] }],
-                        attributes: ['num_putt', 'score_type'],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
       {
         model: MatchPlayClub,
         as: 'clubs',
@@ -1129,11 +1072,64 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
         attributes: { exclude: ['createdAt', 'updatedAt'] },
       },
     ],
+  });
+  if (roundNum) where['round_num'] = roundNum;
+  where['course_id'] = course?.course_id;
+  const versus = await MatchPlayVersus.findAll({
+    where,
+    include: [
+      {
+        model: MatchPlayTeam,
+        as: 'host_team',
+        include: [
+          {
+            model: MatchPlayTeamPlayer,
+            as: 'team_players',
+            include: [
+              {
+                model: Player,
+                as: 'players',
+                include: [
+                  {
+                    model: Score,
+                    as: 'scores',
+                    include: [{ model: Hole, attributes: ['hole_num'] }],
+                    attributes: ['num_putt', 'score_type'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        model: MatchPlayTeam,
+        as: 'guest_team',
+        include: [
+          {
+            model: MatchPlayTeamPlayer,
+            as: 'team_players',
+            include: [
+              {
+                model: Player,
+                as: 'players',
+                include: [
+                  {
+                    model: Score,
+                    as: 'scores',
+                    include: [{ model: Hole, attributes: ['hole_num'] }],
+                    attributes: ['num_putt', 'score_type'],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
     order: [
-      [{ model: GolfCourse, as: 'golf_course' }, { model: Hole, as: 'holes' }, 'hole_num', 'ASC'],
-      [{ model: MatchPlayVersus, as: 'versus' }, 'match_num', 'ASC'],
+      ['match_num', 'ASC'],
       [
-        { model: MatchPlayVersus, as: 'versus' },
         {
           model: MatchPlayTeam,
           as: 'host_team',
@@ -1153,17 +1149,14 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
       ],
     ],
   });
-  /* console.log(
-    getMatchPlayScore(course?.versus[0]?.host_team?.team_players?.map((p) => p.players)),
-    getMatchPlayScore(course?.versus[0]?.host_team?.team_players?.map((p) => p.players))
-  ); */
-  const matches = course?.versus.map((v) => {
+
+  const matches = versus.map((v) => {
     return {
       match: v?.match_num,
       type: v?.type,
       host: v?.host_team?.team_players?.map((p) => p.players),
       guest: v?.guest_team?.team_players?.map((p) => p.players),
-      score: 2,
+      score: getMatchPlayScore(v?.host_team?.team_players, v?.guest_team?.team_players),
       leave_hole: [17, 18],
       start_hole: 1,
     };
