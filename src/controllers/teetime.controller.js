@@ -11,12 +11,13 @@ const {
   INVALID_GOLFER_NAME,
 } = require('../utils/errorMessage');
 const { BadRequestError } = require('../utils/ApiError');
+const { PLAYER_STATUS } = require('../config/constant');
 
 const importTeetime = catchAsync(async (req, res) => {
   if (req.files.length <= 0) return res.status(httpStatus.BAD_REQUEST).send();
   const [data, error] = await getDataFromXlsx(req.files[0].buffer, teetimeSchema);
   if (error) throw error;
-  const totalPlayers = await Player.count({ where: { course_id: req.params.courseId } });
+  const totalPlayers = await Player.count({ where: { course_id: req.params.courseId, status: PLAYER_STATUS.NORMAL } });
   if (totalPlayers !== data.length)
     return res.status(httpStatus.BAD_REQUEST).send({ message: TEETIME_MUST_BE_INCLUDE_ALL_PLAYERS });
   if (error) throw error;
