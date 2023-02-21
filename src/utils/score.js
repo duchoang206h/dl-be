@@ -228,6 +228,35 @@ const getScores = (scores) => {
   }
   return cloneScores;
 };
+const getScoreWithHole = (scores) => {
+  let cloneScores = [];
+  const scoreReach = cloneScores.length;
+  if (scoreReach < 18) {
+    for (let i = 1; i < scores[0]?.Hole?.hole_num; i++) {
+      cloneScores.push({
+        Hole: {
+          hole_num: i,
+        },
+        num_putt: 0,
+        score_type: null,
+      });
+    }
+    for (let i = 0; i < scores.length; i++) {
+      cloneScores.push(scores[i]);
+    }
+    for (let i = scores[scores.length - 1]?.Hole?.hole_num + 1; i < 18; i++) {
+      cloneScores.push({
+        Hole: {
+          hole_num: i,
+        },
+        num_putt: 0,
+        score_type: null,
+      });
+    }
+    return cloneScores;
+  }
+  return cloneScores;
+};
 //[1, 2, 3, 6, 3, 4, 3, 2];
 // [1,2,2,3,3,3,4,6]
 // { 1:1, 2:2, 3:3, 4;1, 6:1 }
@@ -256,4 +285,5 @@ module.exports = {
   getTop,
   getScoreTitle,
   getScores,
+  getScoreWithHole,
 };

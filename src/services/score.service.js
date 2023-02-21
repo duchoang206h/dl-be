@@ -25,7 +25,15 @@ const {
 } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
-const { getScoreType, calculateScoreAverage, getRank, getDefaultScore, getTop, getScores } = require('../utils/score');
+const {
+  getScoreType,
+  calculateScoreAverage,
+  getRank,
+  getDefaultScore,
+  getTop,
+  getScores,
+  getScoreWithHole,
+} = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
 const { NUM_PUTT_INVALID, INVALID_SCORE_INPUT } = require('../utils/errorMessage');
 
@@ -981,11 +989,12 @@ const getPlayerScore = async (courseId, playerId) => {
           attributes: ['num_putt', 'score_type', 'hole_id'],
           include: [{ model: Hole, attributes: ['hole_num'] }],
         });
-        return { scores: getDefaultScore(score), checkScores: score, round: round.round_num };
+        return { scores: getScoreWithHole(score), checkScores: score, round: round.round_num };
       })
     ),
     courseService.getCourseById(courseId),
   ]);
+  console.log({ scores });
   if (player.current_score) {
     // check current score conflict with score
     for (const s of scores) {
@@ -1005,7 +1014,7 @@ const getPlayerScore = async (courseId, playerId) => {
   for (const score of scores) {
     player['rounds'].push({
       round: score.round,
-      scores: score.scores,
+      scores: getScoreWithHole(score.scores),
       total: score.scores.reduce((pre, current) => pre + current.num_putt, 0),
     });
   }
