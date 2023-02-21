@@ -57,7 +57,7 @@ const getHoleStatistic = async ({ courseId, roundNum, holeNum, type }) => {
   const statistic = {};
   Object.values(SCORE_TYPE).forEach((type) => (statistic[type.toUpperCase()] = 0));
   for (const score of scores) {
-    if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+    if (Object.values(SCORE_TYPE).includes(score.score_type)) {
       statistic[score.score_type.toUpperCase()] += 1;
     }
   }
@@ -600,7 +600,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
               player['statistic'] = {};
               Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
               for (const score of todayScore) {
-                if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+                if (Object.values(SCORE_TYPE).includes(score.score_type)) {
                   player['statistic'][score.score_type.toUpperCase()] += 1;
                 }
               }
@@ -690,7 +690,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
               player['statistic'] = {};
               Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
               for (const score of todayScore) {
-                if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+                if (Object.values(SCORE_TYPE).includes(score.score_type)) {
                   player['statistic'][score.score_type.toUpperCase()] += 1;
                 }
               }
@@ -782,7 +782,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
               player['statistic'] = {};
               Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
               for (const score of todayScore) {
-                if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+                if (Object.values(SCORE_TYPE).includes(score.score_type)) {
                   player['statistic'][score.score_type.toUpperCase()] += 1;
                 }
               }
@@ -873,7 +873,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
               player['statistic'] = {};
               Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
               for (const score of todayScore) {
-                if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+                if (Object.values(SCORE_TYPE).includes(score.score_type)) {
                   player['statistic'][score.score_type.toUpperCase()] += 1;
                 }
               }
@@ -963,7 +963,7 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
               player['scores'] = totalScore;
               Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
               for (const score of todayScore) {
-                if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+                if (Object.values(SCORE_TYPE).includes(score.score_type)) {
                   console.log(player['statistic']);
                   player['statistic'][score.score_type.toUpperCase()] += 1;
                 }
@@ -1117,7 +1117,7 @@ const getGolferBottom = async ({ code, courseId }) => {
   ]);
   Object.values(SCORE_TYPE).forEach((type) => (response[type.toUpperCase()] = 0));
   for (const score of todayScores) {
-    if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+    if (Object.values(SCORE_TYPE).includes(score.score_type)) {
       response[score.score_type.toUpperCase()] += 1;
     }
   }
