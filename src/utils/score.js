@@ -202,27 +202,16 @@ const getDefaultScore = (scores) => {
   return cloneScores;
 };
 const getScores = (scores) => {
-  console.log(scores);
   let cloneScores = [];
   cloneScores.sort((a, b) => a.hole_num - b.hole_num);
   const scoreReach = cloneScores.length;
   if (scoreReach < 18) {
-    for (let i = 1; i < scores[0]?.hole_num; i++) {
-      cloneScores.push({
-        hole_num: i,
-        num_putt: 0,
-        score_type: null,
-      });
-    }
-    for (let i = 0; i < scores.length; i++) {
-      cloneScores.push(scores[i]);
-    }
-    for (let i = scores[scores.length - 1]?.hole_num + 1; i < 18; i++) {
-      cloneScores.push({
-        hole_num: i,
-        num_putt: 0,
-        score_type: null,
-      });
+    for (let i = 1; i <= 18; i++) {
+      const score = scores.find((s) => s.hole_num === i);
+      if (score) cloneScores.push(score);
+      else {
+        cloneScores.push({ hole_num: i, num_putt: 0, score_type: null });
+      }
     }
     return cloneScores;
   }

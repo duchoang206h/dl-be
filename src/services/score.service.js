@@ -364,6 +364,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
             avatar: player.avatar,
           };
         player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
+        console.log(player.scores);
         player.scores = player.scores.map((score) => {
           return {
             num_putt: score.num_putt,
@@ -371,7 +372,6 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
             hole_num: score.Hole.hole_num,
           };
         });
-        player.scores = getScores(player.scores);
         const total = player.scores.reduce((pre, current) => pre + current.num_putt, 0);
         const out = player.scores.slice(0, 9).reduce((pre, current) => pre + current.num_putt, 0);
         const _in = player.scores.slice(9).reduce((pre, current) => pre + current.num_putt, 0);
@@ -412,7 +412,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
           out,
           today,
           score,
-          scores: player.scores,
+          scores: player.scores, //getScores(player.scores),
           group_num: player.teetime_group_player?.TeeTimeGroup?.group_num,
           flag: player.flag,
           player_id: player.player_id,
