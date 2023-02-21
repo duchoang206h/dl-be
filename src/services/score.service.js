@@ -988,6 +988,7 @@ const getPlayerScore = async (courseId, playerId) => {
           where: { player_id: player.player_id, round_id: round.round_id, course_id: courseId },
           attributes: ['num_putt', 'score_type', 'hole_id'],
           include: [{ model: Hole, attributes: ['hole_num'] }],
+          order: [[{ model: Hole }, 'hole_num', 'asc']],
         });
         return { scores: getScoreWithHole(score), checkScores: score, round: round.round_num };
       })
@@ -1014,7 +1015,7 @@ const getPlayerScore = async (courseId, playerId) => {
   for (const score of scores) {
     player['rounds'].push({
       round: score.round,
-      scores: getScoreWithHole(score.scores),
+      scores: score.scores,
       total: score.scores.reduce((pre, current) => pre + current.num_putt, 0),
     });
   }
