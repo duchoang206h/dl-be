@@ -201,6 +201,33 @@ const getDefaultScore = (scores) => {
   }
   return cloneScores;
 };
+const getScores = (scores) => {
+  console.log(scores);
+  let cloneScores = [];
+  cloneScores.sort((a, b) => a.hole_num - b.hole_num);
+  const scoreReach = cloneScores.length;
+  if (scoreReach < 18) {
+    for (let i = 1; i < scores[0]?.hole_num; i++) {
+      cloneScores.push({
+        hole_num: i,
+        num_putt: 0,
+        score_type: null,
+      });
+    }
+    for (let i = 0; i < scores.length; i++) {
+      cloneScores.push(scores[i]);
+    }
+    for (let i = scores[scores.length - 1]?.hole_num + 1; i < 18; i++) {
+      cloneScores.push({
+        hole_num: i,
+        num_putt: 0,
+        score_type: null,
+      });
+    }
+    return cloneScores;
+  }
+  return cloneScores;
+};
 //[1, 2, 3, 6, 3, 4, 3, 2];
 // [1,2,2,3,3,3,4,6]
 // { 1:1, 2:2, 3:3, 4;1, 6:1 }
@@ -210,15 +237,15 @@ const getDefaultScore = (scores) => {
 // 4-> 8
 // 6->9
 const getScoreTitle = (score, par) => {
-  let title = ''
+  let title = '';
   const distance = score - par;
-  if(distance <=-2) title = 'FOR EAGLE';
-  else if(distance === -1) title = 'FOR BIRDIE'
-  else if(distance === 0 ) title = 'FOR PAR'
-  else if(distance === 1 ) title = 'FOR BOGEY'
-  else if(distance >=2 ) title = 'FOR DOUBLE BOGEY+'
-  return title
-}
+  if (distance <= -2) title = 'FOR EAGLE';
+  else if (distance === -1) title = 'FOR BIRDIE';
+  else if (distance === 0) title = 'FOR PAR';
+  else if (distance === 1) title = 'FOR BOGEY';
+  else if (distance >= 2) title = 'FOR DOUBLE BOGEY+';
+  return title;
+};
 module.exports = {
   getScoreType,
   calculateScoreAverage,
@@ -228,4 +255,5 @@ module.exports = {
   getTotalOverImage,
   getTop,
   getScoreTitle,
+  getScores,
 };

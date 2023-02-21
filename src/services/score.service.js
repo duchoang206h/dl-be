@@ -25,7 +25,7 @@ const {
 } = require('../models/schema');
 const { yardToMeter } = require('../utils/convert');
 const { dateWithTimezone } = require('../utils/date');
-const { getScoreType, calculateScoreAverage, getRank, getDefaultScore, getTop } = require('../utils/score');
+const { getScoreType, calculateScoreAverage, getRank, getDefaultScore, getTop, getScores } = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
 const { NUM_PUTT_INVALID, INVALID_SCORE_INPUT } = require('../utils/errorMessage');
 
@@ -363,6 +363,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
             hole_num: score.Hole.hole_num,
           };
         });
+        player.scores = getScores(player.scores);
         const total = player.scores.reduce((pre, current) => pre + current.num_putt, 0);
         const out = player.scores.slice(0, 9).reduce((pre, current) => pre + current.num_putt, 0);
         const _in = player.scores.slice(9).reduce((pre, current) => pre + current.num_putt, 0);
@@ -431,6 +432,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
     ...p,
     score: p.score == 0 ? EVENT_ZERO : p.score,
     today: p.today == 0 ? EVENT_ZERO : p.today,
+    scores: getScores(p.scores),
   }));
   const searchPlayerIds = searchPlayers.map((player) => player.player_id);
   if (name || searchPlayers.length) {
