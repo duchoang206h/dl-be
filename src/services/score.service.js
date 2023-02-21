@@ -550,7 +550,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                 Score.findAll({
                   where: {
                     player_id: player.player_id,
-                    updatedAt: {
+                    createdAt: {
                       [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
                       [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
                     },
@@ -709,7 +709,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                 Score.findAll({
                   where: {
                     player_id: player.player_id,
-                    updatedAt: {
+                    createdAt: {
                       [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
                       [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
                     },
@@ -790,7 +790,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                 Score.findAll({
                   where: {
                     player_id: player.player_id,
-                    updatedAt: {
+                    createdAt: {
                       [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
                       [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
                     },
@@ -871,7 +871,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                 Score.findAll({
                   where: {
                     player_id: player.player_id,
-                    updatedAt: {
+                    createdAt: {
                       [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
                       [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
                     },
@@ -1028,7 +1028,7 @@ const getPlayerScore = async (courseId, playerId) => {
       ? Score.findAll({
           where: {
             player_id: playerId,
-            updatedAt: {
+            createdAt: {
               [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
               [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
             },
