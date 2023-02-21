@@ -55,10 +55,10 @@ const getHoleStatistic = async ({ courseId, roundNum, holeNum, type }) => {
     raw: true,
   });
   const statistic = {};
-  Object.values(SCORE_TYPE).forEach((type) => (statistic[type] = 0));
+  Object.values(SCORE_TYPE).forEach((type) => (statistic[type.toUpperCase()] = 0));
   for (const score of scores) {
-    if (Object.values(SCORE_TYPE).includes(score.score_type)) {
-      statistic[score.score_type] = score.total;
+    if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+      statistic[score.score_type.toUpperCase()] += 1;
     }
   }
   response['HOLE'] = hole.hole_num;
@@ -519,7 +519,7 @@ const getGroupRanking = async ({ courseId }) => {};
 const getGolferInHoleStatistic = async ({ courseId, code }) => {
   let [course, player, images, players, rounds] = await Promise.all([
     courseService.getCourseById(courseId),
-    Player.findOne({ where: { course_id: courseId, player_id: code } }),
+    Player.findOne({ where: { course_id: courseId, player_id: code }, include: [{ model: Score, as: 'scores' }] }),
     Image.findAll({
       where: {
         course_id: courseId,
@@ -531,89 +531,527 @@ const getGolferInHoleStatistic = async ({ courseId, code }) => {
     Player.findAll({
       where: { course_id: courseId },
       attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+      include: [{ model: Score, as: 'scores' }],
     }),
     Round.findAll({ where: { course_id: courseId }, raw: true }),
   ]);
-  players = await Promise.all(
-    players.map(async (player) => {
-      player = player.toJSON();
-
-      const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');
-      const [thru, todayScore, totalScore] = await Promise.all([
-        Score.count({ where: { player_id: player.player_id, course_id: courseId } }),
-        Score.findAll({
-          where: {
-            player_id: player.player_id,
-            course_id: courseId,
-            updatedAt: {
-              [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
-              [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
-            },
-          },
-          include: [{ model: Hole }],
-        }),
-        Score.findAll({
-          where: {
-            player_id: player.player_id,
-            course_id: courseId,
-          },
-          include: [{ model: Hole }],
-        }),
-      ]);
-      const today = todayScore.reduce((pre, score) => {
-        score.toJSON();
-        return pre + score.num_putt - score.Hole.par;
-      }, 0);
-      const total = totalScore.reduce((pre, score) => {
-        score.toJSON();
-        return pre + score.num_putt - score.Hole.par;
-      }, 0);
-      const gross = todayScore.reduce((pre, score) => {
-        score.toJSON();
-        return pre + score.num_putt;
-      }, 0);
-      const totalGross = totalScore.reduce((pre, score) => {
-        score.toJSON();
-        return pre + score.num_putt;
-      }, 0);
-      player['thru'] = thru;
-      player['today'] = today;
-      player['total'] = total;
-      player['gross'] = gross;
-      player['total_gross'] = totalGross;
-      player['statistic'] = {};
-      Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
-      for (const score of todayScore) {
-        if (Object.values(SCORE_TYPE).includes(score.score_type)) {
-          player['statistic'][score.score_type.toUpperCase()] = score.total;
-        }
-      }
-      player['statistic']['BOGEY'] = player['statistic']['BOGEY'] + player['statistic']['D.BOGEY+'];
-      delete player['statistic']['D.BOGEY+'];
-
-      return player;
-    })
+  let normalPlayers = players.filter((player) => player.status === PLAYER_STATUS.NORMAL);
+  let outCutPlayers = players.filter(
+    (player) => player.status !== PLAYER_STATUS.NORMAL && player.status !== PLAYER_STATUS.WITHDRAW
   );
-  const scores = players.map(({ total }) => total, 0);
+  let scoredOutCutPlayers = outCutPlayers.filter((p) => p.scores.length);
+  let nonScoredOutCutPlayers = outCutPlayers.filter((p) => p.scores.length === 0);
+  let withdrawPlayers = players.filter((player) => player.status === PLAYER_STATUS.WITHDRAW);
+  let scoredPlayers = normalPlayers.filter((player) => player.scores.length);
+  let nonScoredPlayers = normalPlayers.filter((player) => player.scores.length === 0);
+  const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), 'DD-MM-YYYY').format('DD-MM-YYYY');
+  let [_scoredPlayers, _nonScoredPlayers, _scoredOutCutPlayers, _nonScoredOutCutPlayers, _withdrawPlayers] =
+    await Promise.all([
+      new Promise(async (resolve, reject) => {
+        try {
+          scoredPlayers = await Promise.all(
+            scoredPlayers.map(async (player) => {
+              player = player.toJSON();
 
-  players = players.map((player) => {
-    return {
-      ...player,
-      pos: getRank(player.total, scores),
-    };
-  });
-  players.sort((a, b) => a.pos - b.pos);
+              const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');
+              const [thru, todayScore, totalScore] = await Promise.all([
+                Score.count({ where: { player_id: player.player_id, course_id: courseId } }),
+                Score.findAll({
+                  where: {
+                    player_id: player.player_id,
+                    course_id: courseId,
+                    updatedAt: {
+                      [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
+                      [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
+                    },
+                  },
+                  include: [{ model: Hole }],
+                }),
+                Score.findAll({
+                  where: {
+                    player_id: player.player_id,
+                    course_id: courseId,
+                  },
+                  include: [{ model: Hole }],
+                }),
+              ]);
+              const today = todayScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt - score.Hole.par;
+              }, 0);
+              const total = totalScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt - score.Hole.par;
+              }, 0);
+              const gross = todayScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt;
+              }, 0);
+              const totalGross = totalScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt;
+              }, 0);
+              player['thru'] = thru;
+              player['today'] = today;
+
+              player['total'] = total;
+              player['gross'] = gross;
+              player['total_gross'] = totalGross;
+              player['statistic'] = {};
+              Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
+              for (const score of todayScore) {
+                if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+                  player['statistic'][score.score_type.toUpperCase()] += 1;
+                }
+              }
+              player['statistic']['BOGEY'] = player['statistic']['BOGEY'] + player['statistic']['D.BOGEY+'];
+              delete player['statistic']['D.BOGEY+'];
+
+              return player;
+            })
+          );
+          const scores = scoredPlayers.map(({ total }) => total);
+
+          scoredPlayers = scoredPlayers.map((player) => {
+            return {
+              ...player,
+              pos: getRank(player.total, scores),
+            };
+          });
+          scoredPlayers.sort((a, b) => a.pos - b.pos);
+          const ranks = [];
+          scoredPlayers.forEach((player) => {
+            if (player.ranking) ranks.push(player.ranking);
+          });
+          ranks.sort((a, b) => b - a);
+          scoredPlayers = scoredPlayers.map((player) => {
+            return {
+              ...player,
+              pos: getTop(player.pos, player.ranking, ranks),
+            };
+          });
+          scoredPlayers.sort((a, b) => a.pos - b.pos);
+          resolve(scoredPlayers);
+        } catch (error) {
+          resolve([]);
+        }
+      }),
+      new Promise(async (resolve, reject) => {
+        try {
+          nonScoredPlayers = await Promise.all(
+            nonScoredPlayers.map(async (player) => {
+              player = player.toJSON();
+
+              const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');
+              const [thru, todayScore, totalScore] = await Promise.all([
+                Score.count({ where: { player_id: player.player_id, course_id: courseId } }),
+                Score.findAll({
+                  where: {
+                    player_id: player.player_id,
+                    course_id: courseId,
+                    updatedAt: {
+                      [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
+                      [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
+                    },
+                  },
+                  include: [{ model: Hole }],
+                }),
+                Score.findAll({
+                  where: {
+                    player_id: player.player_id,
+                    course_id: courseId,
+                  },
+                  include: [{ model: Hole }],
+                }),
+              ]);
+              const today = todayScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt - score.Hole.par;
+              }, 0);
+              const total = totalScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt - score.Hole.par;
+              }, 0);
+              const gross = todayScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt;
+              }, 0);
+              const totalGross = totalScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt;
+              }, 0);
+              player['thru'] = thru;
+              player['today'] = today;
+              player['scores'] = totalScore;
+
+              player['total'] = total;
+              player['gross'] = gross;
+              player['total_gross'] = totalGross;
+              player['statistic'] = {};
+              Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
+              for (const score of todayScore) {
+                if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+                  player['statistic'][score.score_type.toUpperCase()] += 1;
+                }
+              }
+              player['statistic']['BOGEY'] = player['statistic']['BOGEY'] + player['statistic']['D.BOGEY+'];
+              delete player['statistic']['D.BOGEY+'];
+
+              return player;
+            })
+          );
+          const scores = nonScoredPlayers.map(({ total }) => total);
+
+          nonScoredPlayers = nonScoredPlayers.map((player) => {
+            return {
+              ...player,
+              pos: getRank(player.total, scores),
+            };
+          });
+          nonScoredPlayers.sort((a, b) => a.pos - b.pos);
+          const ranks = [];
+          nonScoredPlayers.forEach((player) => {
+            if (player.ranking) ranks.push(player.ranking);
+          });
+          ranks.sort((a, b) => b - a);
+          nonScoredPlayers = nonScoredPlayers.map((player) => {
+            return {
+              ...player,
+              pos: getTop(player.pos, player.ranking, ranks),
+            };
+          });
+          nonScoredPlayers.sort((a, b) => a.pos - b.pos);
+          resolve(nonScoredPlayers);
+        } catch (error) {
+          console.log(error);
+          resolve([]);
+        }
+      }),
+
+      new Promise(async (resolve, reject) => {
+        try {
+          scoredOutCutPlayers = await Promise.all(
+            scoredOutCutPlayers.map(async (player) => {
+              player = player.toJSON();
+
+              const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');
+              const [thru, todayScore, totalScore] = await Promise.all([
+                Score.count({ where: { player_id: player.player_id, course_id: courseId } }),
+                Score.findAll({
+                  where: {
+                    player_id: player.player_id,
+                    course_id: courseId,
+                    updatedAt: {
+                      [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
+                      [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
+                    },
+                  },
+                  include: [{ model: Hole }],
+                }),
+                Score.findAll({
+                  where: {
+                    player_id: player.player_id,
+                    course_id: courseId,
+                  },
+                  include: [{ model: Hole }],
+                }),
+              ]);
+              const today = todayScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt - score.Hole.par;
+              }, 0);
+              const total = totalScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt - score.Hole.par;
+              }, 0);
+              const gross = todayScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt;
+              }, 0);
+              const totalGross = totalScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt;
+              }, 0);
+              player['thru'] = thru;
+              player['today'] = today;
+              player['scores'] = totalScore;
+
+              player['total'] = total;
+              player['gross'] = gross;
+              player['total_gross'] = totalGross;
+              player['statistic'] = {};
+              Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
+              for (const score of todayScore) {
+                if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+                  player['statistic'][score.score_type.toUpperCase()] += 1;
+                }
+              }
+              player['statistic']['BOGEY'] = player['statistic']['BOGEY'] + player['statistic']['D.BOGEY+'];
+              delete player['statistic']['D.BOGEY+'];
+
+              return player;
+            })
+          );
+          const scores = scoredOutCutPlayers.map(({ total }) => total);
+
+          scoredOutCutPlayers = scoredOutCutPlayers.map((player) => {
+            return {
+              ...player,
+              pos: getRank(player.total, scores),
+            };
+          });
+          scoredOutCutPlayers.sort((a, b) => a.pos - b.pos);
+          const ranks = [];
+          scoredOutCutPlayers.forEach((player) => {
+            if (player.ranking) ranks.push(player.ranking);
+          });
+          ranks.sort((a, b) => b - a);
+          scoredOutCutPlayers = scoredOutCutPlayers.map((player) => {
+            return {
+              ...player,
+              pos: getTop(player.pos, player.ranking, ranks),
+            };
+          });
+          scoredOutCutPlayers.sort((a, b) => a.pos - b.pos);
+          resolve(scoredOutCutPlayers);
+        } catch (error) {
+          console.log(error);
+          resolve([]);
+        }
+      }),
+      new Promise(async (resolve, reject) => {
+        try {
+          nonScoredOutCutPlayers = await Promise.all(
+            nonScoredOutCutPlayers.map(async (player) => {
+              player = player.toJSON();
+
+              const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');
+              const [thru, todayScore, totalScore] = await Promise.all([
+                Score.count({ where: { player_id: player.player_id, course_id: courseId } }),
+                Score.findAll({
+                  where: {
+                    player_id: player.player_id,
+                    course_id: courseId,
+                    updatedAt: {
+                      [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
+                      [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
+                    },
+                  },
+                  include: [{ model: Hole }],
+                }),
+                Score.findAll({
+                  where: {
+                    player_id: player.player_id,
+                    course_id: courseId,
+                  },
+                  include: [{ model: Hole }],
+                }),
+              ]);
+              const today = todayScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt - score.Hole.par;
+              }, 0);
+              const total = totalScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt - score.Hole.par;
+              }, 0);
+              const gross = todayScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt;
+              }, 0);
+              const totalGross = totalScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt;
+              }, 0);
+              player['thru'] = thru;
+              player['today'] = today;
+              player['scores'] = totalScore;
+
+              player['total'] = total;
+              player['gross'] = gross;
+              player['total_gross'] = totalGross;
+              player['statistic'] = {};
+              Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
+              for (const score of todayScore) {
+                if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+                  player['statistic'][score.score_type.toUpperCase()] += 1;
+                }
+              }
+              player['statistic']['BOGEY'] = player['statistic']['BOGEY'] + player['statistic']['D.BOGEY+'];
+              delete player['statistic']['D.BOGEY+'];
+
+              return player;
+            })
+          );
+          const scores = nonScoredOutCutPlayers.map(({ total }) => total);
+
+          nonScoredOutCutPlayers = nonScoredOutCutPlayers.map((player) => {
+            return {
+              ...player,
+              pos: getRank(player.total, scores),
+            };
+          });
+          nonScoredOutCutPlayers.sort((a, b) => a.pos - b.pos);
+          const ranks = [];
+          nonScoredOutCutPlayers.forEach((player) => {
+            if (player.ranking) ranks.push(player.ranking);
+          });
+          ranks.sort((a, b) => b - a);
+          nonScoredOutCutPlayers = nonScoredOutCutPlayers.map((player) => {
+            return {
+              ...player,
+              pos: getTop(player.pos, player.ranking, ranks),
+            };
+          });
+          nonScoredOutCutPlayers.sort((a, b) => a.pos - b.pos);
+          resolve(nonScoredOutCutPlayers);
+        } catch (error) {
+          console.log(error);
+          resolve([]);
+        }
+      }),
+      new Promise(async (resolve, reject) => {
+        try {
+          withdrawPlayers = await Promise.all(
+            withdrawPlayers.map(async (player) => {
+              player = player.toJSON();
+
+              const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), DATE_FORMAT).format('DD-MM-YYYY');
+              const [thru, todayScore, totalScore] = await Promise.all([
+                Score.count({ where: { player_id: player.player_id, course_id: courseId } }),
+                Score.findAll({
+                  where: {
+                    player_id: player.player_id,
+                    course_id: courseId,
+                    updatedAt: {
+                      [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
+                      [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
+                    },
+                  },
+                  include: [{ model: Hole }],
+                }),
+                Score.findAll({
+                  where: {
+                    player_id: player.player_id,
+                    course_id: courseId,
+                  },
+                  include: [{ model: Hole }],
+                }),
+              ]);
+              const today = todayScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt - score.Hole.par;
+              }, 0);
+              const total = totalScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt - score.Hole.par;
+              }, 0);
+              const gross = todayScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt;
+              }, 0);
+              const totalGross = totalScore.reduce((pre, score) => {
+                score.toJSON();
+                return pre + score.num_putt;
+              }, 0);
+              player['thru'] = thru;
+              player['today'] = today;
+              player['total'] = total;
+              player['gross'] = gross;
+              player['total_gross'] = totalGross;
+              player['statistic'] = {};
+              player['scores'] = totalScore;
+              Object.values(SCORE_TYPE).forEach((type) => (player['statistic'][type.toUpperCase()] = 0));
+              for (const score of todayScore) {
+                if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+                  console.log(player['statistic']);
+                  player['statistic'][score.score_type.toUpperCase()] += 1;
+                }
+              }
+              player['statistic']['BOGEY'] = player['statistic']['BOGEY'] + player['statistic']['D.BOGEY+'];
+              delete player['statistic']['D.BOGEY+'];
+
+              return player;
+            })
+          );
+          const scores = withdrawPlayers.map(({ total }) => total);
+
+          withdrawPlayers = withdrawPlayers.map((player) => {
+            return {
+              ...player,
+              pos: getRank(player.total, scores),
+            };
+          });
+          withdrawPlayers.sort((a, b) => a.pos - b.pos);
+          const ranks = [];
+          withdrawPlayers.forEach((player) => {
+            if (player.ranking) ranks.push(player.ranking);
+          });
+          ranks.sort((a, b) => b - a);
+          withdrawPlayers = withdrawPlayers.map((player) => {
+            return {
+              ...player,
+              pos: getTop(player.pos, player.ranking, ranks),
+            };
+          });
+          withdrawPlayers.sort((a, b) => a.pos - b.pos);
+          resolve(withdrawPlayers);
+        } catch (error) {
+          resolve([]);
+        }
+      }),
+    ]);
+  const lastScoredPlayerPos = _scoredPlayers[_scoredPlayers.length - 1]?.pos || 1;
+  const lastScoredPlayerPosCount = _scoredPlayers.filter((player) => player.pos === lastScoredPlayerPos).length;
+  _nonScoredPlayers = _nonScoredPlayers.map((player) => ({
+    ...player,
+    pos: lastScoredPlayerPos + lastScoredPlayerPosCount - 1 + player.pos,
+  }));
+
+  const lastNonScoredPlayerPos =
+    _nonScoredPlayers[_nonScoredPlayers.length - 1]?.pos || lastScoredPlayerPos + lastScoredPlayerPosCount - 1;
+  const lastNonScoredPlayerPosCount =
+    _nonScoredPlayers.filter((player) => player.pos === lastNonScoredPlayerPos).length || 1;
+  _scoredOutCutPlayers = _scoredOutCutPlayers.map((player) => ({
+    ...player,
+    pos: lastNonScoredPlayerPos + lastNonScoredPlayerPosCount - 1 + player.pos,
+  }));
+  console.log({ lastNonScoredPlayerPos, lastNonScoredPlayerPosCount });
+
+  const lastScoreOutCutPlayerPos =
+    _scoredOutCutPlayers[_scoredOutCutPlayers.length - 1]?.pos || lastNonScoredPlayerPos + lastNonScoredPlayerPosCount - 1;
+  const lastScoreOutCutPlayerPosCount = _scoredOutCutPlayers.filter((p) => p.pos === lastNonScoredPlayerPos).length || 1;
+  _nonScoredOutCutPlayers = _nonScoredOutCutPlayers.map((player) => ({
+    ...player,
+    pos: lastScoreOutCutPlayerPos + lastScoreOutCutPlayerPosCount - 1 + player.pos,
+  }));
+  console.log({ lastScoreOutCutPlayerPosCount, lastScoreOutCutPlayerPos });
+
+  const lastNonScoreOutCutPlayerPos =
+    _nonScoredOutCutPlayers[_nonScoredOutCutPlayers.length - 1]?.pos ||
+    lastScoreOutCutPlayerPos + lastScoreOutCutPlayerPosCount - 1;
+  const lastNonScoreOutCutPlayerPosCount =
+    _nonScoredOutCutPlayers.filter((p) => p.pos === lastNonScoreOutCutPlayerPos).length || 1;
+  console.log({ lastNonScoreOutCutPlayerPosCount, lastNonScoreOutCutPlayerPos });
+  _withdrawPlayers = _withdrawPlayers.map((player) => ({
+    ...player,
+    pos: lastNonScoreOutCutPlayerPos + lastNonScoreOutCutPlayerPosCount - 1 + player.pos,
+  }));
+  let result = [..._scoredPlayers, ..._nonScoredPlayers, ..._scoredOutCutPlayers, ..._nonScoredOutCutPlayers];
+  //result.sort((a, b) => a.pos - b.pos);
+  result = [...result, ..._withdrawPlayers];
+
   const currentScore = await CurrentScore.findOne({
     where: { player_id: player.player_id, course_id: courseId },
     include: [{ model: Hole, as: 'hole' }],
   });
   let response = {};
-  const targetPlayer = players.find((p) => p.player_id === player.player_id);
+  const targetPlayer = result.find((p) => p.player_id === player.player_id);
   response['MAIN'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main.type)?.url;
   response['MAIN1'] = images.find((img) => img.type === GOLFER_IN_HOLE_IMAGES.main1.type)?.url;
   response['YARD'] = currentScore?.hole.yards;
   response['PLAYER1'] = player.fullname;
-
+  console.log(targetPlayer);
   response['COUNTRY'] =
     player.country.length === 2 && isValid(player.country) ? alpha2ToAlpha3(player.country) : player.country;
   response['IMG_COUNTRY'] = player.flag;
@@ -679,8 +1117,8 @@ const getGolferBottom = async ({ code, courseId }) => {
   ]);
   Object.values(SCORE_TYPE).forEach((type) => (response[type.toUpperCase()] = 0));
   for (const score of todayScores) {
-    if (Object.values(SCORE_TYPE).includes(score.score_type)) {
-      response[score.score_type.toUpperCase()] = score.total;
+    if (Object.values(SCORE_TYPE).includes(score.score_type.toUpperCase())) {
+      response[score.score_type.toUpperCase()] += 1;
     }
   }
   response['BOGEY'] = response['BOGEY'] + response['D.BOGEY+'];
