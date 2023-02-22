@@ -22,7 +22,7 @@ const {
 const { Player, Course, Score, Round, Hole, sequelize, TeeTimeGroup, Image, CurrentScore } = require('../models/schema');
 const { TeeTime } = require('../models/schema/Teetime');
 const { TeeTimeGroupPlayer } = require('../models/schema/TeetimeGroupPlayer');
-const { getRank, getScoreImage, getTotalOverImage, getTop, getScoreTitle } = require('../utils/score');
+const { getRank, getScoreImage, getTotalOverImage, getTop, getScoreTitle, getScorecard } = require('../utils/score');
 const { dateWithTimezone } = require('../utils/date');
 const moment = require('moment');
 const { getScoreType } = require('../utils/score');
@@ -302,7 +302,7 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
     where: { player_id: code, course_id: courseId },
     //include: [{ model: Score, as: 'scores', where: { round_id: round.round_id }, include: [{ model: Hole }] }],
   });
-  const [todayScores, allScores] = await Promise.all([
+  let [todayScores, allScores] = await Promise.all([
     Score.findAll({
       where: { player_id: player?.player_id, course_id: courseId, round_id: round.round_id },
       include: [{ model: Hole }],
@@ -330,17 +330,15 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
   const totalGross = allScores.reduce((pre, cur) => pre + cur.num_putt, 0);
   response['TOTALGROSS'] = totalGross;
 
-  todayScores.forEach((score, index) => {
-    score = score.toJSON();
-    response[`G1SCORE${index + 1}`] = score.num_putt;
-    response[`G1IMG${index + 1}`] = getScoreImage(images, score.score_type);
-  });
-
   /// iamge TOTALOVER
   response['STT_TOTALOVER'] = getTotalOverImage(images, totalOver);
+  todayScores = getScorecard(todayScores);
   response['OUT'] = todayScores.slice(0, 9).reduce((pre, cur) => pre + cur.num_putt, 0);
   response['IN'] = todayScores.slice(9).reduce((pre, cur) => pre + cur.num_putt, 0);
-
+  todayScores.forEach((score, index) => {
+    response[`G1SCORE${index + 1}`] = score.num_putt;
+    response[`G1IMG${index + 1}`] = getScoreImage(images, score.score_type) || null;
+  });
   //const [todayScore, totalScore]
   return response;
 };

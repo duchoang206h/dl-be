@@ -217,6 +217,24 @@ const getScores = (scores) => {
   }
   return cloneScores;
 };
+const getScorecard = (scores) => {
+  let cloneScores = [];
+  cloneScores.sort((a, b) => a.hole_num - b.hole_num);
+  const scoreReach = cloneScores.length;
+  if (scoreReach < 18) {
+    for (let i = 1; i <= 18; i++) {
+      const score = scores.find((s) => {
+        return s?.Hole?.hole_num === i;
+      });
+      if (score) cloneScores.push(score);
+      else {
+        cloneScores.push({ Hole: { hole_num: i }, num_putt: null, score_type: null });
+      }
+    }
+    return cloneScores;
+  }
+  return cloneScores;
+};
 const getScoreWithHole = (scores) => {
   let cloneScores = [];
   const scoreReach = cloneScores.length;
@@ -275,4 +293,5 @@ module.exports = {
   getScoreTitle,
   getScores,
   getScoreWithHole,
+  getScorecard,
 };
