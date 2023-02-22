@@ -565,8 +565,8 @@ const getAllPlayerScore = async (courseId, { name }) => {
                   include: [{ model: Hole }],
                 }),
               ]);
-              // const thisRound = player['round'].findLast((r) => r.total > 0);
-              // const today_ = thisRound?.scores?.reduce((pre, cur) => pre + cur?.num_putt - cur?.Hole?.par, 0) || 0;
+              const thisRound = [...player['rounds']].reverse().find((r) => r.total > 0);
+              const today_ = thisRound?.scores?.reduce((pre, cur) => pre + cur?.num_putt - cur?.Hole?.par, 0) || 0;
               const today = todayScore.length
                 ? todayScore.reduce((pre, score) => {
                     score.toJSON();
@@ -577,7 +577,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                     return pre + score.num_putt - score.Hole.par;
                   }, 0);
               player['thru'] = thru > 0 && thru % HOLE_PER_COURSE == 0 ? FINISH_ALL_ROUNDS : thru % HOLE_PER_COURSE;
-              player['today'] = today == 0 ? EVENT_ZERO : today;
+              player['today'] = today_ == 0 ? EVENT_ZERO : today_;
               return player;
             })
           );
