@@ -38,6 +38,7 @@ const {
   getDefaultScore,
   getTop,
   getMatchPlayScore,
+  getMatchPlayHostScore,
 } = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
 const { NUM_PUTT_INVALID, INVALID_SCORE_INPUT } = require('../utils/errorMessage');
@@ -1064,6 +1065,7 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
       {
         model: MatchPlayClub,
         as: 'clubs',
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
       },
       {
         model: GolfCourse,
@@ -1073,13 +1075,15 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
       },
     ],
   });
-  if (roundNum) where['round_num'] = roundNum;
   where['course_id'] = course?.course_id;
+  if (roundNum) where['round_num'] = roundNum;
   const versus = await MatchPlayVersus.findAll({
     where,
     include: [
       {
         model: MatchPlayTeam,
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+
         as: 'host_team',
         include: [
           {
@@ -1099,20 +1103,27 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
                 ],
               },
             ],
+            attributes: { exclude: ['createdAt', 'updatedAt'] },
           },
         ],
       },
       {
         model: MatchPlayTeam,
         as: 'guest_team',
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+
         include: [
           {
             model: MatchPlayTeamPlayer,
             as: 'team_players',
+            attributes: { exclude: ['createdAt', 'updatedAt'] },
+
             include: [
               {
                 model: Player,
                 as: 'players',
+                attributes: { exclude: ['createdAt', 'updatedAt'] },
+
                 include: [
                   {
                     model: Score,
@@ -1156,20 +1167,24 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
       type: v?.type,
       host: v?.host_team?.team_players?.map((p) => p.players),
       guest: v?.guest_team?.team_players?.map((p) => p.players),
-      score: getMatchPlayScore(v?.host_team?.team_players, v?.guest_team?.team_players),
+      score: getMatchPlayScore(v?.host_team?.team_players, v?.guest_team?.team_players, v.type),
       leave_hole: [17, 18],
       start_hole: 1,
     };
   });
+  const hostClub = course.clubs?.find((c) => c.type === 'host');
+  const guestClub = course.clubs?.find((c) => c.type === 'guest');
+  const hostScore = getMatchPlayHostScore(matches, 'host');
+  const guestScore = getMatchPlayHostScore(matches, 'guest');
   response['matches'] = matches;
   response['golf_course'] = course.golf_course;
   response['host'] = {
-    name: 'Miền Bắc',
-    score: 10,
+    name: hostClub.name,
+    ...hostScore,
   };
   response['guest'] = {
-    name: 'Miền Name',
-    score: 10,
+    name: guestClub.name,
+    ...guestScore,
   };
   return {
     result: response,

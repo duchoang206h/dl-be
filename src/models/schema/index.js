@@ -44,7 +44,7 @@ const models = {
   MatchPlayClub,
   MatchPlayVersus,
 };
-const sequelize = new Sequelize(process.env.DB_URL, { dialect: 'mysql', logging: true });
+const sequelize = new Sequelize(process.env.DB_URL, { dialect: 'mysql', logging: false });
 Object.keys(models).forEach((x) => {
   models[x].init(sequelize);
 });

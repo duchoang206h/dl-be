@@ -223,27 +223,72 @@ const getMatchPlayScore = (hostPlayers, guestPlayers, type, startHole = 1) => {
   const host = [];
   const guest = [];
   let score = 0;
-  console.log('scores', hostPlayers[0]);
-  if (type === COURSE_TYPE.FOUR_BALL) {
-    for (let i = 0; i < hostPlayers[0].scores.length; i++) {
+  console.log({ type });
+  if (type === COURSE_TYPE.FOUR_BALL || type === COURSE_TYPE.FOURSOME) {
+    for (let i = 0; i < hostPlayers[0]?.players?.scores.length; i++) {
+      console.log(hostPlayers[0]?.players?.scores[i]?.num_putt);
       const betterScoreHost =
-        hostPlayers[0].scores[i]?.num_putt < hostPlayers[1].scores[i]?.num_putt
-          ? hostPlayers[0].scores[i]?.num_putt
-          : hostPlayers[1].scores[i]?.num_putt;
+        hostPlayers[0]?.players?.scores[i]?.num_putt < hostPlayers[1]?.players?.scores[i]?.num_putt
+          ? hostPlayers[0]?.players?.scores[i]?.num_putt
+          : hostPlayers[1]?.players?.scores[i]?.num_putt;
       const betterScoreGuest =
-        guestPlayers[0].scores[i]?.num_putt < guestPlayers[1].scores[i]?.num_putt
-          ? guestPlayers[0].scores[i]?.num_putt
-          : guestPlayers[1].scores[i]?.num_putt;
+        guestPlayers[0]?.players?.scores[i]?.num_putt < guestPlayers[1]?.players?.scores[i]?.num_putt
+          ? guestPlayers[0]?.players?.scores[i]?.num_putt
+          : guestPlayers[1]?.players?.scores[i]?.num_putt;
       console.log({ betterScoreGuest, betterScoreHost });
       host.push(betterScoreHost);
       guest.push(betterScoreGuest);
     }
-    for (let i = 0; i < hostPlayers[0].scores.length; i++) {
+    for (let i = 0; i < hostPlayers[0]?.players?.scores.length; i++) {
       if (host[i] < guest[i]) score += 1;
       if (host[i] > guest[i]) score -= 1;
     }
   }
+  if (type === COURSE_TYPE.SINGLE_MATCH) {
+  }
   return score;
+};
+const getMatchPlayHostScore = (matches, type = 'host') => {
+  let win = 0,
+    draw = 0,
+    score = 0,
+    lose = 0;
+  if (type === 'host') {
+    matches.forEach((m) => {
+      if (m.score > 0) {
+        score += 1;
+        win++;
+      }
+      if (m.score == 0) {
+        score += 0.5;
+        draw++;
+      }
+      if (m.score < 0) lose++;
+    });
+  }
+  if (type === 'guest') {
+    matches.forEach((m) => {
+      if (m.score < 0) {
+        score += 1;
+        win++;
+      }
+      if (m.score === 0) {
+        score += 0.5;
+        draw++;
+      }
+      if (m.score > 0) lose++;
+    });
+  }
+  return {
+    draw,
+    win,
+    lose,
+    score,
+  };
+};
+const normalizeMatchScore = (players, type) => {
+  let score = [];
+  if(type===COURSE_TYPE.)
 };
 module.exports = {
   getScoreType,
@@ -255,4 +300,5 @@ module.exports = {
   getTop,
   getScoreTitle,
   getMatchPlayScore,
+  getMatchPlayHostScore,
 };
