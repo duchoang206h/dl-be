@@ -403,7 +403,7 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
         score.toJSON();
         return pre + score.num_putt;
       }, 0);
-      player['thru'] = thru == HOLE_PER_COURSE ? FINISH_ALL_ROUNDS : thru;
+      player['thru'] = thru == HOLE_PER_COURSE ? FINISH_ALL_ROUNDS : thru == 0 ? '-' : thru;
       player['today'] = today;
       player['total'] = total;
       player['gross'] = gross;
