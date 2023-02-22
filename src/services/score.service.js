@@ -39,6 +39,8 @@ const {
   getTop,
   getMatchPlayScore,
   getMatchPlayHostScore,
+  normalizePlayersMatchScore,
+  getLeaveHoles,
 } = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
 const { NUM_PUTT_INVALID, INVALID_SCORE_INPUT } = require('../utils/errorMessage');
@@ -1162,13 +1164,16 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
   });
 
   const matches = versus.map((v) => {
+    const host = normalizePlayersMatchScore(v?.host_team?.team_players?.map((p) => p.players));
+    const guest = normalizePlayersMatchScore(v?.guest_team?.team_players?.map((p) => p.players));
+    const leave_hole = getLeaveHoles(host[0]);
     return {
       match: v?.match_num,
       type: v?.type,
-      host: v?.host_team?.team_players?.map((p) => p.players),
-      guest: v?.guest_team?.team_players?.map((p) => p.players),
+      host,
+      guest,
       score: getMatchPlayScore(v?.host_team?.team_players, v?.guest_team?.team_players, v.type),
-      leave_hole: [17, 18],
+      leave_hole,
       start_hole: 1,
     };
   });

@@ -1,4 +1,4 @@
-const { SCORE_TYPE, COURSE_TYPE } = require('../config/constant');
+const { SCORE_TYPE, COURSE_TYPE, HOLE_PER_COURSE } = require('../config/constant');
 
 const getScoreType = (score, par) => {
   let scoreType;
@@ -286,9 +286,28 @@ const getMatchPlayHostScore = (matches, type = 'host') => {
     score,
   };
 };
-const normalizeMatchScore = (players, type) => {
-  let score = [];
-  if(type===COURSE_TYPE.)
+const normalizePlayersMatchScore = (players, type) => {
+  let scores = [];
+  if (type === COURSE_TYPE.FOURSOME) {
+    for (let i = 1; i <= 18; i++) {
+      let score =
+        players[0].scores.find((s) => s?.Hole?.hole_num === i) ?? players[1].scores.find((s) => s?.Hole?.hole_num === i);
+      score = score ?? { num_putt: null, Hole: { hole_num: i } };
+      if (score) {
+        scores.push(score);
+      }
+    }
+    players[0].scores = scores;
+    players[1].scores = scores;
+  }
+  return players;
+};
+const getLeaveHoles = (player) => {
+  const leaveHoles = [];
+  for (let i = 1; i <= HOLE_PER_COURSE; i++) {
+    if (!player.scores.find((s) => s?.Hole?.hole_num === i)) leaveHoles.push(i);
+  }
+  return leaveHoles.sort((a, b) => a - b);
 };
 module.exports = {
   getScoreType,
@@ -301,4 +320,6 @@ module.exports = {
   getScoreTitle,
   getMatchPlayScore,
   getMatchPlayHostScore,
+  normalizePlayersMatchScore,
+  getLeaveHoles,
 };
