@@ -502,12 +502,12 @@ const getAllPlayerScore = async (courseId, { name }) => {
       : [],
   ]);
   let normalPlayers = players.filter((player) => player.status === PLAYER_STATUS.NORMAL);
-  let outCutPlayers = players.filter(
-    (player) => player.status !== PLAYER_STATUS.NORMAL && player.status !== PLAYER_STATUS.WITHDRAW
-  );
+  let outCutPlayers = players.filter((player) => player.status === PLAYER_STATUS.OUT_CUT);
   let scoredOutCutPlayers = outCutPlayers.filter((p) => p.scores.length);
   let nonScoredOutCutPlayers = outCutPlayers.filter((p) => p.scores.length === 0);
-  let withdrawPlayers = players.filter((player) => player.status === PLAYER_STATUS.WITHDRAW);
+  let withdrawPlayers = players.filter(
+    (player) => player.status !== PLAYER_STATUS.NORMAL && player.status !== PLAYER_STATUS.OUT_CUT
+  );
   let scoredPlayers = normalPlayers.filter((player) => player.scores.length);
   let nonScoredPlayers = normalPlayers.filter((player) => player.scores.length === 0);
   const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), 'DD-MM-YYYY').format('DD-MM-YYYY');
@@ -910,7 +910,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
               pos: getRank(player.score, scores),
             };
           });
-          withdrawPlayers.sort((a, b) => a.pos - b.pos);
+          //withdrawPlayers.sort((a, b) => a.pos - b.pos);
           const ranks = [];
           withdrawPlayers.forEach((player) => {
             if (player.ranking) ranks.push(player.ranking);
