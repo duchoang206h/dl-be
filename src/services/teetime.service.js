@@ -88,16 +88,16 @@ const createManyTeetime = async (teetimes, { courseId, roundNum, courseType }) =
         }
         let hostTeam = teams.find((t) => clubs.find((c) => c.type === 'host')?.matchplay_club_id === t?.matchplay_club_id);
         const guestTeam = teams.filter((t) => t.club !== hostTeam.club);
-        hostTeam = [hostTeam, teams.find((t) => t.club === hostTeam.club)];
+        hostTeam = teams.filter((t) => t.club == hostTeam.club);
+        console.log({ hostTeam });
         teamVersus.push([hostTeam, guestTeam]);
       }
       await Promise.all(
         teamVersus.map(async (teams) => {
-          console.log({ teams });
-
           const createdTeams = await Promise.all(
             teams.map(async (team) => {
               // await MatchPlayTeamPlayer.bulkCreate();
+              console.log({ team });
               const players = await Player.findAll({
                 where: {
                   course_id: courseId,
@@ -105,8 +105,10 @@ const createManyTeetime = async (teetimes, { courseId, roundNum, courseType }) =
                     [Op.in]: team.map((t) => t['name-golfer']),
                   },
                 },
+                attributes: ['player_id'],
                 raw: true,
               });
+              console.log({ players });
               return MatchPlayTeam.create(
                 {
                   matchplay_club_id: team[0]?.matchplay_club_id,
@@ -121,15 +123,17 @@ const createManyTeetime = async (teetimes, { courseId, roundNum, courseType }) =
               );
             })
           );
-          console.log({ createdTeams });
-          await MatchPlayVersus.create({
-            course_id: courseId,
-            round_num: roundNum,
-            match_num: teams[0][0]?.match_num,
-            type: teams[0][0]?.type,
-            host: createdTeams[0].dataValues['matchplay_team_id'],
-            guest: createdTeams[1].dataValues['matchplay_team_id'],
-          });
+          await MatchPlayVersus.create(
+            {
+              course_id: courseId,
+              round_num: roundNum,
+              match_num: teams[0][0]?.match_num,
+              type: teams[0][0]?.type,
+              host: createdTeams[0].dataValues['matchplay_team_id'],
+              guest: createdTeams[1].dataValues['matchplay_team_id'],
+            },
+            { transaction: t }
+          );
         })
       );
     } else {
@@ -138,7 +142,7 @@ const createManyTeetime = async (teetimes, { courseId, roundNum, courseType }) =
     await await t.commit();
     return [true, null];
   } catch (error) {
-    logger.error(error.toString());
+    console.log(error);
     await t.rollback();
     return [false, new InternalServerError()];
   }

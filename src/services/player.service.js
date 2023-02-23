@@ -5,9 +5,10 @@ const { uploadSingleFile } = require('./upload.service');
 const { InternalServerError } = require('../utils/ApiError');
 const path = require('path');
 const { writeToXlsx } = require('./xlsxService');
-const { courseService } = require('.');
+const courseService = require('./course.service');
 const { COURSE_TYPE } = require('../config/constant');
 const createManyPlayer = async (data) => {
+  console.log(data[0]);
   const t = await sequelize.transaction();
   try {
     const course = await courseService.getCourseById(data[0]?.course_id);
@@ -21,6 +22,7 @@ const createManyPlayer = async (data) => {
     await t.commit();
     return true;
   } catch (error) {
+    console.log(error);
     await t.rollback();
     throw new InternalServerError();
   }
