@@ -223,29 +223,29 @@ const getMatchPlayScore = (hostPlayers, guestPlayers, type, startHole = 1) => {
   const host = [];
   const guest = [];
   let score = 0;
-  hostPlayers = hostPlayers.map((h) => h.players.toJSON());
-  guestPlayers = guestPlayers.map((g) => g.players.toJSON());
   if (type === COURSE_TYPE.FOUR_BALL || type === COURSE_TYPE.FOURSOME) {
-    for (let i = 0; i < hostPlayers[0]?.players?.scores.length; i++) {
-      console.log(hostPlayers[0]?.players?.scores[i]?.num_putt);
+    for (let i = 0; i < hostPlayers[0]?.scores.length; i++) {
       const betterScoreHost =
-        hostPlayers[0]?.players?.scores[i]?.num_putt < hostPlayers[1]?.players?.scores[i]?.num_putt
-          ? hostPlayers[0]?.players?.scores[i]?.num_putt
-          : hostPlayers[1]?.players?.scores[i]?.num_putt;
+        hostPlayers[0]?.scores[i]?.num_putt < hostPlayers[1]?.scores[i]?.num_putt
+          ? hostPlayers[0]?.scores[i]?.num_putt
+          : hostPlayers[1]?.scores[i]?.num_putt;
       const betterScoreGuest =
-        guestPlayers[0]?.players?.scores[i]?.num_putt < guestPlayers[1]?.players?.scores[i]?.num_putt
-          ? guestPlayers[0]?.players?.scores[i]?.num_putt
-          : guestPlayers[1]?.players?.scores[i]?.num_putt;
-      console.log({ betterScoreGuest, betterScoreHost });
+        guestPlayers[0]?.scores[i]?.num_putt < guestPlayers[1]?.scores[i]?.num_putt
+          ? guestPlayers[0]?.scores[i]?.num_putt
+          : guestPlayers[1]?.scores[i]?.num_putt;
       host.push(betterScoreHost);
       guest.push(betterScoreGuest);
     }
-    for (let i = 0; i < hostPlayers[0]?.players?.scores.length; i++) {
+    for (let i = 0; i < hostPlayers[0]?.scores.length; i++) {
       if (host[i] < guest[i]) score += 1;
       if (host[i] > guest[i]) score -= 1;
     }
   }
   if (type === COURSE_TYPE.SINGLE_MATCH) {
+    for (let i = 0; i < hostPlayers[0]?.scores.length; i++) {
+      if (hostPlayers[0]?.scores[i]?.num_putt < guestPlayers[0]?.scores[i]?.num_putt) score += 1;
+      if (hostPlayers[0]?.scores[i]?.num_putt > guestPlayers[0]?.scores[i]?.num_putt) score -= 1;
+    }
   }
   return score;
 };
@@ -289,7 +289,6 @@ const getMatchPlayHostScore = (matches, type = 'host') => {
 };
 const normalizePlayersMatchScore = (players, type) => {
   let scores = [];
-  console.log({ players });
   if (type === COURSE_TYPE.FOURSOME) {
     for (let i = 1; i <= 18; i++) {
       let score =
@@ -301,6 +300,15 @@ const normalizePlayersMatchScore = (players, type) => {
     }
     players[0].scores = scores;
     players[1].scores = scores;
+  }
+  if (type === COURSE_TYPE.SINGLE_MATCH) {
+    for (let i = 1; i <= 18; i++) {
+      let score = players[0].scores.find((s) => s?.Hole?.hole_num === i) ?? { num_putt: null, Hole: { hole_num: i } };
+      if (score) {
+        scores.push(score);
+      }
+    }
+    players[0].scores = scores;
   }
   return players;
 };

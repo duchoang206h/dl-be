@@ -1176,7 +1176,7 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
         type: v?.type,
         host,
         guest,
-        score: getMatchPlayScore(v?.host_team?.team_players, v?.guest_team?.team_players, v.type),
+        score: getMatchPlayScore(host, guest, v.type),
         leave_hole,
         start_hole: 1,
       };
