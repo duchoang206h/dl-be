@@ -1077,6 +1077,7 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
           attributes: { exclude: ['createdAt', 'updatedAt'] },
         },
       ],
+      order: [[{ model: GolfCourse, as: 'golf_course' }, { model: Hole, as: 'holes' }, 'hole_num', 'ASC']],
     }),
     Round.findOne({ where: { course_id: courseId, round_num: roundNum }, raw: true }),
   ]);
