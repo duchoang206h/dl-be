@@ -223,7 +223,8 @@ const getMatchPlayScore = (hostPlayers, guestPlayers, type, startHole = 1) => {
   const host = [];
   const guest = [];
   let score = 0;
-  console.log({ type });
+  hostPlayers = hostPlayers.map((h) => h.players.toJSON());
+  guestPlayers = guestPlayers.map((g) => g.players.toJSON());
   if (type === COURSE_TYPE.FOUR_BALL || type === COURSE_TYPE.FOURSOME) {
     for (let i = 0; i < hostPlayers[0]?.players?.scores.length; i++) {
       console.log(hostPlayers[0]?.players?.scores[i]?.num_putt);
@@ -288,6 +289,7 @@ const getMatchPlayHostScore = (matches, type = 'host') => {
 };
 const normalizePlayersMatchScore = (players, type) => {
   let scores = [];
+  console.log({ players });
   if (type === COURSE_TYPE.FOURSOME) {
     for (let i = 1; i <= 18; i++) {
       let score =

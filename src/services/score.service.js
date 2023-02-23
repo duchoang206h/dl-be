@@ -1061,22 +1061,26 @@ const getPlayerScore = async (courseId, playerId) => {
 const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
   const where = {};
   const response = {};
-  const course = await Course.findOne({
-    where: { course_id: courseId },
-    include: [
-      {
-        model: MatchPlayClub,
-        as: 'clubs',
-        attributes: { exclude: ['createdAt', 'updatedAt'] },
-      },
-      {
-        model: GolfCourse,
-        as: 'golf_course',
-        include: [{ model: Hole, as: 'holes', attributes: ['meters', 'par', 'yards', 'hole_num'] }],
-        attributes: { exclude: ['createdAt', 'updatedAt'] },
-      },
-    ],
-  });
+  const [course, round] = await Promise.all([
+    Course.findOne({
+      where: { course_id: courseId },
+      include: [
+        {
+          model: MatchPlayClub,
+          as: 'clubs',
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+        },
+        {
+          model: GolfCourse,
+          as: 'golf_course',
+          include: [{ model: Hole, as: 'holes', attributes: ['meters', 'par', 'yards', 'hole_num'] }],
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+        },
+      ],
+    }),
+    Round.findOne({ where: { course_id: courseId, round_num: roundNum }, raw: true }),
+  ]);
+  console.log({ round });
   where['course_id'] = course?.course_id;
   if (roundNum) where['round_num'] = roundNum;
   const versus = await MatchPlayVersus.findAll({
@@ -1095,14 +1099,6 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
               {
                 model: Player,
                 as: 'players',
-                include: [
-                  {
-                    model: Score,
-                    as: 'scores',
-                    include: [{ model: Hole, attributes: ['hole_num'] }],
-                    attributes: ['num_putt', 'score_type'],
-                  },
-                ],
               },
             ],
             attributes: { exclude: ['createdAt', 'updatedAt'] },
@@ -1125,58 +1121,66 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
                 model: Player,
                 as: 'players',
                 attributes: { exclude: ['createdAt', 'updatedAt'] },
-
-                include: [
-                  {
-                    model: Score,
-                    as: 'scores',
-                    include: [{ model: Hole, attributes: ['hole_num'] }],
-                    attributes: ['num_putt', 'score_type'],
-                  },
-                ],
               },
             ],
           },
         ],
       },
     ],
-    order: [
-      ['match_num', 'ASC'],
-      [
-        {
-          model: MatchPlayTeam,
-          as: 'host_team',
-        },
-        {
-          model: MatchPlayTeamPlayer,
-          as: 'team_players',
-        },
-        {
-          model: Player,
-          as: 'players',
-        },
-        { model: Score, as: 'scores' },
-        { model: Hole },
-        'hole_num',
-        'ASC',
-      ],
-    ],
+    order: [['match_num', 'ASC']],
   });
 
-  const matches = versus.map((v) => {
-    const host = normalizePlayersMatchScore(v?.host_team?.team_players?.map((p) => p.players));
-    const guest = normalizePlayersMatchScore(v?.guest_team?.team_players?.map((p) => p.players));
-    const leave_hole = getLeaveHoles(host[0]);
-    return {
-      match: v?.match_num,
-      type: v?.type,
-      host,
-      guest,
-      score: getMatchPlayScore(v?.host_team?.team_players, v?.guest_team?.team_players, v.type),
-      leave_hole,
-      start_hole: 1,
-    };
-  });
+  const matches = await Promise.all(
+    versus.map(async (v) => {
+      const host = normalizePlayersMatchScore(
+        await Promise.all(
+          v?.host_team?.team_players?.map(async (p) => {
+            p = p.players.toJSON();
+            p['scores'] = await Score.findAll({
+              where: {
+                player_id: p.player_id,
+                round_id: round.round_id,
+              },
+              attributes: ['num_putt'],
+
+              include: [{ model: Hole, attributes: ['hole_num'] }],
+              order: [[{ model: Hole }, 'hole_num', 'ASC']],
+            });
+            return p;
+          })
+        ),
+        v?.type
+      );
+      const guest = normalizePlayersMatchScore(
+        await Promise.all(
+          v?.guest_team?.team_players?.map(async (p) => {
+            p = p.players.toJSON();
+            p['scores'] = await Score.findAll({
+              where: {
+                player_id: p.player_id,
+                round_id: round.round_id,
+              },
+              attributes: ['num_putt'],
+              include: [{ model: Hole, attributes: ['hole_num'] }],
+              order: [[{ model: Hole }, 'hole_num', 'ASC']],
+            });
+            return p;
+          })
+        ),
+        v?.type
+      );
+      const leave_hole = getLeaveHoles(host[0]);
+      return {
+        match: v?.match_num,
+        type: v?.type,
+        host,
+        guest,
+        score: getMatchPlayScore(v?.host_team?.team_players, v?.guest_team?.team_players, v.type),
+        leave_hole,
+        start_hole: 1,
+      };
+    })
+  );
   const hostClub = course.clubs?.find((c) => c.type === 'host');
   const guestClub = course.clubs?.find((c) => c.type === 'guest');
   const hostScore = getMatchPlayHostScore(matches, 'host');
