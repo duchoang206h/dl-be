@@ -11,6 +11,7 @@ const {
   MAX_NUM_PUTT,
   DEFAULT_SCORES,
   PLAYER_STATUS,
+  COURSE_TYPE,
 } = require('../config/constant');
 const {
   Score,
@@ -147,11 +148,14 @@ const updateScore = async (scoreBody) => {
 const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
   const t = await sequelize.transaction();
   try {
+    const course = await courseService.getCourseById(courseId);
     for (const score of scores) {
-      if (score.num_putt <= 0 || score.num_putt > MAX_NUM_PUTT) throw new BadRequestError(NUM_PUTT_INVALID);
+      if ((course.type === COURSE_TYPE.STOKE_PLAY && score.num_putt <= 0) || score.num_putt > MAX_NUM_PUTT)
+        throw new BadRequestError(NUM_PUTT_INVALID);
+      if ((course.type === COURSE_TYPE.MATCH_PLAY && score.num_putt < 0) || score.num_putt > MAX_NUM_PUTT)
+        throw new BadRequestError(NUM_PUTT_INVALID);
     }
-    const [course, round, lastRounds] = await Promise.all([
-      courseService.getCourseById(courseId),
+    const [round, lastRounds] = await Promise.all([
       roundService.getRoundByNumAndCourse(roundNum, courseId),
       Round.findAll({
         where: {

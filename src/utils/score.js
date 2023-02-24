@@ -313,10 +313,9 @@ const normalizePlayersMatchScore = (players, type) => {
   return players;
 };
 const getLeaveHoles = (player) => {
-  const leaveHoles = [];
-  for (let i = 1; i <= HOLE_PER_COURSE; i++) {
-    if (!player.scores.find((s) => s?.Hole?.hole_num === i)) leaveHoles.push(i);
-  }
+  let leaveHoles = [];
+  leaveHoles = player.scores.filter((s) => s?.num_putt === 0);
+  leaveHoles = leaveHoles.map((s) => s?.Hole?.hole_num);
   return leaveHoles.sort((a, b) => a - b);
 };
 module.exports = {
