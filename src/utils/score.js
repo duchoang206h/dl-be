@@ -339,6 +339,14 @@ const getPreviousRoundNum = (r) => {
   }
   return rounds;
 };
+const formatMatchPlayScore = (score, leaveHoles) => {
+  let scoreStr = '';
+  if (score > 0) {
+    if (leaveHoles > 0) scoreStr = `${score}&${leaveHoles}`;
+    else scoreStr = `${score}UP`;
+  } else scoreStr = 'AS';
+  return scoreStr;
+};
 module.exports = {
   getScoreType,
   calculateScoreAverage,
@@ -353,4 +361,5 @@ module.exports = {
   normalizePlayersMatchScore,
   getLeaveHoles,
   getPreviousRoundNum,
+  formatMatchPlayScore,
 };
