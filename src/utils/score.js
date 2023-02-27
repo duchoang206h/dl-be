@@ -319,7 +319,7 @@ const normalizePlayersMatchScore = (players, type) => {
       firstScores.push(firstScore);
       let secondScore = players[1].scores.find((s) => s?.Hole?.hole_num === i);
       secondScore = secondScore ?? { num_putt: null, Hole: { hole_num: i } };
-      secondScores.push(firstScore);
+      secondScores.push(secondScore);
     }
     players[0].scores = firstScores;
     players[1].scores = secondScores;
