@@ -310,6 +310,20 @@ const normalizePlayersMatchScore = (players, type) => {
     }
     players[0].scores = scores;
   }
+  if (type === COURSE_TYPE.FOUR_BALL) {
+    let firstScores = [];
+    let secondScores = [];
+    for (let i = 1; i <= 18; i++) {
+      let firstScore = players[0].scores.find((s) => s?.Hole?.hole_num === i);
+      firstScore = firstScore ?? { num_putt: null, Hole: { hole_num: i } };
+      firstScores.push(firstScore);
+      let secondScore = players[1].scores.find((s) => s?.Hole?.hole_num === i);
+      secondScore = secondScore ?? { num_putt: null, Hole: { hole_num: i } };
+      secondScores.push(firstScore);
+    }
+    players[0].scores = firstScores;
+    players[1].scores = secondScores;
+  }
   return players;
 };
 const getLeaveHoles = (player) => {

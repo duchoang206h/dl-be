@@ -1213,11 +1213,6 @@ const getLeaderBoardMatch = async (courseId, { roundNum }) => {
         return getLeaderBoardMatchPlayByRound(courseId, { roundNum: r });
       })
     );
-    console.log(
-      'responses',
-      responses.map((r) => r.result.host.score)
-    );
-    console.log('score', responses.map((r) => r.result.host.score).slice(0, roundNum - 1));
     response = responses[roundNum - 1];
     response['result']['host']['score'] += responses
       .slice(0, roundNum - 1)
