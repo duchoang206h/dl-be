@@ -41,6 +41,8 @@ class MatchPlayVersus extends Base {
         type: Sequelize.STRING,
         host: Sequelize.INTEGER,
         guest: Sequelize.INTEGER,
+        tee: Sequelize.INTEGER,
+        time: Sequelize.STRING,
         finish: {
           type: Sequelize.BOOLEAN,
           defaultValue: false,

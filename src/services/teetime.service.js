@@ -129,6 +129,8 @@ const createManyTeetime = async (teetimes, { courseId, roundNum, courseType }) =
               round_num: roundNum,
               match_num: teams[0][0]?.match_num,
               type: teams[0][0]?.type,
+              tee: teams[0][0]?.tee,
+              time: teams[0][0]?.type,
               host: createdTeams[0].dataValues['matchplay_team_id'],
               guest: createdTeams[1].dataValues['matchplay_team_id'],
             },
