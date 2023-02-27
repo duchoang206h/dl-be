@@ -94,7 +94,7 @@ const getAllStatistic = catchAsync(async (req, res) => {
       name: req.query.name,
     });
   } else if (course.type === COURSE_TYPE.MATCH_PLAY) {
-    result = await scoreService.getLeaderboardMatchPlay(course.course_id, req.query);
+    result = await scoreService.getLeaderBoardMatch(course.course_id, req.query);
   }
 
   res.status(httpStatus.OK).send({

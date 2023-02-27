@@ -318,6 +318,13 @@ const getLeaveHoles = (player) => {
   leaveHoles = leaveHoles.map((s) => s?.Hole?.hole_num);
   return leaveHoles.sort((a, b) => a - b);
 };
+const getPreviousRoundNum = (r) => {
+  const rounds = [];
+  for (let i = 1; i <= r; i++) {
+    rounds.push(i);
+  }
+  return rounds;
+};
 module.exports = {
   getScoreType,
   calculateScoreAverage,
@@ -331,4 +338,5 @@ module.exports = {
   getMatchPlayHostScore,
   normalizePlayersMatchScore,
   getLeaveHoles,
+  getPreviousRoundNum,
 };

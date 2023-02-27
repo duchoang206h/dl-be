@@ -42,6 +42,7 @@ const {
   getMatchPlayHostScore,
   normalizePlayersMatchScore,
   getLeaveHoles,
+  getPreviousRoundNum,
 } = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
 const { NUM_PUTT_INVALID, INVALID_SCORE_INPUT } = require('../utils/errorMessage');
@@ -1062,7 +1063,7 @@ const getPlayerScore = async (courseId, playerId) => {
   player['today'] = today == 0 ? EVENT_ZERO : today;
   return player;
 };
-const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
+const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
   const where = {};
   const response = {};
   const [course, round] = await Promise.all([
@@ -1204,7 +1205,31 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
     result: response,
   };
 };
-
+const getLeaderBoardMatch = async (courseId, { roundNum }) => {
+  let response = null;
+  if (roundNum > 1) {
+    const responses = await Promise.all(
+      getPreviousRoundNum(roundNum).map(async (r) => {
+        return getLeaderBoardMatchPlayByRound(courseId, { roundNum: r });
+      })
+    );
+    console.log(
+      'responses',
+      responses.map((r) => r.result.host.score)
+    );
+    console.log('score', responses.map((r) => r.result.host.score).slice(0, roundNum - 1));
+    response = responses[roundNum - 1];
+    response['result']['host']['score'] += responses
+      .slice(0, roundNum - 1)
+      .reduce((pre, cur) => pre + cur['result']['host']['score'], 0);
+    response['result']['guest']['score'] += responses
+      .slice(0, roundNum - 1)
+      .reduce((pre, cur) => pre + cur['result']['guest']['score'], 0);
+  } else {
+    response = getLeaderBoardMatchPlayByRound(courseId, { roundNum });
+  }
+  return response;
+};
 module.exports = {
   getScoresByPlayerAndRound,
   getHoleStatisticByRound,
@@ -1217,5 +1242,5 @@ module.exports = {
   getAllPlayerScore,
   getPlayerScore,
   updateManyScore,
-  getLeaderboardMatchPlay,
+  getLeaderBoardMatch,
 };
