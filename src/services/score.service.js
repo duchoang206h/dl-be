@@ -1138,6 +1138,7 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
 
   const matches = await Promise.all(
     versus.map(async (v) => {
+      let finish = true;
       const host = normalizePlayersMatchScore(
         await Promise.all(
           v?.host_team?.team_players?.map(async (p) => {
@@ -1152,12 +1153,14 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
               include: [{ model: Hole, attributes: ['hole_num'] }],
               order: [[{ model: Hole }, 'hole_num', 'ASC']],
             });
+            if (p['scores'].length === 0) finish = false;
+            else finish = true;
             return p;
           })
         ),
         v?.type
       );
-      let finish = true;
+
       const guest = normalizePlayersMatchScore(
         await Promise.all(
           v?.guest_team?.team_players?.map(async (p) => {
@@ -1172,6 +1175,7 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
               order: [[{ model: Hole }, 'hole_num', 'ASC']],
             });
             if (p['scores'].length === 0) finish = false;
+            else finish = true;
             return p;
           })
         ),
