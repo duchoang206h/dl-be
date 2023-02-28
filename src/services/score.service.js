@@ -1154,8 +1154,6 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
               include: [{ model: Hole, attributes: ['hole_num'] }],
               order: [[{ model: Hole }, 'hole_num', 'ASC']],
             });
-            if (p['scores'].length === 0) finish = false;
-            else finish = true;
             return p;
           })
         ),
@@ -1176,8 +1174,6 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
               order: [[{ model: Hole }, 'hole_num', 'ASC']],
             });
             console.log({ score: p['scores'] });
-            if (p['scores'].length === 0) finish = false;
-            else finish = true;
             return p;
           })
         ),
@@ -1190,7 +1186,7 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
         type: v?.type,
         host,
         guest,
-        score: finish === false && isScore === false ? null : getMatchPlayScore(host, guest, v.type),
+        score: isScore === false ? null : getMatchPlayScore(host, guest, v.type),
         leave_hole,
         start_hole: 1,
         tee: v?.tee,

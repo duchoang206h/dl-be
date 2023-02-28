@@ -351,14 +351,14 @@ const formatMatchPlayScore = (score, leaveHoles) => {
   return scoreStr;
 };
 const isScoreMatchPlay = (host, guest) => {
-  let isScore = false;
+  let isScore = true;
   let scores = [
     host[0]?.scores.filter((s) => s?.num_putt > 0).length,
     host[1]?.scores.filter((s) => s?.num_putt > 0).length,
     guest[0]?.scores.filter((s) => s?.num_putt > 0).length,
     guest[1]?.scores.filter((s) => s?.num_putt > 0).length,
   ];
-  if (scores.includes(0)) isScore = true;
+  if (scores.includes(0)) isScore = false;
   return isScore;
 };
 module.exports = {
