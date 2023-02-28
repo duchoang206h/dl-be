@@ -1212,6 +1212,7 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
     name: guestClub.name,
     ...guestScore,
   };
+  response['type'] = matches[0]?.type;
   return {
     result: response,
   };
