@@ -350,6 +350,14 @@ const formatMatchPlayScore = (score, leaveHoles) => {
   } else scoreStr = 'AS';
   return scoreStr;
 };
+const isScoreMatchPlay = (host, guest) => {
+  let isScore = false;
+  if (host[0]?.scores.find((s) => s?.num_putt > 0)) isScore = true;
+  if (host[1]?.scores.find((s) => s?.num_putt > 0)) isScore = true;
+  if (guest[0]?.scores.find((s) => s?.num_putt > 0)) isScore = true;
+  if (guest[1]?.scores.find((s) => s?.num_putt > 0)) isScore = true;
+  return isScore;
+};
 module.exports = {
   getScoreType,
   calculateScoreAverage,
@@ -365,4 +373,5 @@ module.exports = {
   getLeaveHoles,
   getPreviousRoundNum,
   formatMatchPlayScore,
+  isScoreMatchPlay,
 };
