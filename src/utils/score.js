@@ -233,12 +233,15 @@ const getMatchPlayScore = (hostPlayers, guestPlayers, type, startHole = 1) => {
         guestPlayers[0]?.scores[i]?.num_putt < guestPlayers[1]?.scores[i]?.num_putt
           ? guestPlayers[0]?.scores[i]?.num_putt
           : guestPlayers[1]?.scores[i]?.num_putt;
+      console.log({ betterScoreGuest, betterScoreHost });
       host.push(betterScoreHost);
       guest.push(betterScoreGuest);
     }
     for (let i = 0; i < hostPlayers[0]?.scores.length; i++) {
-      if (host[i] < guest[i]) score += 1;
-      if (host[i] > guest[i]) score -= 1;
+      if (host[i] && guest[i]) {
+        if (host[i] < guest[i]) score += 1;
+        if (host[i] > guest[i]) score -= 1;
+      }
     }
   }
   if (type === COURSE_TYPE.SINGLE_MATCH) {
