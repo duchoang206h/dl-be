@@ -352,10 +352,13 @@ const formatMatchPlayScore = (score, leaveHoles) => {
 };
 const isScoreMatchPlay = (host, guest) => {
   let isScore = false;
-  if (host[0]?.scores.find((s) => s?.num_putt > 0)) isScore = true;
-  if (host[1]?.scores.find((s) => s?.num_putt > 0)) isScore = true;
-  if (guest[0]?.scores.find((s) => s?.num_putt > 0)) isScore = true;
-  if (guest[1]?.scores.find((s) => s?.num_putt > 0)) isScore = true;
+  let scores = [
+    host[0]?.scores.filter((s) => s?.num_putt > 0).length,
+    host[1]?.scores.filter((s) => s?.num_putt > 0).length,
+    guest[0]?.scores.filter((s) => s?.num_putt > 0).length,
+    guest[1]?.scores.filter((s) => s?.num_putt > 0).length,
+  ];
+  if (scores.includes(0)) isScore = true;
   return isScore;
 };
 module.exports = {
