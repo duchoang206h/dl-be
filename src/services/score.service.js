@@ -1085,7 +1085,6 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
     }),
     Round.findOne({ where: { course_id: courseId, round_num: roundNum }, raw: true }),
   ]);
-  console.log({ round });
   where['course_id'] = course?.course_id;
   if (roundNum) where['round_num'] = roundNum;
   const versus = await MatchPlayVersus.findAll({
@@ -1193,18 +1192,18 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
   response['matches'] = matches;
   response['golf_course'] = course.golf_course;
   response['host'] = {
-    name: hostClub.name,
+    name: hostClub?.name,
     ...hostScore,
   };
   response['guest'] = {
-    name: guestClub.name,
+    name: guestClub?.name,
     ...guestScore,
   };
   return {
     result: response,
   };
 };
-
+//const getHostScoreAllRound = async ()
 module.exports = {
   getScoresByPlayerAndRound,
   getHoleStatisticByRound,
