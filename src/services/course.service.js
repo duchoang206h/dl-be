@@ -1,4 +1,4 @@
-const { Course, Hole, Round, Player, GolfCourse } = require('../models/schema');
+const { Course, Hole, Round, Player, GolfCourse, sequelize } = require('../models/schema');
 const moment = require('moment');
 const { Op } = require('sequelize');
 const createCourse = async (data) => {
@@ -24,7 +24,20 @@ const getCourseById = async (id) =>
         attributes: { exclude: ['createdAt', 'updatedAt'] },
         include: [{ model: Hole, as: 'holes' }],
       },
-      { model: Round, as: 'rounds', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+      {
+        model: Round,
+        as: 'rounds',
+        attributes: [
+          'round_num',
+          'round_id',
+          [
+            sequelize.literal(
+              '(select type from matchplayversuses where round_num = rounds.round_num and course_id = rounds.course_id limit 1)'
+            ),
+            'type',
+          ],
+        ],
+      },
       { model: Player, as: 'players', attributes: { exclude: ['createdAt', 'updatedAt'] } },
     ],
     order: [[{ model: GolfCourse, as: 'golf_course' }, { model: Hole, as: 'holes' }, 'hole_num', 'ASC']],

@@ -42,6 +42,8 @@ const {
   getMatchPlayHostScore,
   normalizePlayersMatchScore,
   getLeaveHoles,
+  getPreviousRoundNum,
+  isScoreMatchPlay,
 } = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
 const { NUM_PUTT_INVALID, INVALID_SCORE_INPUT } = require('../utils/errorMessage');
@@ -1062,7 +1064,7 @@ const getPlayerScore = async (courseId, playerId) => {
   player['today'] = today == 0 ? EVENT_ZERO : today;
   return player;
 };
-const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
+const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
   const where = {};
   const response = {};
   const [course, round] = await Promise.all([
@@ -1136,6 +1138,7 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
 
   const matches = await Promise.all(
     versus.map(async (v) => {
+      let finish = true;
       const host = normalizePlayersMatchScore(
         await Promise.all(
           v?.host_team?.team_players?.map(async (p) => {
@@ -1155,6 +1158,7 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
         ),
         v?.type
       );
+
       const guest = normalizePlayersMatchScore(
         await Promise.all(
           v?.guest_team?.team_players?.map(async (p) => {
@@ -1168,20 +1172,24 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
               include: [{ model: Hole, attributes: ['hole_num'] }],
               order: [[{ model: Hole }, 'hole_num', 'ASC']],
             });
+            console.log({ score: p['scores'] });
             return p;
           })
         ),
         v?.type
       );
       const leave_hole = getLeaveHoles(host[0]);
+      const isScore = isScoreMatchPlay(host, guest);
       return {
         match: v?.match_num,
         type: v?.type,
         host,
         guest,
-        score: getMatchPlayScore(host, guest, v.type),
+        score: isScore === false ? null : getMatchPlayScore(host, guest, v.type),
         leave_hole,
         start_hole: 1,
+        tee: v?.tee,
+        time: v?.time,
       };
     })
   );
@@ -1199,11 +1207,38 @@ const getLeaderboardMatchPlay = async (courseId, { roundNum }) => {
     name: guestClub?.name,
     ...guestScore,
   };
+  response['type'] = matches[0]?.type;
+  response['round'] = roundNum;
+  const lastUpdatedAt =
+    (
+      await Score.findOne({
+        where: { course_id: courseId },
+        order: [['updatedAt', 'DESC']],
+        attribute: ['updatedAt'],
+      })
+    )?.updatedAt ?? null;
   return {
     result: response,
+    lastUpdatedAt,
   };
 };
-//const getHostScoreAllRound = async ()
+const getLeaderBoardMatch = async (courseId, { roundNum }) => {
+  let response = null;
+  const rounds = await Round.findAll({ where: { course_id: courseId }, attributes: ['round_num'], raw: true });
+  const responses = await Promise.all(
+    rounds.map(async (r) => {
+      return getLeaderBoardMatchPlayByRound(courseId, { roundNum: r.round_num });
+    })
+  );
+  response = responses[roundNum - 1];
+  response['result']['host']['score'] += responses
+    .filter((r) => r['result']['round'] !== response['result']['round'])
+    .reduce((pre, cur) => pre + cur['result']['host']['score'], 0);
+  response['result']['guest']['score'] += responses
+    .filter((r) => r['result']['round'] !== response['result']['round'])
+    .reduce((pre, cur) => pre + cur['result']['guest']['score'], 0);
+  return response;
+};
 module.exports = {
   getScoresByPlayerAndRound,
   getHoleStatisticByRound,
@@ -1216,5 +1251,5 @@ module.exports = {
   getAllPlayerScore,
   getPlayerScore,
   updateManyScore,
-  getLeaderboardMatchPlay,
+  getLeaderBoardMatch,
 };
