@@ -17,6 +17,22 @@ const createCourse = async (data) => {
 const getCourseById = async (id) =>
   Course.findByPk(id, {
     attributes: [
+      'logo_url',
+      'main_photo_url',
+      'course_id',
+      'golf_course_id',
+      'name',
+      'type',
+      'total_prize',
+      'description',
+      'total_round',
+      'event_date',
+      'start_date',
+      'end_date',
+      'logo',
+      'address',
+      'main_photo',
+      'color',
       [
         sequelize.literal(
           `(select count(matchplay_versus_id) as total_match from matchplayversuses where  course_id = ${id})`
