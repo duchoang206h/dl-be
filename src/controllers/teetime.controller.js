@@ -9,6 +9,7 @@ const {
   INVALID_GROUP_TIME,
   INVALID_GROUP_TEE,
   INVALID_GOLFER_NAME,
+  INVALID_COURSE_TYPE,
 } = require('../utils/errorMessage');
 const { BadRequestError } = require('../utils/ApiError');
 const { COURSE_TYPE } = require('../config/constant');
@@ -48,6 +49,8 @@ const importTeetime = catchAsync(async (req, res) => {
     }
   } else if (course.type === COURSE_TYPE.MATCH_PLAY) {
     teetimes = data.map((d) => {
+      if (![COURSE_TYPE.FOURSOME, COURSE_TYPE.FOUR_BALL, COURSE_TYPE.SINGLE_MATCH].includes(d.type))
+        throw new BadRequestError(INVALID_COURSE_TYPE);
       ////
       return {
         club: d.club,
