@@ -1,7 +1,10 @@
 const httpStatus = require('http-status');
 const { ApiError } = require('../utils/ApiError');
-const { User } = require('../models/schema');
-const { hashPassword } = require('../utils/hash');
+const { User, Player } = require('../models/schema');
+const { hashPassword, randomString } = require('../utils/hash');
+const { writeToXlsx } = require('./xlsxService');
+const path = require('path');
+const { ROLE } = require('../config/constant');
 
 /**
  * Create a user
@@ -62,6 +65,28 @@ const updateUserById = async (userId, updateBody) => {
   await user.save();
   return user;
 };
+const genCaddyUsers = async (players, courseId) => {
+  //const players = await Player.findAll({ where: { course_id: courseId }, attributes: ['vga', 'fullname'], raw: true });
+  const caddies = players.map((p) => {
+    return {
+      'name-golfer': p.fullname,
+      caddie_username: p.vga,
+      password: randomString(8),
+    };
+  });
+  const filePath = path.join(__dirname, '..', '..', '/data', `course_${courseId}_caddies.xlsx`);
+  await writeToXlsx(caddies, filePath);
+  const createCaddiesData = caddies.map((c) => {
+    return {
+      username: c.caddie_username,
+      password: hashPassword(c.password),
+      role: ROLE.CADDIE,
+      course_id: courseId,
+    };
+  });
+  await User.bulkCreate(createCaddiesData);
+  return true;
+};
 
 /**
  * Delete user by id
@@ -89,4 +114,5 @@ module.exports = {
   updateUserById,
   deleteUserById,
   getUserByUsername,
+  genCaddyUsers,
 };

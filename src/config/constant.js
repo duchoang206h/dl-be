@@ -16,6 +16,7 @@ const SCORE_TYPE = {
 const ROLE = {
   ADMIN: 'admin',
   COURSE_USER: 'course_user',
+  CADDIE: 'caddie',
 };
 const DATE_FORMAT = 'DD/MM/YYYY';
 const PAR_PER_ROUND = 72;

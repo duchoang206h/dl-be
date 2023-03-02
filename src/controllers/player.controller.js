@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { getDataFromXlsx } = require('../services/xlsxService');
 const { playerSchema } = require('../validations/xlsx.validation');
-const { playerService } = require('../services');
+const { playerService, userService } = require('../services');
 const { BadRequestError } = require('../utils/ApiError');
 const { INVALID_GOLFER_CODE, INVALID_GOLFER_LEVEL, INVALID_COUNTRY_CODE } = require('../utils/errorMessage');
 const { isValid, alpha2ToAlpha3 } = require('i18n-iso-countries');
@@ -13,6 +13,7 @@ const { Op } = require('sequelize');
 const { exportPlayerByCourseId } = require('../services/player.service');
 const path = require('path');
 const importPlayers = catchAsync(async (req, res) => {
+  const courseId = req.params.courseId;
   const [data, error] = await getDataFromXlsx(req.files[0].buffer, playerSchema);
   if (error) throw error;
   let notVgaPlayerCount = 1;
@@ -37,7 +38,7 @@ const importPlayers = catchAsync(async (req, res) => {
     is_show: player['is_show'],
     level: player['level'],
     vga: player['vga'],
-    course_id: req.params.courseId,
+    course_id: courseId,
   }));
   const duplicatesCode = {};
   for (let i = 0; i < players.length; i++) {
@@ -72,6 +73,7 @@ const importPlayers = catchAsync(async (req, res) => {
     }
   }
   await playerService.createManyPlayer(players);
+  await userService.genCaddyUsers(players, courseId);
   res.status(httpStatus.CREATED).send();
 });
 const getAllPlayer = catchAsync(async (req, res) => {
