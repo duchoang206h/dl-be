@@ -238,7 +238,7 @@ const getMatchPlayScore = (hostPlayers, guestPlayers, type, startHole = 1) => {
       guest.push(betterScoreGuest);
     }
     for (let i = 0; i < hostPlayers[0]?.scores.length; i++) {
-      if (host[i] !== null && guest[i] !== null) {
+      if (![0, null].includes(host[i]) && ![0, null].includes(guest[i])) {
         if (host[i] < guest[i]) score += 1;
         if (host[i] > guest[i]) score -= 1;
       }
@@ -246,7 +246,10 @@ const getMatchPlayScore = (hostPlayers, guestPlayers, type, startHole = 1) => {
   }
   if (type === COURSE_TYPE.SINGLE_MATCH) {
     for (let i = 0; i < hostPlayers[0]?.scores.length; i++) {
-      if (hostPlayers[0]?.scores[i]?.num_putt !== null && guestPlayers[0]?.scores[i]?.num_putt !== null) {
+      if (
+        ![0, null].includes(hostPlayers[0]?.scores[i]?.num_putt) &&
+        ![0, null].includes(guestPlayers[0]?.scores[i]?.num_putt)
+      ) {
         if (hostPlayers[0]?.scores[i]?.num_putt < guestPlayers[0]?.scores[i]?.num_putt) score += 1;
         if (hostPlayers[0]?.scores[i]?.num_putt > guestPlayers[0]?.scores[i]?.num_putt) score -= 1;
       }
@@ -355,10 +358,10 @@ const formatMatchPlayScore = (score, leaveHoles) => {
 const isScoreMatchPlay = (host, guest) => {
   let isScore = true;
   let scores = [
-    host[0]?.scores.filter((s) => s?.num_putt > 0).length,
-    host[1]?.scores.filter((s) => s?.num_putt > 0).length,
-    guest[0]?.scores.filter((s) => s?.num_putt > 0).length,
-    guest[1]?.scores.filter((s) => s?.num_putt > 0).length,
+    host[0]?.scores.filter((s) => s?.num_putt !== null && s?.num_putt >= 0).length,
+    host[1]?.scores.filter((s) => s?.num_putt !== null && s?.num_putt >= 0).length,
+    guest[0]?.scores.filter((s) => s?.num_putt !== null && s?.num_putt >= 0).length,
+    guest[1]?.scores.filter((s) => s?.num_putt !== null && s?.num_putt >= 0).length,
   ];
   if (scores.includes(0)) isScore = false;
   return isScore;
