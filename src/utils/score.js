@@ -225,15 +225,8 @@ const getMatchPlayScore = (hostPlayers, guestPlayers, type, startHole = 1) => {
   let score = 0;
   if (type === COURSE_TYPE.FOUR_BALL || type === COURSE_TYPE.FOURSOME) {
     for (let i = 0; i < hostPlayers[0]?.scores.length; i++) {
-      const betterScoreHost =
-        hostPlayers[0]?.scores[i]?.num_putt < hostPlayers[1]?.scores[i]?.num_putt
-          ? hostPlayers[0]?.scores[i]?.num_putt
-          : hostPlayers[1]?.scores[i]?.num_putt;
-      const betterScoreGuest =
-        guestPlayers[0]?.scores[i]?.num_putt < guestPlayers[1]?.scores[i]?.num_putt
-          ? guestPlayers[0]?.scores[i]?.num_putt
-          : guestPlayers[1]?.scores[i]?.num_putt;
-      console.log({ betterScoreGuest, betterScoreHost });
+      const betterScoreHost = getBetterScore(hostPlayers[0]?.scores[i]?.num_putt, hostPlayers[1]?.scores[i]?.num_putt);
+      const betterScoreGuest = getBetterScore(guestPlayers[0]?.scores[i]?.num_putt, guestPlayers[1]?.scores[i]?.num_putt);
       host.push(betterScoreHost);
       guest.push(betterScoreGuest);
     }
@@ -365,6 +358,11 @@ const isScoreMatchPlay = (host, guest) => {
   ];
   if (scores.includes(0)) isScore = false;
   return isScore;
+};
+const getBetterScore = (s1, s2) => {
+  if (s1 === 0) return s2;
+  if (s2 === 0) return s1;
+  return s1 < s2 ? s1 : s2;
 };
 module.exports = {
   getScoreType,
