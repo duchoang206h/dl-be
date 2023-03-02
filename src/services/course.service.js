@@ -63,7 +63,17 @@ const getCourseById = async (id) =>
       },
       { model: Player, as: 'players', attributes: { exclude: ['createdAt', 'updatedAt'] } },
     ],
-    order: [[{ model: GolfCourse, as: 'golf_course' }, { model: Hole, as: 'holes' }, 'hole_num', 'ASC']],
+    order: [
+      [{ model: GolfCourse, as: 'golf_course' }, { model: Hole, as: 'holes' }, 'hole_num', 'ASC'],
+      [
+        {
+          model: Round,
+          as: 'rounds',
+        },
+        'round_num',
+        'ASC',
+      ],
+    ],
   });
 const existCourse = async (id) => (await Course.count({ where: { course_id: id } })) > 0;
 const getAllCourseByOffsetLimit = async ({
