@@ -16,7 +16,14 @@ const createCourse = async (data) => {
 };
 const getCourseById = async (id) =>
   Course.findByPk(id, {
-    attributes: { exclude: ['createdAt', 'updatedAt'] },
+    attributes: [
+      [
+        sequelize.literal(
+          `(select count(matchplay_versus_id) as total_match from matchplayversuses where  course_id = ${id})`
+        ),
+        'total_match',
+      ],
+    ],
     include: [
       {
         model: GolfCourse,
