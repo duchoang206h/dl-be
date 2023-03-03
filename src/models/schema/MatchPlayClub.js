@@ -32,6 +32,19 @@ class MatchPlayClub extends Base {
         },
         course_id: Sequelize.INTEGER,
         name: Sequelize.STRING,
+        avatar: {
+          type: Sequelize.STRING,
+          get() {
+            return this.getDataValue('avatar')
+              ? process.env.APP_URL + '/static/images/' + this.getDataValue('avatar')
+              : this.getDataValue('avatar');
+          },
+        },
+
+        last_win: {
+          type: Sequelize.STRING,
+          defaultValue: false,
+        },
         total_player: Sequelize.INTEGER,
         type: {
           type: Sequelize.STRING,

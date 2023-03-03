@@ -10,6 +10,7 @@ const {
   scoreController,
   teetimeController,
   uploadController,
+  clubController,
 } = require('../../controllers');
 const { checkAminPermission, auth, isSuperAdmin } = require('../../middlewares/auth');
 const { upload } = require('../../middlewares/upload');
@@ -121,5 +122,9 @@ router.get('/:courseId/players-export', async (req, res) => {
   fs.unlinkSync(path.resolve(__dirname, '..', '..', 'models/player_course.xlsx'));
   res.download(path.resolve(__dirname, '..', '..', 'models/player_course.xlsx'), 'player_course.xlsx');
 });
+//export caddie account
 router.get('/:courseId/caddie-account', auth, isSuperAdmin, userController.getCaddieAccount);
+
+router.get('/:courseId/clubs', clubController.getCourseById);
+router.put('/:courseId/clubs/:clubId', upload.any(), clubController.updateClub);
 module.exports = router;

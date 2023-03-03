@@ -14,6 +14,8 @@ const { Token } = require('../models/schema');
  */
 const loginUserWithUsernameAndPassword = async (username, password) => {
   const user = await userService.getUserByUsername(username);
+  console.log({ user });
+  console.log(comparePassword(password, user.password));
   if (!user || (user && !comparePassword(password, user.password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect username or password');
   }
