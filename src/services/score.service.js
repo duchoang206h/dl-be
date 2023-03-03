@@ -1177,7 +1177,7 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
         ),
         v?.type
       );
-      const leave_hole = getLeaveHoles(host, guest);
+      const leave_hole = getLeaveHoles(host, guest, v?.type);
       const isScore = isScoreMatchPlay(host, guest);
       return {
         match: v?.match_num,
