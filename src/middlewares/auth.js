@@ -4,6 +4,8 @@ const { roleRights } = require('../config/roles');
 const { jwtVerify } = require('../services/token.service');
 const { getUserById } = require('../services/user.service');
 const { TOKEN_EXPIRED, TOKEN_INVALID, NO_TOKEN_PROVIDED } = require('../utils/errorMessage');
+const { ROLE } = require('../config/constant');
+const { Player } = require('../models/schema');
 
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, user, info) => {
   if (err || info || !user) {
@@ -57,6 +59,7 @@ const isSuperAdmin = async (req, res, next) => {
 const checkAminPermission = async (req, res, next) => {
   try {
     const user = await getUserById(req.userId);
+    req.user = user;
     if (user && user.is_super) return next();
     else if (user && user.course_id == req.params.courseId) return next();
     return res.status(httpStatus.FORBIDDEN).send();
@@ -64,4 +67,16 @@ const checkAminPermission = async (req, res, next) => {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
   }
 };
-module.exports = { isSuperAdmin, auth, checkAminPermission };
+const checkCaddiePermission = async (req, res, next) => {
+  try {
+    const user = req.user;
+    if (user.role === ROLE.CADDIE) {
+      const player = await Player.findOne({ where: { player_id: req.params.playerId }, raw: true });
+      if (user.username !== player.vga) return res.status(httpStatus.FORBIDDEN).send();
+    }
+    return next();
+  } catch (error) {
+    return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
+  }
+};
+module.exports = { isSuperAdmin, auth, checkAminPermission, checkCaddiePermission };

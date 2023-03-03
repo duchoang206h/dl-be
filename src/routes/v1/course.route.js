@@ -121,5 +121,5 @@ router.get('/:courseId/players-export', async (req, res) => {
   fs.unlinkSync(path.resolve(__dirname, '..', '..', 'models/player_course.xlsx'));
   res.download(path.resolve(__dirname, '..', '..', 'models/player_course.xlsx'), 'player_course.xlsx');
 });
-router.get('/:courseId/caddie-account', isSuperAdmin, userController.getCaddieAccount);
+router.get('/:courseId/caddie-account', auth, isSuperAdmin, userController.getCaddieAccount);
 module.exports = router;
