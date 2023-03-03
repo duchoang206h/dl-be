@@ -1172,13 +1172,12 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
               include: [{ model: Hole, attributes: ['hole_num'] }],
               order: [[{ model: Hole }, 'hole_num', 'ASC']],
             });
-            console.log({ score: p['scores'] });
             return p;
           })
         ),
         v?.type
       );
-      const leave_hole = getLeaveHoles(host[0]);
+      const leave_hole = getLeaveHoles(host, guest);
       const isScore = isScoreMatchPlay(host, guest);
       return {
         match: v?.match_num,
