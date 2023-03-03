@@ -35,7 +35,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
   }; */
 const auth = async (req, res, next) => {
   try {
-    const { token } = req.headers || {};
+    const { token } = req.headers || req.cookies;
     if (!token) return res.status(httpStatus.UNAUTHORIZED).send({ message: NO_TOKEN_PROVIDED });
     const payload = jwtVerify(token);
     req.isAuthenticated = true;

@@ -327,17 +327,27 @@ const normalizePlayersMatchScore = (players, type) => {
   }
   return players;
 };
-const getLeaveHoles = (host, guest) => {
+const getLeaveHoles = (host, guest, type) => {
   let leaveHoles = [];
   for (let i = 1; i <= 18; i++) {
-    if (
-      host[0]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length &&
-      host[1]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length &&
-      guest[0]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length &&
-      guest[1]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length
-    )
-      leaveHoles.push(i);
+    if ([COURSE_TYPE.FOURSOME, COURSE_TYPE.FOUR_BALL].includes(type)) {
+      if (
+        host[0]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length &&
+        host[1]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length &&
+        guest[0]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length &&
+        guest[1]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length
+      )
+        leaveHoles.push(i);
+    }
+    if(COURSE_TYPE.SINGLE_MATCH === type){
+       if (
+         host[0]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length &&
+         guest[0]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length &&
+       )
+         leaveHoles.push(i);
+    }
   }
+
   return leaveHoles.sort((a, b) => a - b);
 };
 const getPreviousRoundNum = (r) => {
