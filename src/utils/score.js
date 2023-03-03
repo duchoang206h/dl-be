@@ -339,12 +339,12 @@ const getLeaveHoles = (host, guest, type) => {
       )
         leaveHoles.push(i);
     }
-    if(COURSE_TYPE.SINGLE_MATCH === type){
-       if (
-         host[0]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length &&
-         guest[0]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length &&
-       )
-         leaveHoles.push(i);
+    if (COURSE_TYPE.SINGLE_MATCH === type) {
+      if (
+        host[0]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length &&
+        guest[0]?.scores.filter((s) => s.num_putt === 0 && s?.Hole?.hole_num === i).length
+      )
+        leaveHoles.push(i);
     }
   }
 
