@@ -182,8 +182,6 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
             include: [{ model: Hole }],
           }),
         ]);
-        console.log(preScoreCount.filter((s) => s.round_id === round.round_id && s?.Hole?.hole_num < hole_num).length);
-        console.log((roundNum - 1) * 18 + hole_num - 1);
         /* /*  if (
           preScoreCount.filter((s) => s.round_id === round.round_id && s?.Hole?.hole_num < hole_num).length !==
           (roundNum - 1) * 18 + hole_num - 1
@@ -205,7 +203,6 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
             },
             transaction: t,
           });
-          console.log(created);
           if (exist)
             await Score.update(
               { num_putt, score_type: scoreType },
@@ -956,7 +953,6 @@ const getAllPlayerScore = async (courseId, { name }) => {
     ...player,
     pos: lastNonScoredPlayerPos + lastNonScoredPlayerPosCount - 1 + player.pos,
   }));
-  console.log({ lastNonScoredPlayerPos, lastNonScoredPlayerPosCount });
 
   const lastScoreOutCutPlayerPos =
     _scoredOutCutPlayers[_scoredOutCutPlayers.length - 1]?.pos || lastNonScoredPlayerPos + lastNonScoredPlayerPosCount - 1;
@@ -1192,20 +1188,22 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
       };
     })
   );
-  const hostClub = course.clubs?.find((c) => c.type === 'host');
-  const guestClub = course.clubs?.find((c) => c.type === 'guest');
+  const [hostClub, guestClub] = await Promise.all([
+    MatchPlayClub.findOne({
+      where: { course_id: courseId, type: 'host' },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+    }),
+    MatchPlayClub.findOne({
+      where: { course_id: courseId, type: 'guest' },
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+    }),
+  ]);
   const hostScore = getMatchPlayHostScore(matches, 'host');
   const guestScore = getMatchPlayHostScore(matches, 'guest');
   response['matches'] = matches;
   response['golf_course'] = course.golf_course;
-  response['host'] = {
-    name: hostClub?.name,
-    ...hostScore,
-  };
-  response['guest'] = {
-    name: guestClub?.name,
-    ...guestScore,
-  };
+  response['host'] = Object.assign({}, hostClub.toJSON(), hostScore);
+  response['guest'] = Object.assign({}, guestClub.toJSON(), guestScore);
   response['type'] = matches[0]?.type;
   response['round'] = roundNum;
   const lastUpdatedAt =
