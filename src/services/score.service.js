@@ -1202,8 +1202,8 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
   const guestScore = getMatchPlayHostScore(matches, 'guest');
   response['matches'] = matches;
   response['golf_course'] = course.golf_course;
-  response['host'] = Object.assign({}, hostClub.toJSON(), hostScore);
-  response['guest'] = Object.assign({}, guestClub.toJSON(), guestScore);
+  response['host'] = Object.assign({}, hostClub?.toJSON(), hostScore);
+  response['guest'] = Object.assign({}, guestClub?.toJSON(), guestScore);
   response['type'] = matches[0]?.type;
   response['round'] = roundNum;
   const lastUpdatedAt =
