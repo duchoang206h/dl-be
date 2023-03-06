@@ -267,6 +267,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                     round_id: round.round_id,
                     hole_id: hole.hole_id,
                     player_id: playerId,
+                    match_num,
                   },
                 }),
                 Score.findOne({
@@ -275,6 +276,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                     round_id: round.round_id,
                     hole_id: hole.hole_id,
                     player_id: teammate.player_id,
+                    match_num,
                   },
                 }),
               ]);
@@ -302,6 +304,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                     round_id: round.round_id,
                     hole_id: hole.hole_id,
                     player_id: playerId,
+                    match_num,
                   },
                   { transaction: t }
                 );
@@ -314,6 +317,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                     round_id: round.round_id,
                     hole_id: hole.hole_id,
                     player_id: teammate.player_id,
+                    match_num,
                   },
                   { transaction: t }
                 );
@@ -327,6 +331,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                       round_id: round.round_id,
                       hole_id: hole.hole_id,
                       player_id: playerId,
+                      match_num,
                     },
                     { transaction: t }
                   ),
@@ -338,6 +343,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                       round_id: round.round_id,
                       hole_id: hole.hole_id,
                       player_id: teammate.player_id,
+                      match_num,
                     },
                     { transaction: t }
                   ),
