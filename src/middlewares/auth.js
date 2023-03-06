@@ -65,8 +65,8 @@ const checkAminPermission = async (req, res, next) => {
       const player = await Player.findOne({
         where: { course_id: req.params.courseId, player_id: req.params.playerId },
       });
-      if (user.username !== player.vga) return res.status(httpStatus.FORBIDDEN).send();
-      return next();
+      if (player && user.username === player.vga) return next();
+      return res.status(httpStatus.FORBIDDEN).send();
     } else if (user && user.course_id == req.params.courseId) return next();
     return res.status(httpStatus.FORBIDDEN).send();
   } catch (error) {
