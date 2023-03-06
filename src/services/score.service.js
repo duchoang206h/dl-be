@@ -296,7 +296,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                     transaction: t,
                   }
                 );
-              else if (!existPlayer) {
+              else if (!existPlayer && teammate) {
                 await Score.create(
                   {
                     num_putt,
@@ -309,7 +309,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                   },
                   { transaction: t }
                 );
-              } else if (!teamPlayer) {
+              } else if (!teamPlayer && existPlayer) {
                 await Score.create(
                   {
                     num_putt,
