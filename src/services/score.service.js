@@ -255,7 +255,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
               where: {
                 matchplay_team_id: teamPlayer.matchplay_team_id,
                 player_id: {
-                  [Op.notIn]: [teamPlayer.player_id],
+                  [Op.notIn]: [playerId],
                 },
               },
             });
@@ -280,6 +280,10 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                   },
                 }),
               ]);
+              console.log({
+                existPlayer,
+                existTeammate,
+              });
               if (existPlayer && existTeammate)
                 await Score.update(
                   { num_putt, score_type: scoreType },
@@ -296,32 +300,62 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                     transaction: t,
                   }
                 );
-              else if (!existPlayer && teammate) {
-                await Score.create(
-                  {
-                    num_putt,
-                    score_type: scoreType,
-                    course_id: courseId,
-                    round_id: round.round_id,
-                    hole_id: hole.hole_id,
-                    player_id: playerId,
-                    match_num,
-                  },
-                  { transaction: t }
-                );
-              } else if (!teamPlayer && existPlayer) {
-                await Score.create(
-                  {
-                    num_putt,
-                    score_type: scoreType,
-                    course_id: courseId,
-                    round_id: round.round_id,
-                    hole_id: hole.hole_id,
-                    player_id: teammate.player_id,
-                    match_num,
-                  },
-                  { transaction: t }
-                );
+              else if (!existPlayer && existTeammate) {
+                await Promise.all([
+                  await Score.create(
+                    {
+                      num_putt,
+                      score_type: scoreType,
+                      course_id: courseId,
+                      round_id: round.round_id,
+                      hole_id: hole.hole_id,
+                      player_id: playerId,
+                      match_num,
+                    },
+                    { transaction: t }
+                  ),
+                  await Score.update(
+                    { num_putt, score_type: scoreType },
+                    {
+                      where: {
+                        course_id: courseId,
+                        round_id: round.round_id,
+                        hole_id: hole.hole_id,
+                        match_num,
+                        player_id: teammate.player_id,
+                      },
+                      transaction: t,
+                    }
+                  ),
+                ]);
+              } else if (!existTeammate && existPlayer) {
+                await Promise.all([
+                  await Score.create(
+                    {
+                      num_putt,
+                      score_type: scoreType,
+                      course_id: courseId,
+                      round_id: round.round_id,
+                      hole_id: hole.hole_id,
+                      player_id: teammate.player_id,
+                      match_num,
+                    },
+                    { transaction: t }
+                  ),
+                  await Score.update(
+                    { num_putt, score_type: scoreType },
+                    {
+                      where: {
+                        course_id: courseId,
+                        round_id: round.round_id,
+                        hole_id: hole.hole_id,
+                        match_num,
+                        player_id: playerId,
+                      },
+                      transaction: t,
+                    }
+                  ),
+                ]);
               } else {
                 await Promise.all([
                   Score.create(
