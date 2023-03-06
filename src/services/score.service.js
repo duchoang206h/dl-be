@@ -288,6 +288,7 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
                       course_id: courseId,
                       round_id: round.round_id,
                       hole_id: hole.hole_id,
+                      match_num,
                       player_id: {
                         [Op.in]: [playerId, teammate.player_id],
                       },
