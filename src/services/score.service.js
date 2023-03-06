@@ -188,57 +188,245 @@ const updateManyScore = async (scores, { courseId, playerId, roundNum }) => {
         )
           throw new BadRequestError(INVALID_SCORE_INPUT); */
         const scoreType = getScoreType(num_putt, hole.par);
-        if (finished === true) {
-          const [exist, created] = await Score.findOrCreate({
-            where: {
-              course_id: courseId,
-              round_id: round.round_id,
-              hole_id: hole.hole_id,
-              player_id: playerId,
-            },
-            defaults: {
-              num_putt,
-              score_type: scoreType,
-              match_num,
-            },
-            transaction: t,
-          });
-          if (exist)
-            await Score.update(
-              { num_putt, score_type: scoreType },
-              {
-                where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId },
-                transaction: t,
-              }
-            );
-        } else {
-          const currentScore = await CurrentScore.findOne({
-            where: {
-              player_id: playerId,
-              course_id: courseId,
-            },
-          });
-          if (currentScore) {
-            return await CurrentScore.update(
-              {
+        if (course.type === COURSE_TYPE.STOKE_PLAY) {
+          if (finished === true) {
+            const [exist, created] = await Score.findOrCreate({
+              where: {
+                course_id: courseId,
+                round_id: round.round_id,
                 hole_id: hole.hole_id,
-                round_num: roundNum,
+                player_id: playerId,
+              },
+              defaults: {
                 num_putt,
                 score_type: scoreType,
                 match_num,
               },
-              { where: { player_id: playerId, course_id: courseId } }
-            );
-          } else {
-            return CurrentScore.create({
-              hole_id: hole.hole_id,
-              round_num: roundNum,
-              num_putt,
-              score_type: scoreType,
-              player_id: playerId,
-              course_id: courseId,
-              match_num,
+              transaction: t,
             });
+            if (exist)
+              await Score.update(
+                { num_putt, score_type: scoreType },
+                {
+                  where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId },
+                  transaction: t,
+                }
+              );
+          } else {
+            const currentScore = await CurrentScore.findOne({
+              where: {
+                player_id: playerId,
+                course_id: courseId,
+              },
+            });
+            if (currentScore) {
+              return await CurrentScore.update(
+                {
+                  hole_id: hole.hole_id,
+                  round_num: roundNum,
+                  num_putt,
+                  score_type: scoreType,
+                  match_num,
+                },
+                { where: { player_id: playerId, course_id: courseId } }
+              );
+            } else {
+              return CurrentScore.create({
+                hole_id: hole.hole_id,
+                round_num: roundNum,
+                num_putt,
+                score_type: scoreType,
+                player_id: playerId,
+                course_id: courseId,
+                match_num,
+              });
+            }
+          }
+        } else if (course.type === COURSE_TYPE.MATCH_PLAY) {
+          const roundType = await MatchPlayVersus.findOne({
+            where: {
+              course_id: courseId,
+              round_num: roundNum,
+            },
+          });
+          if (roundType.type === COURSE_TYPE.FOURSOME) {
+            const teamPlayer = await MatchPlayTeamPlayer.findOne({ where: { player_id: playerId } });
+            const teammate = await MatchPlayTeamPlayer.findOne({
+              where: {
+                matchplay_team_id: teamPlayer.matchplay_team_id,
+                player_id: {
+                  [Op.notIn]: [teamPlayer.player_id],
+                },
+              },
+            });
+            if (finished === true) {
+              const [existPlayer, existTeammate] = await Promise.all([
+                Score.findOne({
+                  where: {
+                    course_id: courseId,
+                    round_id: round.round_id,
+                    hole_id: hole.hole_id,
+                    player_id: playerId,
+                  },
+                }),
+                Score.findOne({
+                  where: {
+                    course_id: courseId,
+                    round_id: round.round_id,
+                    hole_id: hole.hole_id,
+                    player_id: teammate.player_id,
+                  },
+                }),
+              ]);
+              if (existPlayer && existTeammate)
+                await Score.update(
+                  { num_putt, score_type: scoreType },
+                  {
+                    where: {
+                      course_id: courseId,
+                      round_id: round.round_id,
+                      hole_id: hole.hole_id,
+                      player_id: {
+                        [Op.in]: [playerId, teammate.player_id],
+                      },
+                    },
+                    transaction: t,
+                  }
+                );
+              else if (!existPlayer) {
+                await Score.create(
+                  {
+                    num_putt,
+                    score_type: scoreType,
+                    course_id: courseId,
+                    round_id: round.round_id,
+                    hole_id: hole.hole_id,
+                    player_id: playerId,
+                  },
+                  { transaction: t }
+                );
+              } else if (!teamPlayer) {
+                await Score.create(
+                  {
+                    num_putt,
+                    score_type: scoreType,
+                    course_id: courseId,
+                    round_id: round.round_id,
+                    hole_id: hole.hole_id,
+                    player_id: teammate.player_id,
+                  },
+                  { transaction: t }
+                );
+              } else {
+                await Promise.all([
+                  Score.create(
+                    {
+                      num_putt,
+                      score_type: scoreType,
+                      course_id: courseId,
+                      round_id: round.round_id,
+                      hole_id: hole.hole_id,
+                      player_id: playerId,
+                    },
+                    { transaction: t }
+                  ),
+                  Score.create(
+                    {
+                      num_putt,
+                      score_type: scoreType,
+                      course_id: courseId,
+                      round_id: round.round_id,
+                      hole_id: hole.hole_id,
+                      player_id: teammate.player_id,
+                    },
+                    { transaction: t }
+                  ),
+                ]);
+              }
+            } else {
+              const currentScore = await CurrentScore.findOne({
+                where: {
+                  player_id: playerId,
+                  course_id: courseId,
+                },
+              });
+              if (currentScore) {
+                return await CurrentScore.update(
+                  {
+                    hole_id: hole.hole_id,
+                    round_num: roundNum,
+                    num_putt,
+                    score_type: scoreType,
+                    match_num,
+                  },
+                  { where: { player_id: playerId, course_id: courseId } }
+                );
+              } else {
+                return CurrentScore.create({
+                  hole_id: hole.hole_id,
+                  round_num: roundNum,
+                  num_putt,
+                  score_type: scoreType,
+                  player_id: playerId,
+                  course_id: courseId,
+                  match_num,
+                });
+              }
+            }
+          } else {
+            if (finished === true) {
+              const [exist, created] = await Score.findOrCreate({
+                where: {
+                  course_id: courseId,
+                  round_id: round.round_id,
+                  hole_id: hole.hole_id,
+                  player_id: playerId,
+                },
+                defaults: {
+                  num_putt,
+                  score_type: scoreType,
+                  match_num,
+                },
+                transaction: t,
+              });
+              if (exist)
+                await Score.update(
+                  { num_putt, score_type: scoreType },
+                  {
+                    where: { course_id: courseId, round_id: round.round_id, hole_id: hole.hole_id, player_id: playerId },
+                    transaction: t,
+                  }
+                );
+            } else {
+              const currentScore = await CurrentScore.findOne({
+                where: {
+                  player_id: playerId,
+                  course_id: courseId,
+                },
+              });
+              if (currentScore) {
+                return await CurrentScore.update(
+                  {
+                    hole_id: hole.hole_id,
+                    round_num: roundNum,
+                    num_putt,
+                    score_type: scoreType,
+                    match_num,
+                  },
+                  { where: { player_id: playerId, course_id: courseId } }
+                );
+              } else {
+                return CurrentScore.create({
+                  hole_id: hole.hole_id,
+                  round_num: roundNum,
+                  num_putt,
+                  score_type: scoreType,
+                  player_id: playerId,
+                  course_id: courseId,
+                  match_num,
+                });
+              }
+            }
           }
         }
       })
