@@ -43,6 +43,10 @@ class MatchPlayClub extends Base {
           type: Sequelize.STRING,
           defaultValue: false,
         },
+        win_by_playoff: {
+          type: Sequelize.STRING,
+          defaultValue: false,
+        },
         total_player: Sequelize.INTEGER,
         type: {
           type: Sequelize.STRING,
