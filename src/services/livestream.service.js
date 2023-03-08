@@ -571,11 +571,11 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
             });
             let thru = m.host[0].scores.filter((s) => s.num_putt !== null).length;
             thru = thru === 18 ? 'F' : thru === 0 ? '-' : thru;
+            let hostScore = thru === '-' ? null : m.score >= 0 ? formatMatchPlayScore(m.score, m.leave_hole.length) : null;
+            let guestScore = thru === '-' ? null : m.score <= 0 ? formatMatchPlayScore(m.score, m.leave_hole.length) : null;
             response[`${roundType}_ORDER_${order}_MATCH_${m.match}_THRU`] = thru;
-            response[`${roundType}_ORDER_${order}_MATCH_${m.match}_HOST_SCORE`] =
-              m.score >= 0 ? formatMatchPlayScore(m.score, m.leave_hole.length) : null;
-            response[`${roundType}_ORDER_${order}_MATCH_${m.match}_GUEST_SCORE`] =
-              m.score <= 0 ? formatMatchPlayScore(m.score, m.leave_hole.length) : null;
+            response[`${roundType}_ORDER_${order}_MATCH_${m.match}_HOST_SCORE`] = hostScore;
+            response[`${roundType}_ORDER_${order}_MATCH_${m.match}_GUEST_SCORE`] = guestScore;
           });
         });
       }
