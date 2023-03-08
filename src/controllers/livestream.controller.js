@@ -83,6 +83,12 @@ const getGolferInHoleStatistic = catchAsync(async (req, res) => {
   const response = await livestreamService.getGolferInHoleStatistic({ courseId, code });
   res.status(httpStatus.OK).send(response);
 });
+const getMatchPlayVersus = catchAsync(async (req, res) => {
+  const { courseId, round, match } = req.query;
+  console.log({ courseId, round, match });
+  const response = await livestreamService.getMatchPlayVersus({ courseId, roundNum: round, matchNum: match });
+  res.status(httpStatus.OK).send(response);
+});
 module.exports = {
   scorecards,
   getHoleBottomStatistic,
@@ -95,4 +101,5 @@ module.exports = {
   getGolferInHoleStatistic,
   getGolferBottom,
   getAllGolfer,
+  getMatchPlayVersus,
 };

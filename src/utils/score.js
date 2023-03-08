@@ -227,8 +227,6 @@ const getMatchPlayScore = (hostPlayers, guestPlayers, type, startHole = 1) => {
     for (let i = 0; i < hostPlayers[0]?.scores.length; i++) {
       const betterScoreHost = getBetterScore(hostPlayers[0]?.scores[i]?.num_putt, hostPlayers[1]?.scores[i]?.num_putt);
       const betterScoreGuest = getBetterScore(guestPlayers[0]?.scores[i]?.num_putt, guestPlayers[1]?.scores[i]?.num_putt);
-      console.log({ type, betterScoreHost });
-      console.log({ type, betterScoreGuest });
       host.push(betterScoreHost);
       guest.push(betterScoreGuest);
     }
@@ -392,6 +390,15 @@ const getBetterScore = (s1, s2) => {
   if ((s1 === 0 && s2 === null) || (s2 === 0 && s1 === null)) return null;
   return s1 < s2 ? s1 : s2;
 };
+const getThru = (host, guest) => {
+  let thruArr = [];
+  host.forEach((h) => thruArr.push(h?.scores?.filter((s) => s.num_putt !== null).length));
+  guest.forEach((g) => thruArr.push(g?.scores?.filter((s) => s.num_putt !== null).length));
+  let thru = Math.min(...thruArr);
+  console.log({ thruArr });
+  console.log({ thru });
+  return thru === 18 ? 'F' : thru === 0 ? '-' : thru;
+};
 module.exports = {
   getScoreType,
   calculateScoreAverage,
@@ -408,4 +415,5 @@ module.exports = {
   getPreviousRoundNum,
   formatMatchPlayScore,
   isScoreMatchPlay,
+  getThru,
 };

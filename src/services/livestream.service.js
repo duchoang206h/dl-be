@@ -31,10 +31,25 @@ const {
   Image,
   CurrentScore,
   MatchPlayClub,
+  MatchPlayVersus,
+  MatchPlayTeam,
+  MatchPlayTeamPlayer,
 } = require('../models/schema');
 const { TeeTime } = require('../models/schema/Teetime');
 const { TeeTimeGroupPlayer } = require('../models/schema/TeetimeGroupPlayer');
-const { getRank, getScoreImage, getTotalOverImage, getTop, getScoreTitle, formatMatchPlayScore } = require('../utils/score');
+const {
+  getRank,
+  getScoreImage,
+  getTotalOverImage,
+  getTop,
+  getScoreTitle,
+  formatMatchPlayScore,
+  normalizePlayersMatchScore,
+  getLeaveHoles,
+  isScoreMatchPlay,
+  getMatchPlayScore,
+  getThru,
+} = require('../utils/score');
 const { dateWithTimezone } = require('../utils/date');
 const moment = require('moment');
 const { getScoreType } = require('../utils/score');
@@ -770,6 +785,119 @@ const getGolferBottom = async ({ code, courseId }) => {
 
   return response;
 };
+const getMatchPlayVersus = async ({ courseId, roundNum, matchNum }) => {
+  const round = await Round.findOne({ where: { course_id: courseId, round_num: roundNum } });
+  const versus = await MatchPlayVersus.findOne({
+    where: {
+      course_id: courseId,
+      round_num: roundNum,
+      match_num: matchNum,
+    },
+    include: [
+      {
+        model: MatchPlayTeam,
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+
+        as: 'host_team',
+        include: [
+          {
+            model: MatchPlayTeamPlayer,
+            as: 'team_players',
+            include: [
+              {
+                model: Player,
+                as: 'players',
+              },
+            ],
+            attributes: { exclude: ['createdAt', 'updatedAt'] },
+          },
+        ],
+      },
+      {
+        model: MatchPlayTeam,
+        as: 'guest_team',
+        attributes: { exclude: ['createdAt', 'updatedAt'] },
+
+        include: [
+          {
+            model: MatchPlayTeamPlayer,
+            as: 'team_players',
+            attributes: { exclude: ['createdAt', 'updatedAt'] },
+
+            include: [
+              {
+                model: Player,
+                as: 'players',
+                attributes: { exclude: ['createdAt', 'updatedAt'] },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    order: [['match_num', 'ASC']],
+  });
+  const host = normalizePlayersMatchScore(
+    await Promise.all(
+      versus?.host_team?.team_players?.map(async (p) => {
+        p = p.players.toJSON();
+        p['scores'] = await Score.findAll({
+          where: {
+            player_id: p.player_id,
+            round_id: round.round_id,
+          },
+          attributes: ['num_putt'],
+
+          include: [{ model: Hole, attributes: ['hole_num'] }],
+          order: [[{ model: Hole }, 'hole_num', 'ASC']],
+        });
+        return p;
+      })
+    ),
+    versus?.type
+  );
+  const guest = normalizePlayersMatchScore(
+    await Promise.all(
+      versus?.guest_team?.team_players?.map(async (p) => {
+        p = p.players.toJSON();
+        p['scores'] = await Score.findAll({
+          where: {
+            player_id: p.player_id,
+            round_id: round.round_id,
+          },
+          attributes: ['num_putt'],
+          include: [{ model: Hole, attributes: ['hole_num'] }],
+          order: [[{ model: Hole }, 'hole_num', 'ASC']],
+        });
+        return p;
+      })
+    ),
+    versus?.type
+  );
+  const leave_hole = getLeaveHoles(host, guest, versus?.type);
+  const isScore = isScoreMatchPlay(host, guest);
+  const response = {};
+  host.forEach((h, i) => {
+    response[`HOST_G${i + 1}`] = h.fullname;
+    response[`HOST_G${i + 1}_NATION`] = alpha2ToAlpha3(h.country);
+    response[`HOST_G${i + 1}_COUNTRY`] = h.flag;
+    response[`HOST_G${i + 1}_AVATAR`] = h.avatar_url;
+  });
+  guest.forEach((g, i) => {
+    response[`GUEST_G${i + 1}`] = g.fullname;
+    response[`GUEST_G${i + 1}_NATION`] = alpha2ToAlpha3(g.country);
+    response[`GUEST_G${i + 1}_COUNTRY`] = g.flag;
+    response[`GUEST_G${i + 1}_AVATAR`] = g.avatar_url;
+  });
+  const score = isScore === false ? null : getMatchPlayScore(host, guest, versus.type);
+  let thru = getThru(host, guest);
+  response['THRU'] = thru;
+  let hostScore = thru === '-' ? null : score >= 0 ? formatMatchPlayScore(score, leave_hole.length) : null;
+  let guestScore = thru === '-' ? null : score <= 0 ? formatMatchPlayScore(score, leave_hole.length) : null;
+  response['HOST_SCORE'] = hostScore;
+  response['GUEST_SCORE'] = guestScore;
+  return response;
+};
 module.exports = {
   getHoleStatistic,
   getFlightImage,
@@ -779,4 +907,5 @@ module.exports = {
   getLeaderboard,
   getGolferInHoleStatistic,
   getGolferBottom,
+  getMatchPlayVersus,
 };

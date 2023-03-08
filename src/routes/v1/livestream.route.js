@@ -16,4 +16,5 @@ router.get('/golfers/bottom.json', livestreamController.getGolferBottom);
 router.get('/scorecard.json', livestreamController.scorecardStatic);
 router.get('/leaderboard.json', livestreamController.getLeaderboard);
 router.get('/golfer-in-hole.json', livestreamController.getGolferInHoleStatistic);
+router.get('/versus.json', livestreamController.getMatchPlayVersus);
 module.exports = router;
