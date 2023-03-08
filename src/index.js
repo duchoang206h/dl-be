@@ -8,10 +8,10 @@ let server;
 db.sequelize.authenticate().then(() => {
   //seed();
   if (process.env.NODE_ENV == 'development') {
-    /* db.sequelize
+    db.sequelize
       .sync()
       .then()
-      .catch((error) => console.log(error)); */
+      .catch((error) => console.log(error));
   }
   logger.info('Connected to mysql');
   server = app.listen(config.port, () => {

@@ -11,14 +11,16 @@ const {
   teetimeController,
   uploadController,
   clubController,
+  roundController,
 } = require('../../controllers');
-const { checkAminPermission, auth, isSuperAdmin } = require('../../middlewares/auth');
+const { checkAminPermission, auth, isSuperAdmin, checkCaddiePermission } = require('../../middlewares/auth');
 const { upload } = require('../../middlewares/upload');
 const path = require('path');
 const httpStatus = require('http-status');
 const { COURSE_TYPE, PLAYER_STATUS } = require('../../config/constant');
 const { exportPlayerXlsx, exportTeetimeXlsx } = require('../../models/seed');
 const { playerService } = require('../../services');
+const { checkRoundFinished } = require('../../middlewares/round');
 const router = express.Router();
 router.post('/', auth, isSuperAdmin, validate(courseValidation.createCourse), courseController.createCourse);
 router.post(
@@ -77,7 +79,14 @@ router.post(
   checkAminPermission,
   scoreController.createManyScore
 );
-router.put('/:courseId/scores/players/:playerId/rounds/:roundNum', auth, checkAminPermission, scoreController.updateScore);
+router.put(
+  '/:courseId/scores/players/:playerId/rounds/:roundNum',
+  auth,
+  checkRoundFinished,
+  checkAminPermission,
+  checkCaddiePermission,
+  scoreController.updateScore
+);
 // statistic
 router.get('/:courseId/statistic/rounds/:roundNum', scoreController.getHoleStatisticByRoundNum);
 router.get('/:courseId/statistic/rounds', scoreController.getHoleStatisticByRoundNum);
@@ -126,5 +135,8 @@ router.get('/:courseId/players-export', async (req, res) => {
 router.get('/:courseId/caddie-account', auth, isSuperAdmin, userController.getCaddieAccount);
 
 router.get('/:courseId/clubs', clubController.getCourseById);
-router.put('/:courseId/clubs/:clubId', upload.any(), clubController.updateClub);
+router.put('/:courseId/clubs/:clubId', auth, isSuperAdmin, upload.any(), clubController.updateClub);
+
+// round
+router.put('/:courseId/rounds/:roundNum', auth, isSuperAdmin, roundController.updateRound);
 module.exports = router;

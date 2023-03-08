@@ -3,9 +3,10 @@ const { ApiError } = require('../utils/ApiError');
 const { roleRights } = require('../config/roles');
 const { jwtVerify } = require('../services/token.service');
 const { getUserById } = require('../services/user.service');
-const { TOKEN_EXPIRED, TOKEN_INVALID, NO_TOKEN_PROVIDED } = require('../utils/errorMessage');
-const { ROLE } = require('../config/constant');
-const { Player } = require('../models/schema');
+const { TOKEN_EXPIRED, TOKEN_INVALID, NO_TOKEN_PROVIDED, CADDIE_NOT_PERMISSION } = require('../utils/errorMessage');
+const { ROLE, COURSE_TYPE } = require('../config/constant');
+const { Player, MatchPlayVersus, MatchPlayTeamPlayer } = require('../models/schema');
+const { Op } = require('sequelize');
 
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, user, info) => {
   if (err || info || !user) {
@@ -61,13 +62,7 @@ const checkAminPermission = async (req, res, next) => {
     const user = await getUserById(req.userId);
     req.user = user;
     if (user && user.is_super) return next();
-    else if (user && user.role === ROLE.CADDIE) {
-      const player = await Player.findOne({
-        where: { course_id: req.params.courseId, player_id: req.params.playerId },
-      });
-      if (player && user.username === player.vga) return next();
-      return res.status(httpStatus.FORBIDDEN).send();
-    } else if (user && user.course_id == req.params.courseId) return next();
+    else if (user && user.course_id == req.params.courseId) return next();
     return res.status(httpStatus.FORBIDDEN).send();
   } catch (error) {
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).send();
@@ -76,9 +71,41 @@ const checkAminPermission = async (req, res, next) => {
 const checkCaddiePermission = async (req, res, next) => {
   try {
     const user = req.user;
-    if (user.role === ROLE.CADDIE) {
-      const player = await Player.findOne({ where: { player_id: req.params.playerId }, raw: true });
-      if (user.username !== player.vga) return res.status(httpStatus.FORBIDDEN).send();
+    const { courseId, roundNum, playerId } = req.params;
+    if (user && user.role === ROLE.CADDIE) {
+      const roundType = await MatchPlayVersus.findOne({
+        where: {
+          course_id: courseId,
+          round_num: roundNum,
+        },
+      });
+      if (roundType.type === COURSE_TYPE.FOURSOME) {
+        const teamPlayer = await MatchPlayTeamPlayer.findOne({
+          where: { player_id: playerId },
+          include: [{ model: Player, as: 'players' }],
+        });
+        const teammate = await MatchPlayTeamPlayer.findOne({
+          where: {
+            matchplay_team_id: teamPlayer.matchplay_team_id,
+            player_id: {
+              [Op.notIn]: [playerId],
+            },
+          },
+          include: [{ model: Player, as: 'players' }],
+        });
+        if (teamPlayer && teammate && [teammate?.players?.vga, teamPlayer?.players?.vga].includes(user.username))
+          return next();
+        return res.status(httpStatus.BAD_REQUEST).send({
+          message: CADDIE_NOT_PERMISSION,
+        });
+      }
+      const player = await Player.findOne({
+        where: { course_id: req.params.courseId, player_id: req.params.playerId },
+      });
+      if (player && user.username === player.vga) return next();
+      return res.status(httpStatus.BAD_REQUEST).send({
+        message: CADDIE_NOT_PERMISSION,
+      });
     }
     return next();
   } catch (error) {

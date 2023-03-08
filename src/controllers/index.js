@@ -9,3 +9,4 @@ module.exports.uploadController = require('./upload.controller');
 module.exports.golfCourseController = require('./golf_course.controller');
 module.exports.livestreamController = require('./livestream.controller');
 module.exports.clubController = require('./club.controller');
+module.exports.roundController = require('./round.controller');

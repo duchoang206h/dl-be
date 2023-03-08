@@ -25,6 +25,10 @@ class Round extends Base {
         },
         course_id: Sequelize.INTEGER,
         round_num: Sequelize.INTEGER,
+        finished: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false,
+        },
       },
       {
         sequelize,

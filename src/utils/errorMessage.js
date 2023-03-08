@@ -16,6 +16,8 @@ const INVALID_SCORE_INPUT = `Previous hole score must be completed, then create 
 const INVALID_COUNTRY_CODE = `Invalid country code`;
 const COURSE_TYPE_NOT_FOUND = `Course type not found`;
 const INVALID_COURSE_TYPE = 'Invalid course type';
+const ROUND_FINISHED = 'Round has finished';
+const CADDIE_NOT_PERMISSION = `You don't have permission`;
 module.exports = {
   TOKEN_EXPIRED,
   TOKEN_INVALID,
@@ -35,4 +37,6 @@ module.exports = {
   INVALID_COUNTRY_CODE,
   COURSE_TYPE_NOT_FOUND,
   INVALID_COURSE_TYPE,
+  ROUND_FINISHED,
+  CADDIE_NOT_PERMISSION,
 };
