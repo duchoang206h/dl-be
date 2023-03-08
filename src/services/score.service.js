@@ -1466,6 +1466,13 @@ const getLeaderBoardMatch = async (courseId, { roundNum }) => {
     .reduce((pre, cur) => pre + cur['result']['guest']['score'], 0);
   return response;
 };
+const getCourseTypeUpperCaseKey = (type) => {
+  let key = '';
+  if (type === COURSE_TYPE.FOUR_BALL) key = 'FOURBALL';
+  if (type === COURSE_TYPE.FOURSOME) key = 'FOURSOME';
+  if (type === COURSE_TYPE.SINGLE_MATCH) key = 'SINGLEMATCH';
+  return key;
+};
 module.exports = {
   getScoresByPlayerAndRound,
   getHoleStatisticByRound,
@@ -1479,4 +1486,5 @@ module.exports = {
   getPlayerScore,
   updateManyScore,
   getLeaderBoardMatch,
+  getCourseTypeUpperCaseKey,
 };
