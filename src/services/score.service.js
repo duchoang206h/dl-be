@@ -1414,6 +1414,7 @@ const getLeaderBoardMatchPlayByRound = async (courseId, { roundNum }) => {
         start_hole: v?.tee,
         tee: v?.tee,
         time: v?.time,
+        finished: v?.finished,
       };
     })
   );
