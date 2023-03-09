@@ -73,6 +73,8 @@ const checkCaddiePermission = async (req, res, next) => {
     const user = req.user;
     const { courseId, roundNum, playerId } = req.params;
     if (user && user.role === ROLE.CADDIE) {
+      const vga = user.username?.replace(getVgaRegex, '');
+
       const roundType = await MatchPlayVersus.findOne({
         where: {
           course_id: courseId,
@@ -93,7 +95,6 @@ const checkCaddiePermission = async (req, res, next) => {
           },
           include: [{ model: Player, as: 'players' }],
         });
-        const vga = user.username?.replace(getVgaRegex, '');
         if (teamPlayer && teammate && [teammate?.players?.vga, teamPlayer?.players?.vga].includes(vga)) return next();
         return res.status(httpStatus.BAD_REQUEST).send({
           message: CADDIE_NOT_PERMISSION,
