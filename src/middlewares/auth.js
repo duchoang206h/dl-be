@@ -7,7 +7,7 @@ const { TOKEN_EXPIRED, TOKEN_INVALID, NO_TOKEN_PROVIDED, CADDIE_NOT_PERMISSION }
 const { ROLE, COURSE_TYPE } = require('../config/constant');
 const { Player, MatchPlayVersus, MatchPlayTeamPlayer } = require('../models/schema');
 const { Op } = require('sequelize');
-
+const getVgaRegex = /C_\d+_/;
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, user, info) => {
   if (err || info || !user) {
     return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
@@ -93,8 +93,8 @@ const checkCaddiePermission = async (req, res, next) => {
           },
           include: [{ model: Player, as: 'players' }],
         });
-        if (teamPlayer && teammate && [teammate?.players?.vga, teamPlayer?.players?.vga].includes(user.username))
-          return next();
+        const vga = user.username?.replace(getVgaRegex, '');
+        if (teamPlayer && teammate && [teammate?.players?.vga, teamPlayer?.players?.vga].includes(vga)) return next();
         return res.status(httpStatus.BAD_REQUEST).send({
           message: CADDIE_NOT_PERMISSION,
         });
