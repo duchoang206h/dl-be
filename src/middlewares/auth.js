@@ -102,7 +102,7 @@ const checkCaddiePermission = async (req, res, next) => {
       const player = await Player.findOne({
         where: { course_id: req.params.courseId, player_id: req.params.playerId },
       });
-      if (player && user.username === player.vga) return next();
+      if (player && vga === player.vga) return next();
       return res.status(httpStatus.BAD_REQUEST).send({
         message: CADDIE_NOT_PERMISSION,
       });
