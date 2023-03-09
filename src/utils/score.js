@@ -367,6 +367,7 @@ const getPreviousRoundNum = (r) => {
 };
 const formatMatchPlayScore = (score, leaveHoles) => {
   let scoreStr = '';
+  score = Math.abs(score);
   if (score > 0) {
     if (leaveHoles > 0) scoreStr = `${score}&${leaveHoles}`;
     else scoreStr = `${score}UP`;
