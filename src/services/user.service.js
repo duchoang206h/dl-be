@@ -69,8 +69,8 @@ const genCaddyUsers = async (players, courseId) => {
   //const players = await Player.findAll({ where: { course_id: courseId }, attributes: ['vga', 'fullname'], raw: true });
   const caddies = players.map((p) => {
     return {
-      'name-golfer': `C_${courseId}_` + p.fullname,
-      caddie_username: p.vga,
+      'name-golfer': p.fullname,
+      caddie_username: `C_${courseId}_` + p.vga,
       password: randomString(8),
     };
   });
