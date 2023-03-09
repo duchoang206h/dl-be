@@ -543,14 +543,12 @@ const getLeaderboard = async ({ roundNum, courseId, type }) => {
       console.log({ roundNum, courseId, type });
       const response = {};
 
-      const round = [1, 2].includes(Number(roundNum))
-        ? await Promise.all([
-            scoreService.getLeaderBoardMatch(courseId, { roundNum: roundNum == 1 ? 1 : 3 }),
-            scoreService.getLeaderBoardMatch(courseId, { roundNum: roundNum == 1 ? 2 : 4 }),
-          ])
-        : Number(roundNum) === 3
-        ? [await scoreService.getLeaderBoardMatch(courseId, { roundNum: 5 })]
-        : [];
+      const round = await Promise.all(
+        roundNum
+          .split(',')
+          .sort()
+          .map((r) => scoreService.getLeaderBoardMatch(courseId, { roundNum: +r }))
+      );
       const [hostClub, guestClub] = await Promise.all([
         MatchPlayClub.findOne({
           where: { course_id: courseId, type: 'host' },
