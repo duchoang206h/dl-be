@@ -1,11 +1,27 @@
-const { MatchPlayClub } = require('../models/schema');
+const { MatchPlayClub, sequelize } = require('../models/schema');
 const { uploadSingleFile } = require('./upload.service');
 
-const updateClub = async (clubId, data) => {
+const updateClub = async (clubId, competitorClubId, data) => {
+  console.log('aaaa', { clubId, competitorClubId, data })
   if (data.file) {
     return uploadClubImage(clubId, data.file);
   }
-  return MatchPlayClub.update(data, { where: { matchplay_club_id: clubId } });
+  const t = await sequelize.transaction();
+  try {
+    if (data.last_win) {
+      await MatchPlayClub.update({ last_win: false }, { where: { matchplay_club_id: competitorClubId }, transaction: t },);
+    }
+    if (data.win_by_playoff) {
+      await MatchPlayClub.update({ win_by_playoff: false }, { where: { matchplay_club_id: competitorClubId }, transaction: t });
+    }
+
+    await MatchPlayClub.update(data, { where: { matchplay_club_id: clubId }, transaction: t })
+    await t.commit();
+    return true;
+  } catch (error) {
+    await t.rollback();
+
+  }
 };
 const uploadClubImage = async (clubId, file) => {
   const path = await uploadSingleFile(file);

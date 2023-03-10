@@ -7,7 +7,12 @@ const getCourseById = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send({ result });
 });
 const updateClub = catchAsync(async (req, res) => {
-  const result = await clubService.updateClub(req.params.clubId, { file: req.files?.[0], ...req.body });
+  const courseClubs = await clubService.getClubByCourseId(req.params.courseId)
+  console.log(' courseClubs', courseClubs)
+  const result = await clubService.updateClub(
+    req.params.clubId,
+    courseClubs.find(club => String(club.dataValues.matchplay_club_id) !== req.params.clubId).dataValues.matchplay_club_id,
+    { file: req.files?.[0], ...req.body });
   res.status(httpStatus.OK).send({ result });
 });
 module.exports = {
