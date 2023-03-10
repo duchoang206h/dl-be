@@ -8,7 +8,6 @@ const getCourseById = catchAsync(async (req, res) => {
 });
 const updateClub = catchAsync(async (req, res) => {
   const courseClubs = await clubService.getClubByCourseId(req.params.courseId)
-  console.log(' courseClubs', courseClubs)
   const result = await clubService.updateClub(
     req.params.clubId,
     courseClubs.find(club => String(club.dataValues.matchplay_club_id) !== req.params.clubId).dataValues.matchplay_club_id,
