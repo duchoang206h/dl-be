@@ -49,6 +49,7 @@ const {
   isScoreMatchPlay,
   getMatchPlayScore,
   getThru,
+  getScorecardScore,
 } = require('../utils/score');
 const { dateWithTimezone } = require('../utils/date');
 const moment = require('moment');
@@ -313,7 +314,7 @@ const getFlightStatic = async ({ courseId, flight, roundNum }) => {
   });
   return response;
 };
-const scorecardStatic = async ({ courseId, code, roundNum }) => {
+const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
   const [course, round, images] = await Promise.all([
     Course.findByPk(courseId),
     Round.findOne({ where: { course_id: courseId, round_num: roundNum } }),
@@ -326,45 +327,170 @@ const scorecardStatic = async ({ courseId, code, roundNum }) => {
       },
     }),
   ]);
-  const player = await Player.findOne({
-    where: { player_id: code, course_id: courseId },
-    include: [{ model: Score, as: 'scores', where: { round_id: round.round_id }, include: [{ model: Hole }] }],
-  });
-  const allScores = await Score.findAll({
-    where: { player_id: player.player_id, course_id: courseId },
-    include: [{ model: Hole }],
-  });
+  if (course.type === COURSE_TYPE.STOKE_PLAY) {
+    const player = await Player.findOne({
+      where: { player_id: code, course_id: courseId },
+      include: [{ model: Score, as: 'scores', where: { round_id: round.round_id }, include: [{ model: Hole }] }],
+    });
+    const allScores = await Score.findAll({
+      where: { player_id: player.player_id, course_id: courseId },
+      include: [{ model: Hole }],
+    });
 
-  let response = {};
-  response['MAIN'] = images.find((img) => img.type == SCORECARD_IMAGES.main.type)?.url;
-  response[`G1`] = player.fullname;
-  response[`IMG_COUNTRY1`] = player.flag;
-  response[`NATION1`] = player.country.length == 2 ? alpha2ToAlpha3(player.country) : player.country;
-  player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
+    let response = {};
+    response['MAIN'] = images.find((img) => img.type == SCORECARD_IMAGES.main.type)?.url;
+    response[`G1`] = player.fullname;
+    response[`IMG_COUNTRY1`] = player.flag;
+    response[`NATION1`] = player.country.length == 2 ? alpha2ToAlpha3(player.country) : player.country;
+    player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
 
-  //TOTALOVER
-  const totalOver = player.scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
-  response['TOTALOVER'] = totalOver;
-  //TOTALOVERALL
-  const totalOverAll = allScores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
-  response['TOTALOVERALL'] = totalOverAll;
-  // TOTALGROSS
-  const totalGross = allScores.reduce((pre, cur) => pre + cur.num_putt, 0);
-  response['TOTALGROSS'] = totalGross;
+    //TOTALOVER
+    const totalOver = player.scores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
+    response['TOTALOVER'] = totalOver;
+    //TOTALOVERALL
+    const totalOverAll = allScores.reduce((pre, cur) => pre + cur.num_putt - cur.Hole.par, 0);
+    response['TOTALOVERALL'] = totalOverAll;
+    // TOTALGROSS
+    const totalGross = allScores.reduce((pre, cur) => pre + cur.num_putt, 0);
+    response['TOTALGROSS'] = totalGross;
 
-  player.scores.forEach((score, index) => {
-    score = score.toJSON();
-    response[`G1SCORE${index + 1}`] = score.num_putt;
-    response[`G1IMG${index + 1}`] = getScoreImage(images, score.score_type);
-  });
+    player.scores.forEach((score, index) => {
+      score = score.toJSON();
+      response[`G1SCORE${index + 1}`] = score.num_putt;
+      response[`G1IMG${index + 1}`] = getScoreImage(images, score.score_type);
+    });
 
-  /// iamge TOTALOVER
-  response['STT_TOTALOVER'] = getTotalOverImage(images, totalOver);
-  response['OUT'] = player.scores.slice(0, 9).reduce((pre, cur) => pre + cur.num_putt, 0);
-  response['IN'] = player.scores.slice(9).reduce((pre, cur) => pre + cur.num_putt, 0);
+    /// iamge TOTALOVER
+    response['STT_TOTALOVER'] = getTotalOverImage(images, totalOver);
+    response['OUT'] = player.scores.slice(0, 9).reduce((pre, cur) => pre + cur.num_putt, 0);
+    response['IN'] = player.scores.slice(9).reduce((pre, cur) => pre + cur.num_putt, 0);
 
-  //const [todayScore, totalScore]
-  return response;
+    //const [todayScore, totalScore]
+    return response;
+  } else if (course.type === COURSE_TYPE.MATCH_PLAY) {
+    const response = {};
+    const round = await Round.findOne({ where: { course_id: courseId, round_num: roundNum } });
+    const versus = await MatchPlayVersus.findOne({
+      where: {
+        course_id: courseId,
+        round_num: roundNum,
+        match_num: matchNum,
+      },
+      include: [
+        {
+          model: MatchPlayTeam,
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+
+          as: 'host_team',
+          include: [
+            {
+              model: MatchPlayTeamPlayer,
+              as: 'team_players',
+              include: [
+                {
+                  model: Player,
+                  as: 'players',
+                },
+              ],
+              attributes: { exclude: ['createdAt', 'updatedAt'] },
+            },
+          ],
+        },
+        {
+          model: MatchPlayTeam,
+          as: 'guest_team',
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+
+          include: [
+            {
+              model: MatchPlayTeamPlayer,
+              as: 'team_players',
+              attributes: { exclude: ['createdAt', 'updatedAt'] },
+
+              include: [
+                {
+                  model: Player,
+                  as: 'players',
+                  attributes: { exclude: ['createdAt', 'updatedAt'] },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      order: [['match_num', 'ASC']],
+    });
+    const [hostClub, guestClub] = await Promise.all([
+      MatchPlayClub.findOne({ where: { course_id: courseId, type: 'host' } }),
+      MatchPlayClub.findOne({ where: { course_id: courseId, type: 'guest' } }),
+    ]);
+    const host = normalizePlayersMatchScore(
+      await Promise.all(
+        versus?.host_team?.team_players?.map(async (p) => {
+          p = p.players.toJSON();
+          p['scores'] = await Score.findAll({
+            where: {
+              player_id: p.player_id,
+              round_id: round.round_id,
+            },
+            attributes: ['num_putt'],
+
+            include: [{ model: Hole, attributes: ['hole_num'] }],
+            order: [[{ model: Hole }, 'hole_num', 'ASC']],
+          });
+          return p;
+        })
+      ),
+      versus?.type
+    );
+    const guest = normalizePlayersMatchScore(
+      await Promise.all(
+        versus?.guest_team?.team_players?.map(async (p) => {
+          p = p.players.toJSON();
+          p['scores'] = await Score.findAll({
+            where: {
+              player_id: p.player_id,
+              round_id: round.round_id,
+            },
+            attributes: ['num_putt'],
+            include: [{ model: Hole, attributes: ['hole_num'] }],
+            order: [[{ model: Hole }, 'hole_num', 'ASC']],
+          });
+          return p;
+        })
+      ),
+      versus?.type
+    );
+    const leave_hole = getLeaveHoles(host, guest, versus?.type);
+    const isScore = isScoreMatchPlay(host, guest);
+    const scores = getScorecardScore(host, guest, versus?.type);
+    response['HOST'] = hostClub.name;
+    response['GUEST'] = guestClub.name;
+    scores.forEach((s, i) => {
+      response[`HOST_SCORE_${i + 1}`] = s >= 0 ? formatMatchPlayScore(s, 0) : null;
+      response[`GUEST_SCORE_${i + 1}`] = s <= 0 ? formatMatchPlayScore(s, 0) : null;
+    });
+    host.forEach((h, i) => {
+      response[`HOST_G${i + 1}`] = h.fullname;
+      response[`HOST_G${i + 1}_NATION`] = alpha2ToAlpha3(h.country);
+      response[`HOST_G${i + 1}_COUNTRY`] = h.flag;
+      response[`HOST_G${i + 1}_AVATAR`] = h.avatar_url;
+    });
+    guest.forEach((g, i) => {
+      response[`GUEST_G${i + 1}`] = g.fullname;
+      response[`GUEST_G${i + 1}_NATION`] = alpha2ToAlpha3(g.country);
+      response[`GUEST_G${i + 1}_COUNTRY`] = g.flag;
+      response[`GUEST_G${i + 1}_AVATAR`] = g.avatar_url;
+    });
+    const score = isScore === false ? null : getMatchPlayScore(host, guest, versus.type);
+    let thru = getThru(host, guest);
+    response['THRU'] = thru;
+    let hostScore = thru === '-' ? null : score >= 0 ? formatMatchPlayScore(score, leave_hole.length) : null;
+    let guestScore = thru === '-' ? null : score <= 0 ? formatMatchPlayScore(score, leave_hole.length) : null;
+    response['HOST_SCORE'] = hostScore;
+    response['GUEST_SCORE'] = guestScore;
+    return response;
+  }
 };
 
 const getLeaderboard = async ({ roundNum, courseId, type }) => {
@@ -835,6 +961,10 @@ const getMatchPlayVersus = async ({ courseId, roundNum, matchNum }) => {
     ],
     order: [['match_num', 'ASC']],
   });
+  const [hostClub, guestClub] = await Promise.all([
+    MatchPlayClub.findOne({ where: { course_id: courseId, type: 'host' } }),
+    MatchPlayClub.findOne({ where: { course_id: courseId, type: 'guest' } }),
+  ]);
   const host = normalizePlayersMatchScore(
     await Promise.all(
       versus?.host_team?.team_players?.map(async (p) => {
@@ -875,6 +1005,8 @@ const getMatchPlayVersus = async ({ courseId, roundNum, matchNum }) => {
   const leave_hole = getLeaveHoles(host, guest, versus?.type);
   const isScore = isScoreMatchPlay(host, guest);
   const response = {};
+  response['HOST'] = hostClub.name;
+  response['GUEST'] = guestClub.name;
   host.forEach((h, i) => {
     response[`HOST_G${i + 1}`] = h.fullname;
     response[`HOST_G${i + 1}_NATION`] = alpha2ToAlpha3(h.country);
