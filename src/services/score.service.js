@@ -718,6 +718,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
     Player.findAll({
       where: { course_id: courseId },
       attributes: { exclude: ['createdAt', 'updatedAt', 'course_id'] },
+      order: [['createdAt', 'ASC']],
       include: [{ model: Score, as: 'scores' }],
     }),
     name
