@@ -53,7 +53,9 @@ node_modules
 
 # yarn error logs
 yarn-error.log
-
+yarn.lock
+package-lock.json
+.env
 # Environment varibales
 .env*
 !.env*.example

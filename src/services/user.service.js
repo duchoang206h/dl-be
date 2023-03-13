@@ -70,7 +70,7 @@ const genCaddyUsers = async (players, courseId) => {
   const caddies = players.map((p) => {
     return {
       'name-golfer': p.fullname,
-      caddie_username: p.vga,
+      caddie_username: `C_${courseId}_` + p.vga,
       password: randomString(8),
     };
   });

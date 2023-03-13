@@ -367,6 +367,7 @@ const getPreviousRoundNum = (r) => {
 };
 const formatMatchPlayScore = (score, leaveHoles) => {
   let scoreStr = '';
+  score = Math.abs(score);
   if (score > 0) {
     if (leaveHoles > 0) scoreStr = `${score}&${leaveHoles}`;
     else scoreStr = `${score}UP`;
@@ -383,6 +384,49 @@ const isScoreMatchPlay = (host, guest) => {
   ];
   if (scores.includes(0)) isScore = false;
   return isScore;
+};
+const getScorecardScore = (hostPlayers, guestPlayers, type) => {
+  const host = [];
+  const guest = [];
+  let score = [];
+  if (type === COURSE_TYPE.FOUR_BALL || type === COURSE_TYPE.FOURSOME) {
+    for (let i = 0; i < hostPlayers[0]?.scores.length; i++) {
+      const betterScoreHost = getBetterScore(hostPlayers[0]?.scores[i]?.num_putt, hostPlayers[1]?.scores[i]?.num_putt);
+      const betterScoreGuest = getBetterScore(guestPlayers[0]?.scores[i]?.num_putt, guestPlayers[1]?.scores[i]?.num_putt);
+      host.push(betterScoreHost);
+      guest.push(betterScoreGuest);
+    }
+    for (let i = 0; i < hostPlayers[0]?.scores.length; i++) {
+      if (![0, null].includes(host[i]) && ![0, null].includes(guest[i])) {
+        if (host[i] < guest[i]) score.push(1);
+        if (host[i] > guest[i]) score.push(-1);
+        if (host[i] === guest[i]) score.push(0);
+      } else {
+        if (![0, null].includes(host[i]) && guest[i] === 0) score.push(1);
+        if (![0, null].includes(guest[i]) && host[i] === 0) score.push(-1);
+        if ([0, null].includes(guest[i]) && [0, null].includes(guest[i])) score.push(null);
+      }
+    }
+  }
+  if (type === COURSE_TYPE.SINGLE_MATCH) {
+    for (let i = 0; i < hostPlayers[0]?.scores.length; i++) {
+      if (
+        ![0, null].includes(hostPlayers[0]?.scores[i]?.num_putt) &&
+        ![0, null].includes(guestPlayers[0]?.scores[i]?.num_putt)
+      ) {
+        if (hostPlayers[0]?.scores[i]?.num_putt < guestPlayers[0]?.scores[i]?.num_putt) score.push(1);
+        if (hostPlayers[0]?.scores[i]?.num_putt > guestPlayers[0]?.scores[i]?.num_putt) score.push(-1);
+        if (hostPlayers[0]?.scores[i]?.num_putt === guestPlayers[0]?.scores[i]?.num_putt) score.push(0);
+      } else {
+        if (![0, null].includes(hostPlayers[0]?.scores[i]?.num_putt) && guestPlayers[0]?.scores[i]?.num_putt === 0)
+          score.push(1);
+        if (![0, null].includes(guestPlayers[0]?.scores[i]?.num_putt) && hostPlayers[0]?.scores[i]?.num_putt === 0)
+          score.push(-1);
+        if ([0, null].includes(guest[i]) && [0, null].includes(guest[i])) score.push(null);
+      }
+    }
+  }
+  return score;
 };
 const getBetterScore = (s1, s2) => {
   if (s1 === 0 && s2 !== null) return s2;
@@ -416,4 +460,5 @@ module.exports = {
   formatMatchPlayScore,
   isScoreMatchPlay,
   getThru,
+  getScorecardScore,
 };
