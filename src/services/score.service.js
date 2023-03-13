@@ -39,12 +39,17 @@ const {
   getRank,
   getDefaultScore,
   getTop,
+<<<<<<< HEAD
   getMatchPlayScore,
   getMatchPlayHostScore,
   normalizePlayersMatchScore,
   getLeaveHoles,
   getPreviousRoundNum,
   isScoreMatchPlay,
+=======
+  getScores,
+  getScoreWithHole,
+>>>>>>> e73f5f19c1d39235c2076e6492aab20cf3e951fc
 } = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
 const { NUM_PUTT_INVALID, INVALID_SCORE_INPUT } = require('../utils/errorMessage');
@@ -609,6 +614,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
             avatar: player.avatar,
           };
         player.scores.sort((a, b) => a.Hole.hole_num - b.Hole.hole_num);
+        console.log(player.scores);
         player.scores = player.scores.map((score) => {
           return {
             num_putt: score.num_putt,
@@ -656,7 +662,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
           out,
           today,
           score,
-          scores: player.scores,
+          scores: player.scores, //getScores(player.scores),
           group_num: player.teetime_group_player?.TeeTimeGroup?.group_num,
           flag: player.flag,
           player_id: player.player_id,
@@ -684,6 +690,7 @@ const getAllPlayerScoreByRoundId = async (roundId, courseId, { name, vhandicap }
     ...p,
     score: p.score == 0 ? EVENT_ZERO : p.score,
     today: p.today == 0 ? EVENT_ZERO : p.today,
+    scores: getScores(p.scores),
   }));
   const searchPlayerIds = searchPlayers.map((player) => player.player_id);
   if (name || searchPlayers.length) {
@@ -745,12 +752,12 @@ const getAllPlayerScore = async (courseId, { name }) => {
       : [],
   ]);
   let normalPlayers = players.filter((player) => player.status === PLAYER_STATUS.NORMAL);
-  let outCutPlayers = players.filter(
-    (player) => player.status !== PLAYER_STATUS.NORMAL && player.status !== PLAYER_STATUS.WITHDRAW
-  );
+  let outCutPlayers = players.filter((player) => player.status === PLAYER_STATUS.OUT_CUT);
   let scoredOutCutPlayers = outCutPlayers.filter((p) => p.scores.length);
   let nonScoredOutCutPlayers = outCutPlayers.filter((p) => p.scores.length === 0);
-  let withdrawPlayers = players.filter((player) => player.status === PLAYER_STATUS.WITHDRAW);
+  let withdrawPlayers = players.filter(
+    (player) => player.status !== PLAYER_STATUS.NORMAL && player.status !== PLAYER_STATUS.OUT_CUT
+  );
   let scoredPlayers = normalPlayers.filter((player) => player.scores.length);
   let nonScoredPlayers = normalPlayers.filter((player) => player.scores.length === 0);
   const _today = moment(dateWithTimezone(null, 'DD-MM-YYYY', 'utc'), 'DD-MM-YYYY').format('DD-MM-YYYY');
@@ -793,7 +800,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                 Score.findAll({
                   where: {
                     player_id: player.player_id,
-                    updatedAt: {
+                    createdAt: {
                       [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
                       [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
                     },
@@ -808,6 +815,8 @@ const getAllPlayerScore = async (courseId, { name }) => {
                   include: [{ model: Hole }],
                 }),
               ]);
+              const thisRound = [...player['rounds']].reverse().find((r) => r.total > 0);
+              const today_ = thisRound?.scores?.reduce((pre, cur) => pre + cur?.num_putt - cur?.Hole?.par, 0) || 0;
               const today = todayScore.length
                 ? todayScore.reduce((pre, score) => {
                   score.toJSON();
@@ -818,7 +827,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                   return pre + score.num_putt - score.Hole.par;
                 }, 0);
               player['thru'] = thru > 0 && thru % HOLE_PER_COURSE == 0 ? FINISH_ALL_ROUNDS : thru % HOLE_PER_COURSE;
-              player['today'] = today == 0 ? EVENT_ZERO : today;
+              player['today'] = today_ == 0 ? EVENT_ZERO : today_;
               return player;
             })
           );
@@ -952,7 +961,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                 Score.findAll({
                   where: {
                     player_id: player.player_id,
-                    updatedAt: {
+                    createdAt: {
                       [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
                       [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
                     },
@@ -1033,7 +1042,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                 Score.findAll({
                   where: {
                     player_id: player.player_id,
-                    updatedAt: {
+                    createdAt: {
                       [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
                       [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
                     },
@@ -1114,7 +1123,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
                 Score.findAll({
                   where: {
                     player_id: player.player_id,
-                    updatedAt: {
+                    createdAt: {
                       [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
                       [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
                     },
@@ -1151,7 +1160,7 @@ const getAllPlayerScore = async (courseId, { name }) => {
               pos: getRank(player.score, scores),
             };
           });
-          withdrawPlayers.sort((a, b) => a.pos - b.pos);
+          //withdrawPlayers.sort((a, b) => a.pos - b.pos);
           const ranks = [];
           withdrawPlayers.forEach((player) => {
             if (player.ranking) ranks.push(player.ranking);
@@ -1230,12 +1239,14 @@ const getPlayerScore = async (courseId, playerId) => {
           where: { player_id: player.player_id, round_id: round.round_id, course_id: courseId },
           attributes: ['num_putt', 'score_type', 'hole_id'],
           include: [{ model: Hole, attributes: ['hole_num'] }],
+          order: [[{ model: Hole }, 'hole_num', 'asc']],
         });
-        return { scores: getDefaultScore(score), checkScores: score, round: round.round_num };
+        return { scores: getScoreWithHole(score), checkScores: score, round: round.round_num };
       })
     ),
     courseService.getCourseById(courseId),
   ]);
+  console.log({ scores });
   if (player.current_score) {
     // check current score conflict with score
     for (const s of scores) {
@@ -1275,13 +1286,13 @@ const getPlayerScore = async (courseId, playerId) => {
     Score.count({ where: { player_id: player.player_id } }),
     moment(_today, DATE_FORMAT).isBefore(moment(course.end_date))
       ? Score.findAll({
-        where: {
-          player_id: playerId,
-          updatedAt: {
-            [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
-            [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
+          where: {
+            player_id: playerId,
+            createdAt: {
+              [Op.gte]: moment(_today, 'DD-MM-YYYY').toDate(),
+              [Op.lt]: moment(_today, 'DD-MM-YYYY').add(1, 'days').toDate(), // tomorrow
+            },
           },
-        },
         include: [{ model: Hole }],
       })
       : Score.findAll({

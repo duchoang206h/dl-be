@@ -12,7 +12,7 @@ const {
   INVALID_COURSE_TYPE,
 } = require('../utils/errorMessage');
 const { BadRequestError } = require('../utils/ApiError');
-const { COURSE_TYPE } = require('../config/constant');
+const { COURSE_TYPE, PLAYER_STATUS } = require('../config/constant');
 
 const importTeetime = catchAsync(async (req, res) => {
   if (req.files.length <= 0) return res.status(httpStatus.BAD_REQUEST).send();

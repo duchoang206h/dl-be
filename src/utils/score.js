@@ -201,6 +201,69 @@ const getDefaultScore = (scores) => {
   }
   return cloneScores;
 };
+const getScores = (scores) => {
+  let cloneScores = [];
+  cloneScores.sort((a, b) => a.hole_num - b.hole_num);
+  const scoreReach = cloneScores.length;
+  if (scoreReach < 18) {
+    for (let i = 1; i <= 18; i++) {
+      const score = scores.find((s) => s.hole_num === i);
+      if (score) cloneScores.push(score);
+      else {
+        cloneScores.push({ hole_num: i, num_putt: 0, score_type: null });
+      }
+    }
+    return cloneScores;
+  }
+  return cloneScores;
+};
+const getScorecard = (scores) => {
+  let cloneScores = [];
+  cloneScores.sort((a, b) => a.hole_num - b.hole_num);
+  const scoreReach = cloneScores.length;
+  if (scoreReach < 18) {
+    for (let i = 1; i <= 18; i++) {
+      const score = scores.find((s) => {
+        return s?.Hole?.hole_num === i;
+      });
+      if (score) cloneScores.push(score);
+      else {
+        cloneScores.push({ Hole: { hole_num: i }, num_putt: null, score_type: null });
+      }
+    }
+    return cloneScores;
+  }
+  return cloneScores;
+};
+const getScoreWithHole = (scores) => {
+  let cloneScores = [];
+  const scoreReach = cloneScores.length;
+  if (scoreReach < 18) {
+    for (let i = 1; i < scores[0]?.Hole?.hole_num; i++) {
+      cloneScores.push({
+        Hole: {
+          hole_num: i,
+        },
+        num_putt: 0,
+        score_type: null,
+      });
+    }
+    for (let i = 0; i < scores.length; i++) {
+      cloneScores.push(scores[i]);
+    }
+    for (let i = scores[scores.length - 1]?.Hole?.hole_num + 1; i < 18; i++) {
+      cloneScores.push({
+        Hole: {
+          hole_num: i,
+        },
+        num_putt: 0,
+        score_type: null,
+      });
+    }
+    return cloneScores;
+  }
+  return cloneScores;
+};
 //[1, 2, 3, 6, 3, 4, 3, 2];
 // [1,2,2,3,3,3,4,6]
 // { 1:1, 2:2, 3:3, 4;1, 6:1 }
