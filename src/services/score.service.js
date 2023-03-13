@@ -39,17 +39,12 @@ const {
   getRank,
   getDefaultScore,
   getTop,
-<<<<<<< HEAD
   getMatchPlayScore,
   getMatchPlayHostScore,
   normalizePlayersMatchScore,
   getLeaveHoles,
   getPreviousRoundNum,
   isScoreMatchPlay,
-=======
-  getScores,
-  getScoreWithHole,
->>>>>>> e73f5f19c1d39235c2076e6492aab20cf3e951fc
 } = require('../utils/score');
 const { InternalServerError, BadRequestError, ApiError } = require('../utils/ApiError');
 const { NUM_PUTT_INVALID, INVALID_SCORE_INPUT } = require('../utils/errorMessage');
