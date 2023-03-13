@@ -6,6 +6,7 @@ const userService = require('./user.service');
 const { ApiError } = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
 const { Token } = require('../models/schema');
+const { ROLE } = require('../config/constant');
 /**
  * Generate token
  * @param {ObjectId} userId
@@ -47,11 +48,11 @@ const saveToken = async (token, userId, expires, type, blacklisted = false) => {
   });
   return tokenDoc;
 };
-const generateAuthTokens = async (user) => {
-  const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
+const generateAuthTokens = async (user, role) => {
+  const accessTokenExpires = moment().add(role === ROLE.CADDIE ? 7200 : config.jwt.accessExpirationMinutes, 'minutes');
   const accessToken = generateToken(user.user_id, accessTokenExpires, tokenTypes.ACCESS);
 
-  const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
+  const refreshTokenExpires = moment().add(role === ROLE.CADDIE ? 7200 : config.jwt.refreshExpirationDays, 'days');
   const refreshToken = generateToken(user.user_id, refreshTokenExpires, tokenTypes.REFRESH);
   await saveToken(refreshToken, user.user_id, refreshTokenExpires, tokenTypes.REFRESH);
 

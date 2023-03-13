@@ -6,7 +6,15 @@ const { User } = require('../models/schema');
 const { uploadSingleFile } = require('../services/upload.service');
 const { DATE_FORMAT } = require('../config/constant');
 const { cacheService } = require('../services');
+const { INVALID_DATE } = require('../utils/errorMessage');
 const createCourse = catchAsync(async (req, res) => {
+  const { start_date, end_date } = req.body;
+  if (
+    moment(moment(start_date, 'DD/MM/YYYY')).isAfter(moment(moment(end_date, 'DD/MM/YYYY'))) ||
+    moment(moment(start_date, 'DD/MM/YYYY')).isBefore(moment()) ||
+    moment(moment(end_date, 'DD/MM/YYYY')).isBefore(moment(moment()))
+  )
+    return res.status(httpStatus.BAD_REQUEST).send({ message: INVALID_DATE });
   const course = await courseService.createCourse(req.body);
   if (course) res.status(httpStatus.CREATED).json({ result: course });
 });

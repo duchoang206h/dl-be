@@ -35,6 +35,7 @@ class Score extends Base {
         player_id: Sequelize.INTEGER,
         num_putt: Sequelize.INTEGER,
         score_type: Sequelize.STRING,
+        match_num: Sequelize.INTEGER,
       },
       {
         sequelize,

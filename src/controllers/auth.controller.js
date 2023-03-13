@@ -11,7 +11,11 @@ const register = catchAsync(async (req, res) => {
 const login = catchAsync(async (req, res) => {
   const { username, password } = req.body;
   const { password: _, ...user } = await authService.loginUserWithUsernameAndPassword(username, password);
-  const tokens = await tokenService.generateAuthTokens(user);
+  const tokens = await tokenService.generateAuthTokens(user, user.role);
+  res.cookie('token', tokens.access.token, {
+    maxAge: Number(process.env.JWT_ACCESS_EXPIRATION_MINUTES) * 60 * 1000, // 24 hours
+    httpOnly: true,
+  });
   res.send({ user, tokens });
 });
 

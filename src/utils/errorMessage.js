@@ -14,6 +14,12 @@ const INVALID_GOLFER_LEVEL = `Level must be Amateur or Professional`;
 const INVALID_GOLFER_NAME = `Golfer name field must be unique`;
 const INVALID_SCORE_INPUT = `Previous hole score must be completed, then create a new one`;
 const INVALID_COUNTRY_CODE = `Invalid country code`;
+const COURSE_TYPE_NOT_FOUND = `Course type not found`;
+const INVALID_COURSE_TYPE = 'Invalid course type';
+const ROUND_FINISHED = 'Round has finished';
+const MATCH_FINISHED = 'Match has finished';
+const CADDIE_NOT_PERMISSION = `You don't have permission`;
+const INVALID_DATE = `Invalid date`;
 module.exports = {
   TOKEN_EXPIRED,
   TOKEN_INVALID,
@@ -31,4 +37,10 @@ module.exports = {
   INVALID_SCORE_INPUT,
   INVALID_GOLFER_LEVEL,
   INVALID_COUNTRY_CODE,
+  COURSE_TYPE_NOT_FOUND,
+  INVALID_COURSE_TYPE,
+  ROUND_FINISHED,
+  CADDIE_NOT_PERMISSION,
+  MATCH_FINISHED,
+  INVALID_DATE,
 };

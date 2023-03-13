@@ -1,7 +1,10 @@
 const httpStatus = require('http-status');
 const { ApiError } = require('../utils/ApiError');
-const { User } = require('../models/schema');
-const { hashPassword } = require('../utils/hash');
+const { User, Player, Round, MatchPlayVersus, TeeTime, TeeTimeGroup, TeeTimeGroupPlayer } = require('../models/schema');
+const { hashPassword, randomString } = require('../utils/hash');
+const { writeToXlsx } = require('./xlsxService');
+const path = require('path');
+const { ROLE, CADDIE_ACCOUNT_TYPE, PLAYER_STATUS } = require('../config/constant');
 
 /**
  * Create a user
@@ -62,6 +65,120 @@ const updateUserById = async (userId, updateBody) => {
   await user.save();
   return user;
 };
+const genCaddyUsers = async (players, courseId, type = CADDIE_ACCOUNT_TYPE.BELONG_TO_PLAYER) => {
+  if (type === CADDIE_ACCOUNT_TYPE.BY_PLAYER) {
+    players = players ?? (await Player.findAll({ where: { course_id: courseId }, raw: true }));
+    const caddies = players.map((p) => {
+      return {
+        'name-golfer': p.fullname,
+        caddie_username: `C_${courseId}_` + p.vga,
+        password: randomString(8),
+      };
+    });
+    const filePath = path.join(__dirname, '..', '..', '/data', `course_${courseId}_caddies_${type}.xlsx`);
+    await writeToXlsx(caddies, filePath);
+    const createCaddiesData = caddies.map((c) => {
+      return {
+        username: c.caddie_username,
+        password: hashPassword(c.password),
+        role: ROLE.CADDIE,
+        course_id: courseId,
+        type: CADDIE_ACCOUNT_TYPE.BY_PLAYER,
+      };
+    });
+    await User.bulkCreate(createCaddiesData);
+    return true;
+  } else if (type === CADDIE_ACCOUNT_TYPE.BY_ROUND_MATCH) {
+    const roundAndMatch = await MatchPlayVersus.findAll({
+      where: {
+        course_id: courseId,
+      },
+      raw: true,
+    });
+    const caddieAccounts = roundAndMatch.map((r) => {
+      return {
+        username: `c${courseId}r${r.round_num}m${r.match_num}`,
+        password: randomString(8),
+        round: r.round_num,
+        match: r.match_num,
+        type: r.type,
+      };
+    });
+    const filePath = path.join(__dirname, '..', '..', '/data', `course_${courseId}_caddies_${type}.xlsx`);
+    await writeToXlsx(caddieAccounts, filePath);
+    const createCaddiesData = caddieAccounts.map((c) => {
+      return {
+        username: c.username,
+        password: hashPassword(c.password),
+        role: ROLE.CADDIE,
+        course_id: courseId,
+        type: CADDIE_ACCOUNT_TYPE.BY_ROUND_MATCH,
+      };
+    });
+    await User.bulkCreate(createCaddiesData);
+    return true;
+  } else if (type === CADDIE_ACCOUNT_TYPE.BY_FLIGHT) {
+    let teetimes = await TeeTime.findAll({
+      where: {
+        course_id: courseId,
+      },
+      include: [
+        {
+          model: TeeTimeGroup,
+          as: 'groups',
+          attributes: { exclude: ['createdAt', 'updatedAt'] },
+
+          include: [
+            {
+              model: TeeTimeGroupPlayer,
+              as: 'group_players',
+              attributes: { exclude: ['createdAt', 'updatedAt', 'course_id', 'round_id'] },
+              include: [
+                {
+                  model: Player,
+                  as: 'players',
+                  attributes: { exclude: ['createdAt', 'updatedAt'] },
+                  where: { status: PLAYER_STATUS.NORMAL },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    teetimes = teetimes.map((teetime) => {
+      teetime.toJSON();
+      return {
+        teetime_group_id: teetime.teetime_group_id,
+        tee: teetime.tee,
+        time: teetime.time,
+        group_num: teetime.groups.group_num,
+        players: teetime.groups.group_players.map((player) => player.players),
+      };
+    });
+    console.log(teetimes);
+    const caddieAccounts = teetimes.map((t) => {
+      return {
+        username: `c${courseId}f${t.group_num}`,
+        password: randomString(8),
+        flight: t.group_num,
+      };
+    });
+    const filePath = path.join(__dirname, '..', '..', '/data', `course_${courseId}_caddies_${type}.xlsx`);
+    await writeToXlsx(caddieAccounts, filePath);
+    const createCaddiesData = caddieAccounts.map((c) => {
+      return {
+        username: c.username,
+        password: hashPassword(c.password),
+        role: ROLE.CADDIE,
+        course_id: courseId,
+        type: CADDIE_ACCOUNT_TYPE.BY_FLIGHT,
+      };
+    });
+    await User.bulkCreate(createCaddiesData);
+    return true;
+  }
+};
 
 /**
  * Delete user by id
@@ -89,4 +206,5 @@ module.exports = {
   updateUserById,
   deleteUserById,
   getUserByUsername,
+  genCaddyUsers,
 };

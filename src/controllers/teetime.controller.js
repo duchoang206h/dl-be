@@ -1,51 +1,71 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { teetimeSchema } = require('../validations/xlsx.validation');
+const { strokePlayTeetimeSchema, matchPlayTeetimeSchema } = require('../validations/xlsx.validation');
 const { getDataFromXlsx } = require('../services/xlsxService');
-const { teetimeService, cacheService } = require('../services');
+const { teetimeService, cacheService, courseService } = require('../services');
 const { Player } = require('../models/schema');
 const {
   TEETIME_MUST_BE_INCLUDE_ALL_PLAYERS,
   INVALID_GROUP_TIME,
   INVALID_GROUP_TEE,
   INVALID_GOLFER_NAME,
+  INVALID_COURSE_TYPE,
 } = require('../utils/errorMessage');
 const { BadRequestError } = require('../utils/ApiError');
-const { PLAYER_STATUS } = require('../config/constant');
+const { COURSE_TYPE, PLAYER_STATUS } = require('../config/constant');
 
 const importTeetime = catchAsync(async (req, res) => {
   if (req.files.length <= 0) return res.status(httpStatus.BAD_REQUEST).send();
-  const [data, error] = await getDataFromXlsx(req.files[0].buffer, teetimeSchema);
+  const course = await courseService.getCourseById(req.params.courseId);
+  const schema = course.type === COURSE_TYPE.STOKE_PLAY ? strokePlayTeetimeSchema : matchPlayTeetimeSchema;
+  const [data, error] = await getDataFromXlsx(req.files[0].buffer, schema);
+  let teetimes;
   if (error) throw error;
-  const totalPlayers = await Player.count({ where: { course_id: req.params.courseId, status: PLAYER_STATUS.NORMAL } });
-  if (totalPlayers !== data.length)
-    return res.status(httpStatus.BAD_REQUEST).send({ message: TEETIME_MUST_BE_INCLUDE_ALL_PLAYERS });
-  if (error) throw error;
-  const teetimes = data.map((teetime) => ({
-    'name-golfer': teetime['name-golfer'],
-    group: teetime['flight'],
-    tee: teetime['tee'],
-    time: teetime['time'],
-  }));
-  const playerNames = {};
-  const times = {};
-  const tees = {};
-  for (const teetime of teetimes) {
-    if (playerNames.hasOwnProperty(teetime['name-golfer'])) throw new BadRequestError(INVALID_GOLFER_NAME);
-    else {
-      playerNames[teetime['name-golfer']] = true;
+  if (course.type === COURSE_TYPE.STOKE_PLAY) {
+    const totalPlayers = await Player.count({ where: { course_id: req.params.courseId } });
+    if (totalPlayers !== data.length)
+      return res.status(httpStatus.BAD_REQUEST).send({ message: TEETIME_MUST_BE_INCLUDE_ALL_PLAYERS });
+    if (error) throw error;
+    teetimes = data.map((teetime) => ({
+      'name-golfer': teetime['name-golfer'],
+      group: teetime['flight'],
+      tee: teetime['tee'],
+      time: teetime['time'],
+    }));
+    const playerNames = {};
+    const times = {};
+    const tees = {};
+    for (const teetime of teetimes) {
+      if (playerNames.hasOwnProperty(teetime['name-golfer'])) throw new BadRequestError(INVALID_GOLFER_NAME);
+      else {
+        playerNames[teetime['name-golfer']] = true;
+      }
+      if (times.hasOwnProperty(teetime['group'])) {
+        if (times[teetime['group']] != teetime.time) throw new BadRequestError(INVALID_GROUP_TIME);
+      } else times[teetime['group']] = teetime.time;
+      if (tees.hasOwnProperty(teetime['group'])) {
+        if (tees[teetime['group']] != teetime.tee) throw new BadRequestError(INVALID_GROUP_TEE);
+      } else tees[teetime['group']] = teetime.tee;
     }
-    if (times.hasOwnProperty(teetime['group'])) {
-      if (times[teetime['group']] != teetime.time) throw new BadRequestError(INVALID_GROUP_TIME);
-    } else times[teetime['group']] = teetime.time;
-    if (tees.hasOwnProperty(teetime['group'])) {
-      if (tees[teetime['group']] != teetime.tee) throw new BadRequestError(INVALID_GROUP_TEE);
-    } else tees[teetime['group']] = teetime.tee;
+  } else if (course.type === COURSE_TYPE.MATCH_PLAY) {
+    teetimes = data.map((d) => {
+      if (![COURSE_TYPE.FOURSOME, COURSE_TYPE.FOUR_BALL, COURSE_TYPE.SINGLE_MATCH].includes(d.type))
+        throw new BadRequestError(INVALID_COURSE_TYPE);
+      ////
+      return {
+        club: d.club,
+        'name-golfer': d['name-golfer'],
+        type: d.type,
+        match_num: d.match,
+        tee: d.tee,
+        time: d.time,
+      };
+    });
   }
-
   const [_, createError] = await teetimeService.createManyTeetime(teetimes, {
     courseId: req.params.courseId,
     roundNum: req.params.roundNum,
+    courseType: course.type,
   });
   if (createError) return res.status(httpStatus.BAD_REQUEST).send({ message: createError.message });
   res.status(httpStatus.CREATED).send();

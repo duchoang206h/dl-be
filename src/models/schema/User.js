@@ -38,6 +38,9 @@ class User extends Base {
           type: Sequelize.INTEGER,
           allowNull: true,
         },
+        type: {
+          type: Sequelize.STRING,
+        },
       },
       {
         sequelize,
