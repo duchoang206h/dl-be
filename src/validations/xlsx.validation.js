@@ -33,7 +33,7 @@ const playerSchema = Joi.object({
   level: Joi.any(),
   vga: Joi.any(),
 });
-const teetimeSchema = Joi.object({
+const strokePlayTeetimeSchema = Joi.object({
   'name-golfer': Joi.string().required(),
   flight: Joi.any().required(),
   tee: Joi.number().required(),
@@ -44,8 +44,17 @@ const holeSchema = Joi.object({
   par: Joi.number().required(),
   yards: Joi.number().required(),
 });
+const matchPlayTeetimeSchema = Joi.object({
+  club: Joi.string().required(),
+  tee: Joi.any().required(),
+  time: Joi.any().required(),
+  type: Joi.string().required(),
+  match: Joi.number().required(),
+  'name-golfer': Joi.string().required(),
+});
 module.exports = {
   playerSchema,
-  teetimeSchema,
+  strokePlayTeetimeSchema,
   holeSchema,
+  matchPlayTeetimeSchema,
 };

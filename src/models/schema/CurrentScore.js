@@ -33,6 +33,7 @@ class CurrentScore extends Base {
         course_id: Sequelize.INTEGER,
         score_type: Sequelize.STRING,
         round_num: Sequelize.INTEGER,
+        match_num: Sequelize.INTEGER,
       },
       {
         sequelize,

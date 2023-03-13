@@ -20,6 +20,7 @@ const { jwt } = require('./config/config');
 const path = require('path');
 const { cacheMiddleware } = require('./middlewares/cache');
 const { swaggerDocument } = require('./docs/docs');
+const cookieParser = require('cookie-parser');
 const app = express();
 
 if (config.env !== 'test') {
@@ -36,7 +37,7 @@ app.use(function (req, res, next) {
 });
 // parse json request body
 app.use(express.json());
-
+app.use(cookieParser());
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 

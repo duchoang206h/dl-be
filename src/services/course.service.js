@@ -1,4 +1,4 @@
-const { Course, Hole, Round, Player, GolfCourse } = require('../models/schema');
+const { Course, Hole, Round, Player, GolfCourse, sequelize } = require('../models/schema');
 const moment = require('moment');
 const { Op } = require('sequelize');
 const createCourse = async (data) => {
@@ -16,7 +16,30 @@ const createCourse = async (data) => {
 };
 const getCourseById = async (id) =>
   Course.findByPk(id, {
-    attributes: { exclude: ['createdAt', 'updatedAt'] },
+    attributes: [
+      'logo_url',
+      'main_photo_url',
+      'course_id',
+      'golf_course_id',
+      'name',
+      'type',
+      'total_prize',
+      'description',
+      'total_round',
+      'event_date',
+      'start_date',
+      'end_date',
+      'logo',
+      'address',
+      'main_photo',
+      'color',
+      [
+        sequelize.literal(
+          `(select count(matchplay_versus_id) as total_match from matchplayversuses where  course_id = ${id})`
+        ),
+        'total_match',
+      ],
+    ],
     include: [
       {
         model: GolfCourse,
@@ -24,10 +47,33 @@ const getCourseById = async (id) =>
         attributes: { exclude: ['createdAt', 'updatedAt'] },
         include: [{ model: Hole, as: 'holes' }],
       },
-      { model: Round, as: 'rounds', attributes: { exclude: ['createdAt', 'updatedAt'] } },
+      {
+        model: Round,
+        as: 'rounds',
+        attributes: [
+          'round_num',
+          'round_id',
+          [
+            sequelize.literal(
+              '(select type from matchplayversuses where round_num = rounds.round_num and course_id = rounds.course_id limit 1)'
+            ),
+            'type',
+          ],
+        ],
+      },
       { model: Player, as: 'players', attributes: { exclude: ['createdAt', 'updatedAt'] } },
     ],
-    order: [[{ model: GolfCourse, as: 'golf_course' }, { model: Hole, as: 'holes' }, 'hole_num', 'ASC']],
+    order: [
+      [{ model: GolfCourse, as: 'golf_course' }, { model: Hole, as: 'holes' }, 'hole_num', 'ASC'],
+      [
+        {
+          model: Round,
+          as: 'rounds',
+        },
+        'round_num',
+        'ASC',
+      ],
+    ],
   });
 const existCourse = async (id) => (await Course.count({ where: { course_id: id } })) > 0;
 const getAllCourseByOffsetLimit = async ({

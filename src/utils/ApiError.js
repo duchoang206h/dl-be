@@ -20,8 +20,14 @@ class InternalServerError extends ApiError {
     super(500, message, isOperational, stack);
   }
 }
+class ForbiddenError extends ApiError {
+  constructor(message, isOperational = true, stack = '') {
+    super(403, message, isOperational, stack);
+  }
+}
 module.exports = {
   ApiError,
   BadRequestError,
   InternalServerError,
+  ForbiddenError,
 };

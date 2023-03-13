@@ -2,8 +2,9 @@ const COURSE_TYPE = {
   STOKE_PLAY: 'Stroke play',
   MATCH_PLAY: 'Match play',
   FOURSOME: 'Foursome',
-  FOUR_BALL: 'Four ball',
+  FOUR_BALL: 'Four-ball',
   STABLEFORD: 'Stableford',
+  SINGLE_MATCH: 'Single match',
 };
 const SCORE_TYPE = {
   PAR: 'PAR',
@@ -15,6 +16,7 @@ const SCORE_TYPE = {
 const ROLE = {
   ADMIN: 'admin',
   COURSE_USER: 'course_user',
+  CADDIE: 'caddie',
 };
 const DATE_FORMAT = 'DD/MM/YYYY';
 const PAR_PER_ROUND = 72;
@@ -666,6 +668,11 @@ const PLAYER_LEVEL = {
   AMATEUR: 'Amateur',
   PROFESSIONAL: 'Professional',
 };
+const CADDIE_ACCOUNT_TYPE = {
+  BY_PLAYER: 'byPlayer',
+  BY_ROUND_MATCH: 'byRoundMatch',
+  BY_FLIGHT: 'byFlight',
+};
 module.exports = {
   COURSE_TYPE,
   SCORE_TYPE,
@@ -690,4 +697,5 @@ module.exports = {
   GOLFER_BOTTOM_IMAGES,
   COUNTRY,
   PLAYER_LEVEL,
+  CADDIE_ACCOUNT_TYPE,
 };

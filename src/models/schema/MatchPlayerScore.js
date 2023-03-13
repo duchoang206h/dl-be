@@ -1,7 +1,9 @@
+const { PLAYER_STATUS, PLAYER_LEVEL } = require('../../config/constant');
+const { getFlag } = require('../../utils/country');
 const { Base } = require('./Base');
 const Sequelize = require('sequelize');
 
-class TeeTime extends Base {
+class MatchPlayScore extends Base {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
@@ -9,28 +11,28 @@ class TeeTime extends Base {
    */
   static associate(models) {
     // define association here
-    TeeTime.belongsTo(models.TeeTimeGroup, { foreignKey: 'teetime_group_id', sourceKey: 'teetime_group_id', as: 'groups' });
-    TeeTime.hasOne(models.Round, { foreignKey: 'round_id', sourceKey: 'round_id', as: 'round' });
   }
   static init(sequelize) {
     return super.init(
       {
+        matchplay_group_id: Sequelize.INTEGER,
+        player_id: Sequelize.INTEGER,
         course_id: Sequelize.INTEGER,
-        round_id: Sequelize.INTEGER,
-        teetime_group_id: Sequelize.INTEGER,
-        tee: Sequelize.INTEGER,
-        time: Sequelize.STRING,
+        num_putt: Sequelize.INTEGER,
+        hole_num: Sequelize.INTEGER,
+        round_num: Sequelize.INTEGER,
+        match_num: Sequelize.INTEGER,
       },
       {
         sequelize,
-        modelName: 'TeeTime',
+        modelName: 'MatchPlayScore',
         freezeTableName: true,
-        tableName: 'teetimes',
+        tableName: 'matchplayscores',
         timestamps: true,
       }
     );
   }
 }
 module.exports = {
-  TeeTime,
+  MatchPlayScore,
 };
