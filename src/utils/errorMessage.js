@@ -19,6 +19,7 @@ const INVALID_COURSE_TYPE = 'Invalid course type';
 const ROUND_FINISHED = 'Round has finished';
 const MATCH_FINISHED = 'Match has finished';
 const CADDIE_NOT_PERMISSION = `You don't have permission`;
+const INVALID_DATE = `Invalid date`;
 module.exports = {
   TOKEN_EXPIRED,
   TOKEN_INVALID,
@@ -41,4 +42,5 @@ module.exports = {
   ROUND_FINISHED,
   CADDIE_NOT_PERMISSION,
   MATCH_FINISHED,
+  INVALID_DATE,
 };
