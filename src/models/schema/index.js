@@ -21,6 +21,7 @@ const { MatchPlayTeamPlayer } = require('./MatchPlayTeamPlayer');
 const { MatchPlayClub } = require('./MatchPlayClub');
 const { MatchPlayVersus } = require('./MatchPlayVersus');
 const { MatchPlayScore } = require('./MatchPlayerScore');
+const { PlayerFinishRound } = require('./PlayerFinishRound');
 const db = {};
 const models = {
   Image,
@@ -43,6 +44,7 @@ const models = {
   MatchPlayScore,
   MatchPlayClub,
   MatchPlayVersus,
+  PlayerFinishRound,
 };
 const sequelize = new Sequelize(process.env.DB_URL, { dialect: 'mysql', logging: false });
 Object.keys(models).forEach((x) => {
