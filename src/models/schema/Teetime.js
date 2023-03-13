@@ -10,6 +10,7 @@ class TeeTime extends Base {
   static associate(models) {
     // define association here
     TeeTime.belongsTo(models.TeeTimeGroup, { foreignKey: 'teetime_group_id', sourceKey: 'teetime_group_id', as: 'groups' });
+    TeeTime.hasOne(models.Round, { foreignKey: 'round_id', sourceKey: 'round_id', as: 'round' });
   }
   static init(sequelize) {
     return super.init(

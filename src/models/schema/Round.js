@@ -14,6 +14,11 @@ class Round extends Base {
       foreignKey: 'course_id',
       targetKey: 'course_id',
     });
+    Round.belongsTo(models.TeeTime, {
+      foreignKey: 'round_id',
+      targetKey: 'round_id',
+      as: 'teetime',
+    });
   }
   static init(sequelize) {
     return super.init(

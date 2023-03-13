@@ -3,7 +3,7 @@ const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { userService } = require('../services');
-const { ROLE } = require('../config/constant');
+const { ROLE, CADDIE_ACCOUNT_TYPE } = require('../config/constant');
 const { User, Player } = require('../models/schema');
 const { USER_EXIST } = require('../utils/errorMessage');
 const path = require('path');
@@ -42,10 +42,10 @@ const deleteUser = catchAsync(async (req, res) => {
 });
 const getCaddieAccount = catchAsync(async (req, res) => {
   const { courseId } = req.params;
-  const filePath = path.join(__dirname, '..', '..', `/data/course_${courseId}_caddies.xlsx`);
+  const { type } = req.query;
+  const filePath = path.join(__dirname, '..', '..', `/data/course_${courseId}_caddies_${type}.xlsx`);
   if (!fs.existsSync(filePath)) {
-    const players = await Player.findAll({ where: { course_id: courseId }, raw: true });
-    await userService.genCaddyUsers(players, courseId);
+    await userService.genCaddyUsers(null, courseId, type);
   }
   res.download(filePath, 'caddie_account.xlsx');
 });

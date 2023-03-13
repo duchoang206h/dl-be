@@ -668,6 +668,11 @@ const PLAYER_LEVEL = {
   AMATEUR: 'Amateur',
   PROFESSIONAL: 'Professional',
 };
+const CADDIE_ACCOUNT_TYPE = {
+  BY_PLAYER: 'byPlayer',
+  BY_ROUND_MATCH: 'byRoundMatch',
+  BY_FLIGHT: 'byFlight',
+};
 module.exports = {
   COURSE_TYPE,
   SCORE_TYPE,
@@ -692,4 +697,5 @@ module.exports = {
   GOLFER_BOTTOM_IMAGES,
   COUNTRY,
   PLAYER_LEVEL,
+  CADDIE_ACCOUNT_TYPE,
 };

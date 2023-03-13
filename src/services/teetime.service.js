@@ -21,7 +21,7 @@ const { Op } = require('sequelize');
 const createManyTeetime = async (teetimes, { courseId, roundNum, courseType }) => {
   const t = await sequelize.transaction();
   try {
-    if (courseId === COURSE_TYPE.STOKE_PLAY) {
+    if (courseType === COURSE_TYPE.STOKE_PLAY) {
       let groups = [];
       const round = await Round.findOne({ where: { course_id: courseId, round_num: roundNum }, raw: true });
       if (!round) return [false, new BadRequestError()];
