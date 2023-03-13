@@ -62,4 +62,4 @@ package-lock.json
 config/config.json
 # Code coverage
 coverage
-data
+data/
