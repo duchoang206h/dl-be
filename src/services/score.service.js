@@ -1235,7 +1235,7 @@ const getPlayerScore = async (courseId, playerId) => {
           include: [{ model: Hole, attributes: ['hole_num'] }],
           order: [[{ model: Hole }, 'hole_num', 'asc']],
         });
-        return { scores: getScoreWithHole(score), checkScores: score, round: round.round_num };
+        return { scores: getDefaultScore(score), checkScores: score, round: round.round_num };
       })
     ),
     courseService.getCourseById(courseId),
