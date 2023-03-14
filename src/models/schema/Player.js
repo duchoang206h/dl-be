@@ -50,7 +50,7 @@ class Player extends Base {
           type: Sequelize.STRING,
           allowNull: false,
           get() {
-            return this.getDataValue('level') === PLAYER_LEVEL.PROFESSIONAL
+            return this.getDataValue('level') == null || this.getDataValue('level') === PLAYER_LEVEL.PROFESSIONAL
               ? this.getDataValue('fullname')
               : this.getDataValue('fullname') + ' (Am)';
           },

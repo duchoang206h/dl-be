@@ -47,10 +47,10 @@ const importPlayers = catchAsync(async (req, res) => {
       duplicatesCode[players[i].vga] = true;
     }
     if (!isValid(players[i].country)) throw new BadRequestError(INVALID_COUNTRY_CODE);
-    if (players[i].level !== PLAYER_LEVEL.AMATEUR && players[i].level !== PLAYER_LEVEL.PROFESSIONAL)
-      throw new BadRequestError(INVALID_GOLFER_LEVEL);
+    /* if (players[i].level !== PLAYER_LEVEL.AMATEUR && players[i].level !== PLAYER_LEVEL.PROFESSIONAL)
+      throw new BadRequestError(INVALID_GOLFER_LEVEL); */
     if (!players[i].vga) {
-      const suffix = players[i].level === PLAYER_LEVEL.AMATEUR ? 'A' : 'P';
+      const suffix = !players[i].vga ? 'A' : players[i].level === PLAYER_LEVEL.AMATEUR ? 'A' : 'P';
       const countryCode3Alpha = players[i].country.length === 2 ? alpha2ToAlpha3(players[i].country) : players[i].country;
       let count = await Player.count({
         where: {
