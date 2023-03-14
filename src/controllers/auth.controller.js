@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { authService, userService, tokenService, emailService } = require('../services');
+const { getCookieConfig } = require('../utils/hash');
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -12,10 +13,7 @@ const login = catchAsync(async (req, res) => {
   const { username, password } = req.body;
   const { password: _, ...user } = await authService.loginUserWithUsernameAndPassword(username, password);
   const tokens = await tokenService.generateAuthTokens(user, user.role);
-  res.cookie('token', tokens.access.token, {
-    maxAge: Number(process.env.JWT_ACCESS_EXPIRATION_MINUTES) * 60 * 1000, // 24 hours
-    httpOnly: true,
-  });
+  res.cookie('token', tokens.access.token, getCookieConfig());
   res.send({ user, tokens });
 });
 
