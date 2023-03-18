@@ -471,9 +471,16 @@ const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
     response['HOST'] = hostClub.name;
     response['GUEST'] = guestClub.name;
     scores.forEach((s, i) => {
-      response[`HOST_SCORE_${i + 1}`] = s >= 0 && formatMatchPlayScore(s, 0) === 'AS' ? null : formatMatchPlayScore(s, 0);
-      response[`AS_${i + 1}`] = s >= 0 && formatMatchPlayScore(s, 0) === 'AS' ? 'AS' : null;
-      response[`GUEST_SCORE_${i + 1}`] = s <= 0 && formatMatchPlayScore(s, 0) === 'AS' ? null : formatMatchPlayScore(s, 0);
+      console.log({ s, i });
+      response[`HOST_SCORE_${i + 1}`] =
+        s >= 0 && formatMatchPlayScore(s, 0) === 'AS' ? null : s >= 0 ? formatMatchPlayScore(s, 0) : null;
+      response[`AS_${i + 1}`] = s === 0 && formatMatchPlayScore(s, 0) === 'AS' ? 'AS' : null;
+      response[`GUEST_SCORE_${i + 1}`] =
+        response[`HOST_SCORE_${i + 1}`] === null
+          ? s <= 0 && formatMatchPlayScore(s, 0) === 'AS'
+            ? null
+            : formatMatchPlayScore(s, 0)
+          : null;
     });
     host.forEach((h, i) => {
       response[`HOST_G${i + 1}`] = h.fullname;
