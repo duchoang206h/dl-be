@@ -468,6 +468,7 @@ const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
     const leave_hole = getLeaveHoles(host, guest, versus?.type);
     const isScore = isScoreMatchPlay(host, guest);
     const scores = getScorecardScore(host, guest, versus?.type);
+    console.log({ lenght: scores.length });
     response['HOST'] = hostClub.name;
     response['GUEST'] = guestClub.name;
     scores.forEach((s, i) => {

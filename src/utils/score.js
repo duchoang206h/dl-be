@@ -380,6 +380,7 @@ const normalizePlayersMatchScore = (players, type) => {
         scores.push(score);
       }
     }
+    console.log({ scores: scores.length });
     players[0].scores = scores;
   }
   if (type === COURSE_TYPE.FOUR_BALL) {
@@ -485,7 +486,13 @@ const getScorecardScore = (hostPlayers, guestPlayers, type) => {
           score.push(1);
         if (![0, null].includes(guestPlayers[0]?.scores[i]?.num_putt) && hostPlayers[0]?.scores[i]?.num_putt === 0)
           score.push(-1);
-        if ([0, null].includes(guest[i]) && [0, null].includes(guest[i])) score.push(null);
+        if (
+          ([0, null].includes(hostPlayers[0]?.scores[i]?.num_putt) &&
+            [0, null].includes(guestPlayers[0]?.scores[i]?.num_putt)) ||
+          [null].includes(guestPlayers[0]?.scores[i]?.num_putt) ||
+          [null].includes(hostPlayers[0]?.scores[i]?.num_putt)
+        )
+          score.push(null);
       }
     }
   }
