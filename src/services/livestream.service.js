@@ -468,11 +468,20 @@ const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
     const leave_hole = getLeaveHoles(host, guest, versus?.type);
     const isScore = isScoreMatchPlay(host, guest);
     const scores = getScorecardScore(host, guest, versus?.type);
+    console.log({ lenght: scores.length });
     response['HOST'] = hostClub.name;
     response['GUEST'] = guestClub.name;
     scores.forEach((s, i) => {
-      response[`HOST_SCORE_${i + 1}`] = s >= 0 ? formatMatchPlayScore(s, 0) : null;
-      response[`GUEST_SCORE_${i + 1}`] = s <= 0 ? formatMatchPlayScore(s, 0) : null;
+      console.log({ s, i });
+      response[`HOST_SCORE_${i + 1}`] =
+        s >= 0 && formatMatchPlayScore(s, 0) === 'AS' ? null : s >= 0 ? formatMatchPlayScore(s, 0) : null;
+      response[`AS_${i + 1}`] = s === 0 && formatMatchPlayScore(s, 0) === 'AS' ? 'AS' : null;
+      response[`GUEST_SCORE_${i + 1}`] =
+        response[`HOST_SCORE_${i + 1}`] === null
+          ? s <= 0 && formatMatchPlayScore(s, 0) === 'AS'
+            ? null
+            : formatMatchPlayScore(s, 0)
+          : null;
     });
     host.forEach((h, i) => {
       response[`HOST_G${i + 1}`] = h.fullname;
