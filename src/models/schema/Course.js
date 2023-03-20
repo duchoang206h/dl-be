@@ -49,7 +49,7 @@ class Course extends Base {
         main_photo: Sequelize.STRING,
         public: {
           type: Sequelize.BOOLEAN,
-          defaultValue: true,
+          defaultValue: false,
         },
         main_photo_url: {
           type: Sequelize.VIRTUAL,
