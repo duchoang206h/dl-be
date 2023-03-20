@@ -44,7 +44,7 @@ const getCaddieAccount = catchAsync(async (req, res) => {
   const { courseId } = req.params;
   const { type } = req.query;
   const filePath = path.join(__dirname, '..', '..', `/data/course_${courseId}_caddies_${type}.xlsx`);
-  if (!fs.existsSync(filePath)) {
+  if (!fs.existsSync(filePath) || type === CADDIE_ACCOUNT_TYPE.BY_ROUND_MATCH) {
     await userService.genCaddyUsers(null, courseId, type);
   }
   res.download(filePath, 'caddie_account.xlsx');
