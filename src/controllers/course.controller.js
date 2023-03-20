@@ -75,9 +75,12 @@ const getPublicCourse = catchAsync(async (req, res) => {
     ],
   });
   courses = courses.map((course) => {
-    course.end_date = moment(course.end_date, 'YYYY-MM-DD').format(DATE_FORMAT);
-    course.start_date = moment(course.start_date, 'YYYY-MM-DD').format(DATE_FORMAT);
-    return course;
+    return {
+      name: course.name,
+      course_id: course.course_id,
+      end_date: moment(course.end_date, 'YYYY-MM-DD').format(DATE_FORMAT),
+      start_date: moment(course.start_date, 'YYYY-MM-DD').format(DATE_FORMAT),
+    };
   });
   if (courses) res.status(httpStatus.OK).json({ result: courses });
   else res.status(httpStatus.NOT_FOUND).json({ result: [] });
