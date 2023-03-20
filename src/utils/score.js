@@ -435,7 +435,7 @@ const formatMatchPlayScore = (score, leaveHoles) => {
   if (score > 0) {
     if (leaveHoles > 0) scoreStr = `${score}&${leaveHoles}`;
     else scoreStr = `${score}UP`;
-  } else scoreStr = 'AS';
+  } else scoreStr = 'TIED';
   return scoreStr;
 };
 const isScoreMatchPlay = (host, guest) => {
