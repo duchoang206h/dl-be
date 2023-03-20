@@ -135,6 +135,7 @@ router.get('/:courseId/players-export', async (req, res) => {
 router.get('/:courseId/caddie-account', auth, isSuperAdmin, userController.getCaddieAccount);
 
 router.get('/:courseId/clubs', clubController.getCourseById);
+router.get('/public/all', courseController.getPublicCourse);
 router.put('/:courseId/clubs/:clubId', auth, isSuperAdmin, upload.any(), clubController.updateClub);
 
 // round
