@@ -422,7 +422,7 @@ const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
           ],
         },
       ],
-      order: [['match_num', 'ASC']],
+      order: [['match_num', 'TIEDC']],
     });
     const [hostClub, guestClub] = await Promise.all([
       MatchPlayClub.findOne({ where: { course_id: courseId, type: 'host' } }),
@@ -440,7 +440,7 @@ const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
             attributes: ['num_putt'],
 
             include: [{ model: Hole, attributes: ['hole_num'] }],
-            order: [[{ model: Hole }, 'hole_num', 'ASC']],
+            order: [[{ model: Hole }, 'hole_num', 'TIEDC']],
           });
           return p;
         })
@@ -458,7 +458,7 @@ const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
             },
             attributes: ['num_putt'],
             include: [{ model: Hole, attributes: ['hole_num'] }],
-            order: [[{ model: Hole }, 'hole_num', 'ASC']],
+            order: [[{ model: Hole }, 'hole_num', 'TIEDC']],
           });
           return p;
         })
@@ -474,11 +474,11 @@ const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
     scores.forEach((s, i) => {
       console.log({ s, i });
       response[`HOST_SCORE_${i + 1}`] =
-        s >= 0 && formatMatchPlayScore(s, 0) === 'AS' ? null : s >= 0 ? formatMatchPlayScore(s, 0) : null;
-      response[`AS_${i + 1}`] = s === 0 && formatMatchPlayScore(s, 0) === 'AS' ? 'AS' : null;
+        s >= 0 && formatMatchPlayScore(s, 0) === 'TIED' ? null : s >= 0 ? formatMatchPlayScore(s, 0) : null;
+      response[`TIED_${i + 1}`] = s === 0 && formatMatchPlayScore(s, 0) === 'TIED' ? 'TIED' : null;
       response[`GUEST_SCORE_${i + 1}`] =
         response[`HOST_SCORE_${i + 1}`] === null
-          ? s <= 0 && formatMatchPlayScore(s, 0) === 'AS'
+          ? s <= 0 && formatMatchPlayScore(s, 0) === 'TIED'
             ? null
             : formatMatchPlayScore(s, 0)
           : null;
@@ -1410,7 +1410,7 @@ const getMatchPlayVersus = async ({ courseId, roundNum, matchNum }) => {
         ],
       },
     ],
-    order: [['match_num', 'ASC']],
+    order: [['match_num', 'TIEDC']],
   });
   const [hostClub, guestClub] = await Promise.all([
     MatchPlayClub.findOne({ where: { course_id: courseId, type: 'host' } }),
@@ -1428,7 +1428,7 @@ const getMatchPlayVersus = async ({ courseId, roundNum, matchNum }) => {
           attributes: ['num_putt'],
 
           include: [{ model: Hole, attributes: ['hole_num'] }],
-          order: [[{ model: Hole }, 'hole_num', 'ASC']],
+          order: [[{ model: Hole }, 'hole_num', 'TIEDC']],
         });
         return p;
       })
@@ -1446,7 +1446,7 @@ const getMatchPlayVersus = async ({ courseId, roundNum, matchNum }) => {
           },
           attributes: ['num_putt'],
           include: [{ model: Hole, attributes: ['hole_num'] }],
-          order: [[{ model: Hole }, 'hole_num', 'ASC']],
+          order: [[{ model: Hole }, 'hole_num', 'TIEDC']],
         });
         return p;
       })
