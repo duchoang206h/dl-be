@@ -422,7 +422,7 @@ const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
           ],
         },
       ],
-      order: [['match_num', 'TIEDC']],
+      order: [['match_num', 'ASC']],
     });
     const [hostClub, guestClub] = await Promise.all([
       MatchPlayClub.findOne({ where: { course_id: courseId, type: 'host' } }),
@@ -440,7 +440,7 @@ const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
             attributes: ['num_putt'],
 
             include: [{ model: Hole, attributes: ['hole_num'] }],
-            order: [[{ model: Hole }, 'hole_num', 'TIEDC']],
+            order: [[{ model: Hole }, 'hole_num', 'ASC']],
           });
           return p;
         })
@@ -458,7 +458,7 @@ const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
             },
             attributes: ['num_putt'],
             include: [{ model: Hole, attributes: ['hole_num'] }],
-            order: [[{ model: Hole }, 'hole_num', 'TIEDC']],
+            order: [[{ model: Hole }, 'hole_num', 'ASC']],
           });
           return p;
         })
@@ -1410,7 +1410,7 @@ const getMatchPlayVersus = async ({ courseId, roundNum, matchNum }) => {
         ],
       },
     ],
-    order: [['match_num', 'TIEDC']],
+    order: [['match_num', 'ASC']],
   });
   const [hostClub, guestClub] = await Promise.all([
     MatchPlayClub.findOne({ where: { course_id: courseId, type: 'host' } }),
@@ -1428,7 +1428,7 @@ const getMatchPlayVersus = async ({ courseId, roundNum, matchNum }) => {
           attributes: ['num_putt'],
 
           include: [{ model: Hole, attributes: ['hole_num'] }],
-          order: [[{ model: Hole }, 'hole_num', 'TIEDC']],
+          order: [[{ model: Hole }, 'hole_num', 'ASC']],
         });
         return p;
       })
@@ -1446,7 +1446,7 @@ const getMatchPlayVersus = async ({ courseId, roundNum, matchNum }) => {
           },
           attributes: ['num_putt'],
           include: [{ model: Hole, attributes: ['hole_num'] }],
-          order: [[{ model: Hole }, 'hole_num', 'TIEDC']],
+          order: [[{ model: Hole }, 'hole_num', 'ASC']],
         });
         return p;
       })
