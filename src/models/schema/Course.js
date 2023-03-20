@@ -1,5 +1,5 @@
-const { Base } = require('./Base');
 const Sequelize = require('sequelize');
+const { Base } = require('./Base');
 
 class Course extends Base {
   /**
@@ -17,6 +17,7 @@ class Course extends Base {
     Course.hasMany(models.MatchPlayClub, { as: 'clubs', foreignKey: 'course_id', sourceKey: 'course_id' });
     Course.hasMany(models.MatchPlayVersus, { as: 'versus', foreignKey: 'course_id', sourceKey: 'course_id' });
   }
+
   static init(sequelize) {
     return super.init(
       {
@@ -41,15 +42,19 @@ class Course extends Base {
         logo_url: {
           type: Sequelize.VIRTUAL,
           get() {
-            return process.env.APP_URL + '/static/images/' + this.logo;
+            return `${process.env.APP_URL}/static/images/${this.logo}`;
           },
         },
         address: Sequelize.STRING,
         main_photo: Sequelize.STRING,
+        public: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: false,
+        },
         main_photo_url: {
           type: Sequelize.VIRTUAL,
           get() {
-            return process.env.APP_URL + '/static/images/' + this.main_photo;
+            return `${process.env.APP_URL}/static/images/${this.main_photo}`;
           },
         },
         color: Sequelize.STRING,

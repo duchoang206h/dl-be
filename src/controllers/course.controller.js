@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const courseService = require('../services/course.service');
 const moment = require('moment');
-const { User } = require('../models/schema');
+const { User, Course } = require('../models/schema');
 const { uploadSingleFile } = require('../services/upload.service');
 const { DATE_FORMAT } = require('../config/constant');
 const { cacheService } = require('../services');
@@ -56,10 +56,37 @@ const updateCourse = catchAsync(async (req, res) => {
   await courseService.updateCourse(req.params.courseId, req.body);
   return res.status(httpStatus.OK).send();
 });
+const getPublicCourse = catchAsync(async (req, res) => {
+  let courses = await Course.findAll({
+    where: {
+      public: true,
+    },
+    attributes: [
+      'logo_url',
+      'main_photo_url',
+      'course_id',
+      'name',
+      'type',
+      'start_date',
+      'end_date',
+      'logo',
+      'main_photo',
+      'color',
+    ],
+  });
+  courses = courses.map((course) => {
+    course.end_date = moment(course.end_date, 'YYYY-MM-DD').format(DATE_FORMAT);
+    course.start_date = moment(course.start_date, 'YYYY-MM-DD').format(DATE_FORMAT);
+    return course;
+  });
+  if (courses) res.status(httpStatus.OK).json({ result: courses });
+  else res.status(httpStatus.NOT_FOUND).json({ result: [] });
+});
 module.exports = {
   createCourse,
   getCourseById,
   getAllCourse,
   uploadPhoto,
   updateCourse,
+  getPublicCourse,
 };
