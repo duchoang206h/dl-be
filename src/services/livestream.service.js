@@ -475,7 +475,7 @@ const scorecardStatic = async ({ courseId, code, roundNum, matchNum }) => {
       console.log({ s, i });
       response[`HOST_SCORE_${i + 1}`] =
         s >= 0 && formatMatchPlayScore(s, 0) === 'TIED' ? null : s >= 0 ? formatMatchPlayScore(s, 0) : null;
-      response[`TIED_${i + 1}`] = s === 0 && formatMatchPlayScore(s, 0) === 'TIED' ? 'TIED' : null;
+      response[`AS_${i + 1}`] = s === 0 && formatMatchPlayScore(s, 0) === 'TIED' ? 'TIED' : null;
       response[`GUEST_SCORE_${i + 1}`] =
         response[`HOST_SCORE_${i + 1}`] === null
           ? s <= 0 && formatMatchPlayScore(s, 0) === 'TIED'
