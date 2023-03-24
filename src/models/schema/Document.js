@@ -14,6 +14,11 @@ class Document extends Base {
             foreignKey: 'documentId',
             sourceKey: 'documentId'
         })
+        Document.hasOne(models.Thread, {
+            as: "thread",
+            foreignKey: 'documentId',
+            sourceKey: 'documentId'
+        })
     }
 
     static init(sequelize) {
@@ -28,29 +33,18 @@ class Document extends Base {
                     type: Sequelize.STRING,
                     allowNull: false,
                 },
-                status: {
-                    type: Sequelize.STRING,
-                },
-                location: {
-                    type: Sequelize.STRING
-                },
-                type: {
-                    type: Sequelize.STRING
-                },
-                resource: {
-                    type: Sequelize.STRING
-                }
+
             },
             {
                 sequelize,
-                modelName: 'Content',
+                modelName: 'Document',
                 freezeTableName: true,
-                tableName: 'contents',
+                tableName: 'documents',
                 timestamps: true,
             }
         );
     }
 }
 module.exports = {
-    Content,
+    Document,
 };

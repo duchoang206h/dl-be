@@ -18,7 +18,6 @@ const { errorConverter, errorHandler } = require('./middlewares/error');
 const { ApiError } = require('./utils/ApiError');
 const { jwt } = require('./config/config');
 const path = require('path');
-const { cacheMiddleware } = require('./middlewares/cache');
 const { swaggerDocument } = require('./docs/docs');
 const cookieParser = require('cookie-parser');
 const app = express();

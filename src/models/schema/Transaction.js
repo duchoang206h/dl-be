@@ -18,6 +18,11 @@ class Transaction extends Base {
             foreignKey: 'orderId',
             targetKey: 'orderId'
         })
+        Transaction.hasOne(models.Subscription, {
+            as: 'subscriptions',
+            foreignKey: 'orderId',
+            sourceKey: 'orderId'
+        })
     }
     static init(sequelize) {
         return super.init(
@@ -28,11 +33,10 @@ class Transaction extends Base {
                     primaryKey: true,
                 },
                 userId: {
-                    type: Sequelize.STRING,
+                    type: Sequelize.BIGINT,
                 },
                 orderId: {
-                    type: Sequelize.FLOAT,
-                    allowNull: false,
+                    type: Sequelize.BIGINT,
                 },
                 fee: {
                     type: Sequelize.FLOAT,

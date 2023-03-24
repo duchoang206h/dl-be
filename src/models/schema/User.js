@@ -49,7 +49,7 @@ class User extends Base {
     return super.init(
       {
         userId: {
-          type: Sequelize.INTEGER,
+          type: Sequelize.BIGINT,
           autoIncrement: true,
           primaryKey: true,
         },

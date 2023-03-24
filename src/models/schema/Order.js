@@ -21,7 +21,13 @@ class Order extends Base {
         })
         Order.hasMany(models.Transaction, {
             as: 'transactions',
-            foreignKey: 'orderId'
+            foreignKey: 'orderId',
+            sourceKey: 'orderId'
+        })
+        Order.hasOne(models.Subscription, {
+            as: 'subscriptions',
+            foreignKey: 'orderId',
+            sourceKey: 'orderId'
         })
     }
 
@@ -35,11 +41,9 @@ class Order extends Base {
                 },
                 userId: {
                     type: Sequelize.BIGINT,
-                    allowNull: false,
                 },
                 planId: {
                     type: Sequelize.BIGINT,
-                    allowNull: false,
                 },
                 discount: {
                     type: Sequelize.FLOAT,

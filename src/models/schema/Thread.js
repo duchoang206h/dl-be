@@ -31,8 +31,7 @@ class Thread extends Base {
           type: Sequelize.BIGINT,
         },
         documentId: {
-          type: Sequelize.STRING,
-          allowNull: false,
+          type: Sequelize.BIGINT,
         },
         status: {
           type: Sequelize.STRING,

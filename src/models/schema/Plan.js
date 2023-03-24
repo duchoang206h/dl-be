@@ -18,6 +18,11 @@ class Plan extends Base {
       foreignKey: 'planId',
       sourceKey: 'planId'
     })
+    Plan.hasMany(models.Subscription, {
+      as: 'subscriptions',
+      foreignKey: 'planId',
+      sourceKey: 'planId'
+    })
 
   }
   static init(sequelize) {

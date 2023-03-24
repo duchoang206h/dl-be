@@ -10,9 +10,9 @@ class Token extends Base {
   static associate(models) {
     // define association here
     Token.hasMany(models.Login, {
-      as: 'logins',
+      as: 'token_logins',
       foreignKey: 'tokenId',
-      sourceKey: 'tokenid'
+      sourceKey: 'tokenId'
     })
     Token.belongsTo(models.User, {
       as: 'user',
