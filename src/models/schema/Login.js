@@ -1,7 +1,7 @@
-const { Base } = require('./Base');
 const Sequelize = require('sequelize');
+const { Base } = require('./Base');
 
-class Token extends Base {
+class Login extends Base {
   /**
    * Helper method for defining associations.
    * This method is not a part of Sequelize lifecycle.
@@ -9,21 +9,22 @@ class Token extends Base {
    */
   static associate(models) {
     // define association here
-    Token.hasMany(models.Login, {
-      as: 'logins',
-      foreignKey: 'tokenId',
-      sourceKey: 'tokenid'
-    })
-    Token.belongsTo(models.User, {
+    Login.belongsTo(models.User, {
       as: 'user',
       foreignKey: 'userId',
-      targetKey: 'userId'
-    })
+      targetKey: 'userId',
+    });
+    Login.belongsTo(models.Token, {
+      as: 'token',
+      foreignKey: 'tokenId',
+      targetKey: 'tokenId',
+    });
   }
+
   static init(sequelize) {
     return super.init(
       {
-        tokenId: {
+        loginId: {
           type: Sequelize.BIGINT,
           autoIncrement: true,
           primaryKey: true,
@@ -31,20 +32,23 @@ class Token extends Base {
         userId: {
           type: Sequelize.BIGINT,
         },
-        type: Sequelize.STRING,
-        whitelist: Sequelize.BOOLEAN,
-        token: Sequelize.STRING,
+        tokenId: {
+          type: Sequelize.BIGINT,
+        },
+        ip: Sequelize.STRING,
+        location: Sequelize.STRING,
+        device: Sequelize.STRING,
       },
       {
         sequelize,
-        modelName: 'Token',
+        modelName: 'Login',
         freezeTableName: true,
-        tableName: 'tokens',
+        tableName: 'logins',
         timestamps: true,
       }
     );
   }
 }
 module.exports = {
-  Token,
+  Login,
 };

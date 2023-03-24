@@ -8,18 +8,57 @@ class User extends Base {
    */
   static associate(models) {
     // define association here
+    User.hasMany(models.Order, {
+      as: 'orders',
+      foreignKey: 'userId',
+      sourceKey: 'userId'
+    })
+    User.hasMany(models.Token, {
+      as: 'tokens',
+      foreignKey: 'userId',
+      sourceKey: 'userId'
+    })
+    User.hasMany(models.Login, {
+      as: 'logins',
+      foreignKey: 'userId',
+      sourceKey: 'userId'
+    })
+    User.hasMany(models.Thread, {
+      as: 'threads',
+      foreignKey: 'userId',
+      sourceKey: 'userId'
+    })
+    User.hasMany(models.Order, {
+      as: 'orders',
+      foreignKey: 'userId',
+      sourceKey: 'userId'
+    })
+    User.hasMany(models.Transaction, {
+      as: 'transactions',
+      foreignKey: 'userId',
+      sourceKey: 'userId'
+    })
+    User.hasMany(models.Subscription, {
+      as: 'subscriptions',
+      foreignKey: 'userId',
+      sourceKey: 'userId'
+    })
+
   }
   static init(sequelize) {
     return super.init(
       {
-        user_id: {
+        userId: {
           type: Sequelize.INTEGER,
           autoIncrement: true,
           primaryKey: true,
         },
+        email: {
+          type: Sequelize.STRING,
+          allowNull: false
+        },
         username: {
           type: Sequelize.STRING,
-          allowNull: false,
         },
         password: {
           type: Sequelize.STRING,
@@ -30,17 +69,14 @@ class User extends Base {
           allowNull: false,
           defaultValue: 'user',
         },
-        is_super: {
+        isSuper: {
           type: Sequelize.BOOLEAN,
           defaultValue: false,
         },
-        course_id: {
-          type: Sequelize.INTEGER,
-          allowNull: true,
-        },
-        type: {
-          type: Sequelize.STRING,
-        },
+        active: {
+          type: Sequelize.BOOLEAN,
+          defaultValue: true
+        }
       },
       {
         sequelize,

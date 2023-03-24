@@ -1,32 +1,24 @@
 version: '3'
 
 services:
-  node-app:
-    build: .
-    image: node-app
+  mysql:
+    image: mysql
     environment:
-      - MONGODB_URL=mongodb://mongodb:27017/node-boilerplate
-    ports:
-      - '3000:3000'
-    depends_on:
-      - mongodb
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
     volumes:
-      - .:/usr/src/node-app
-    networks:
-      - node-network
-
-  mongodb:
-    image: mongo:4.2.1-bionic
+      - mysql-data:/var/lib/mysql
     ports:
-      - '27017:27017'
+      - "3306:3306"
+  redis:
+    image: redis:latest
     volumes:
-      - dbdata:/data/db
-    networks:
-      - node-network
+      - redis-data:/data
+    ports:
+      - "6379:6379"
 
 volumes:
-  dbdata:
-
-networks:
-  node-network:
-    driver: bridge
+  mysql-data:
+  redis-data:
