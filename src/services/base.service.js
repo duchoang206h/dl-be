@@ -1,6 +1,6 @@
 const { Model } = require("sequelize");
 const { getLimitRecordReturn } = require("../utils/common");
-export class BaseService {
+class BaseService {
     /**
      *
      * @param {Model} model
@@ -62,3 +62,4 @@ export class BaseService {
         };
     };
 }
+module.exports = { BaseService }

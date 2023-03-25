@@ -2,6 +2,7 @@ const { default: axios } = require("axios");
 const { GenLinkService } = require("./genlink.service");
 const { Y2MATE_API } = require("../../config/constant");
 const { getYTImageUrl } = require("../../utils/common");
+const { encryptAes } = require("../../utils/hash");
 
 class Y2MateService extends GenLinkService {
     getResolutions = async (url) => {
@@ -21,7 +22,7 @@ class Y2MateService extends GenLinkService {
                     type: v.f,
                     qualify: v.q,
                     size: v.size,
-                    key: await this.getLinks({ key: v.k, vid })
+                    key: encryptAes(await this.getLinks({ key: v.k, vid }))
                 }
             })))
             promises.push(Promise.all(Object.values(data.links.mp3).map(async v => {
@@ -29,7 +30,7 @@ class Y2MateService extends GenLinkService {
                     type: v.f,
                     qualify: v.q,
                     size: v.size,
-                    key: await this.getLinks({ key: v.k, vid })
+                    key: encryptAes(await this.getLinks({ key: v.k, vid }))
                 }
             })))
             const [videos, audios] = await Promise.all(promises)

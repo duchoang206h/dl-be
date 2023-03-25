@@ -3,7 +3,12 @@ const router = express.Router();
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 //const authRoute = require('./auth.route');
+const contentRoute = require('./content.route')
 const defaultRoutes = [
+  {
+    path: '/contents',
+    route: contentRoute,
+  }
 ]
 
 const devRoutes = [
