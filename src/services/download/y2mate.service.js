@@ -20,7 +20,7 @@ class Y2MateService extends GenLinkService {
             promises.push(Promise.all(Object.values(data.links.mp4).map(async v => {
                 return {
                     type: v.f,
-                    qualify: v.q,
+                    quality: v.q,
                     size: v.size,
                     key: encryptAes(await this.getLinks({ key: v.k, vid }))
                 }
@@ -28,7 +28,7 @@ class Y2MateService extends GenLinkService {
             promises.push(Promise.all(Object.values(data.links.mp3).map(async v => {
                 return {
                     type: v.f,
-                    qualify: v.q,
+                    quality: v.q,
                     size: v.size,
                     key: encryptAes(await this.getLinks({ key: v.k, vid }))
                 }

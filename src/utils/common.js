@@ -24,8 +24,10 @@ const getContentType = (url) => {
   }
   return type;
 };
+const getFileSizeMB = (bytes) => (!isNaN(bytes) ? Number(bytes) * 10e-6 : 0);
 module.exports = {
   getLimitRecordReturn,
   getYTImageUrl,
   getContentType,
+  getFileSizeMB
 };

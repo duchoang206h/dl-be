@@ -47,10 +47,35 @@ const RESOURCES = {
   TIKTOK: 'tiktok',
   OTHER: 'other',
 };
+const YT4K_API = {
+  GET_RESOLUTION_URL: 'https://youtube4kdownloader.com/en62/',
+  HEADERS: {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    Accept: '*/*',
+    'Accept-Language': 'en-US,en;q=0.9,vi-VN;q=0.8,vi;q=0.7',
+    'Cache-Control': 'no-cache',
+    Connection: 'keep-alive',
+    'Content-type': 'application/x-www-form-urlencoded',
+    Origin: 'https://youtube4kdownloader.com',
+    Pragma: 'no-cache',
+    Referer: 'https://youtube4kdownloader.com/',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-site',
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36',
+    'sec-ch-ua': '"Google Chrome";v="111", "Not(A:Brand";v="8", "Chromium";v="111"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+  },
+
+}
 const MAX_RECORD_RETURN = 1000;
 module.exports = {
   Y2MATE_API,
   SNAPSAVE_API,
   RESOURCES,
   MAX_RECORD_RETURN,
+  YT4K_API
 };

@@ -26,7 +26,7 @@ class SnapsaveService extends GenLinkService {
                 return {
                     type: 'mp4',
                     size: null,
-                    qualify: resolutions.shift(),
+                    quality: resolutions.shift(),
                     key: encodeURI(encryptAes(l))
                 }
             })
@@ -34,7 +34,7 @@ class SnapsaveService extends GenLinkService {
                 return {
                     type: 'mp4',
                     size: null,
-                    qualify: resolutions.shift(),
+                    quality: resolutions.shift(),
                     key: encodeURI(encryptAes(await this.getLinks({ token: l.replace('render.php?token=', '') })))
                 }
             }))
